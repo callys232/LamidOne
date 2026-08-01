@@ -68,7 +68,7 @@ export default function HomePage() {
             A precise, countable sentence. We count what is true today
             rather than publishing outcome figures we have not measured. */}
         <div className="border-b" style={{ borderColor: "var(--line-soft)" }}>
-          <ProofStrip sentence="Nine suites, 280+ intelligence engines and ten AI agents on one operating layer." />
+          <ProofStrip sentence="Free plan. One real diagnostic, on your own numbers. No card required." />
           <div className="shell pb-12">
             <StatRow stats={REACH} />
           </div>
@@ -85,7 +85,7 @@ export default function HomePage() {
           />
           <div className="grid gap-5 lg:grid-cols-3">
             {[
-              { n: "01", t: "Know", d: "Diagnostics and 280+ engines compute your position from your own figures. Nothing is estimated by a model.", href: "/suites/core" },
+              { n: "01", t: "Know", d: "Diagnostics compute your position from your own figures, across every suite. Nothing is estimated by a model.", href: "/suites/core" },
               { n: "02", t: "Decide", d: "Options, weightings and rationale held together — so the reason survives the decision.", href: "/suites/core#decision" },
               { n: "03", t: "Do", d: "Source the expert, run the milestones, release the payment, keep the capability.", href: "/suites/market" },
             ].map((l) => (
