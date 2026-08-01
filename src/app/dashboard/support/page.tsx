@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useApi, apiPost } from "@/lib/useApi";
 import { EmptyState } from "@/app/dashboard/page";
 
-type Ticket = { id: string; subject: string; status: string; createdAt: number };
+type Ticket = { id: string; subject: string; body: string; status: string; createdAt: number };
+type StewardResult = {
+  result: { reply: string; relatedEvents: { id: string; title: string }[]; lmsHandoff: boolean };
+  charged: number;
+};
 
 export default function SupportPage() {
   const { data, loading, reload } = useApi<{ tickets: Ticket[]; responseTarget: string }>("/api/support/tickets");
@@ -51,13 +55,53 @@ export default function SupportPage() {
       ) : !data?.tickets.length ? (
         <EmptyState text="No tickets yet." />
       ) : (
-        <div className="divide-hairline card overflow-hidden">
-          {data.tickets.map((t) => (
-            <div key={t.id} className="flex items-center justify-between px-4 py-3">
-              <p className="text-sm">{t.subject}</p>
-              <span className="faint text-xs capitalize">{t.status.replace("_", " ")}</span>
-            </div>
-          ))}
+        <div className="grid gap-3">
+          {data.tickets.map((t) => <TicketRow key={t.id} ticket={t} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Steward is grounded against real events and hands off honestly to
+ *  LEARN for learning questions — see lib/supportAgent.ts. 15 points,
+ *  Starter and up; a ticket you resolve without asking never costs. */
+function TicketRow({ ticket }: { ticket: Ticket }) {
+  const [result, setResult] = useState<StewardResult["result"] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function ask() {
+    setBusy(true);
+    setError(null);
+    const res = await apiPost<StewardResult>("/api/agents/steward/run", { input: { subject: ticket.subject, body: ticket.body } });
+    setBusy(false);
+    if (res.ok && res.data) setResult(res.data.result);
+    else setError(res.error);
+  }
+
+  return (
+    <div className="card p-4">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm font-medium">{ticket.subject}</p>
+        <span className="faint shrink-0 text-xs capitalize">{ticket.status.replace("_", " ")}</span>
+      </div>
+      <p className="muted mt-1.5 text-xs leading-relaxed">{ticket.body}</p>
+
+      {!result && (
+        <button type="button" onClick={ask} disabled={busy} className="btn btn-ghost mt-3 !px-3 !py-1.5 text-xs disabled:opacity-50">
+          {busy ? "Asking Steward…" : "Get Steward's suggested reply — 15 pts"}
+        </button>
+      )}
+      {error && <p className="mt-2 text-xs" style={{ color: "var(--bad)" }}>{error}</p>}
+      {result && (
+        <div className="mt-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--brand-soft)" }}>
+          <p className="font-semibold text-brand">Steward suggests:</p>
+          <p className="mt-1.5">{result.reply}</p>
+          {result.relatedEvents.length > 0 && (
+            <p className="faint mt-2">Related events: {result.relatedEvents.map((e) => e.title).join(", ")}</p>
+          )}
+          {result.lmsHandoff && <p className="faint mt-2">This ticket looks learning-related — see the LMS link above.</p>}
         </div>
       )}
     </div>

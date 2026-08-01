@@ -89,10 +89,36 @@ export async function createTransfer(input: {
   });
 }
 
-export type VerifiedTransaction = { reference: string; status: string; amount: number; currency: string };
+export type VerifiedTransaction = {
+  reference: string; status: string; amount: number; currency: string;
+  metadata?: Record<string, unknown>;
+};
 
 export async function verifyTransaction(reference: string): Promise<VerifiedTransaction> {
   return call<VerifiedTransaction>(`/transaction/verify/${encodeURIComponent(reference)}`);
+}
+
+export type InitializedTransaction = { authorization_url: string; access_code: string; reference: string };
+
+/** Starts a real Paystack Checkout — the customer is redirected to
+ *  `authorization_url` to actually pay by card, bank or transfer.
+ *  Amount in the account's major currency unit (dollars, not cents);
+ *  converted to the minor unit here so callers pass what the UI shows. */
+export async function initializeTransaction(input: {
+  email: string; amountMajorUnit: number; currency?: string; reference: string;
+  callbackUrl: string; metadata?: Record<string, unknown>;
+}): Promise<InitializedTransaction> {
+  return call<InitializedTransaction>("/transaction/initialize", {
+    method: "POST",
+    body: JSON.stringify({
+      email: input.email,
+      amount: Math.round(input.amountMajorUnit * 100),
+      currency: input.currency ?? "USD",
+      reference: input.reference,
+      callback_url: input.callbackUrl,
+      metadata: input.metadata ?? {},
+    }),
+  });
 }
 
 export const paystackConfigured = () => Boolean(process.env.PAYSTACK_SECRET_KEY);

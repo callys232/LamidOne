@@ -30,7 +30,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   MessageSquare, Stethoscope, Compass as CompassIcon, Target, FileText,
   Waves, ShieldCheck, Scale, Telescope, Boxes,
-  Radio, Send,
+  Radio, Send, LifeBuoy,
 } from "lucide-react";
 
 export type AgentSurface = "platform" | "admin";
@@ -186,6 +186,19 @@ export const AGENTS: Agent[] = [
     surface: "platform",
     Icon: MessageSquare,
     minTier: "free",
+  },
+  {
+    id: "steward",
+    name: "Steward",
+    role: "Support ticket agent",
+    what: "Drafts a grounded reply to a support ticket — checked against real upcoming events, and handed off honestly to LAMID Learning when a question is about courses or certification rather than the platform itself.",
+    unit: "per resolved ticket",
+    points: 15,
+    route: "lib/supportAgent.ts",
+    suite: "desk",
+    surface: "platform",
+    Icon: LifeBuoy,
+    minTier: "starter",
   },
 
   /* ── Operator agents. Internal tooling, never customer-billable. ── */

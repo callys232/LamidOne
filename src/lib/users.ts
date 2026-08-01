@@ -143,6 +143,52 @@ export async function updateUser(id: string, patch: Partial<Pick<User, "name" | 
   return user;
 }
 
+/**
+ * Activates a tier after a REAL, verified payment — called only from
+ * the checkout callback once Paystack's own `verifyTransaction`
+ * confirms the charge succeeded. This is the production path;
+ * `setTierForTesting` below is the dev-only shortcut that skips
+ * payment entirely and must never be reachable outside mockEnabled().
+ */
+export async function activateTier(id: string, tier: TierId): Promise<User | null> {
+  const patch = { tier, subscriptionStatus: "active" as const };
+  if (persistenceEnabled()) {
+    const col = await collection<User>("users");
+    if (col) {
+      const after = await col.findOneAndUpdate({ id }, { $set: patch }, { returnDocument: "after" });
+      return after ?? null;
+    }
+  }
+  const user = users.get(id);
+  if (!user) return null;
+  Object.assign(user, patch);
+  return user;
+}
+
+/**
+ * Sets tier/subscriptionStatus directly, bypassing any real payment.
+ * Deliberately NOT exposed through updateUser() (the self-service
+ * profile-edit path) — this exists only for the dev-only tier-testing
+ * route, which is itself gated behind mockEnabled() so it can never
+ * run against a real production deployment. A real upgrade must go
+ * through an actual payment webhook; this is a shortcut for testing
+ * what each tier's account looks like, not a billing mechanism.
+ */
+export async function setTierForTesting(id: string, tier: TierId): Promise<User | null> {
+  const patch = { tier, subscriptionStatus: tier === "free" ? "none" as const : "active" as const };
+  if (persistenceEnabled()) {
+    const col = await collection<User>("users");
+    if (col) {
+      const after = await col.findOneAndUpdate({ id }, { $set: patch }, { returnDocument: "after" });
+      return after ?? null;
+    }
+  }
+  const user = users.get(id);
+  if (!user) return null;
+  Object.assign(user, patch);
+  return user;
+}
+
 export async function authenticate(email: string, password: string): Promise<User> {
   const user = await findUserByEmail(email);
   if (!user || !verifyPassword(password, user.passwordHash)) {

@@ -5,6 +5,7 @@ import { withMeter, available, getBalance } from "@/lib/points";
 import { AGENTS } from "@/content/agents";
 import { runEngine, parseEngineCode, EngineInputError } from "@/lib/engines";
 import { chatCompletion, systemPrompt } from "@/lib/ai";
+import { resolveTicket } from "@/lib/supportAgent";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,6 +71,16 @@ export const POST = handler(async (req) => {
       const engineCode = typeof input.engine === "string" ? parseEngineCode(input.engine) : null;
       if (engineCode) {
         return runEngine(engineCode, input);
+      }
+
+      /* Steward: grounded against real events and an honest LMS
+         handoff BEFORE the model sees the ticket — see supportAgent.ts
+         for why this cannot just be the generic passthrough below. */
+      if (agentId === "steward") {
+        const subject = String(input.subject ?? "").slice(0, 200);
+        const body = String(input.body ?? "").slice(0, 4000);
+        if (!subject && !body) throw new EngineInputError("Steward needs `subject` and/or `body` — the ticket text to resolve.");
+        return resolveTicket(subject, body);
       }
 
       /* Language-backed: the model writes prose around supplied facts. */

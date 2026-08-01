@@ -1,14 +1,29 @@
 "use client";
 
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
+import { BuyPointsButton } from "@/components/sections/BuyPointsButton";
+import { POINT_PACKAGES } from "@/content/agents";
 
 export default function WalletPage() {
   const v = useDashboard();
   const { points } = v;
+  const params = useSearchParams();
+  const purchase = params.get("purchase");
 
   return (
     <div className="space-y-8">
+      {purchase === "success" && (
+        <div className="card p-4 text-sm" style={{ borderColor: "var(--good)", color: "var(--good)" }}>
+          Payment confirmed{params.get("points") ? ` — ${Number(params.get("points")).toLocaleString()} points added.` : "."}
+        </div>
+      )}
+      {purchase === "failed" && (
+        <div className="card p-4 text-sm" style={{ borderColor: "var(--bad)", color: "var(--bad)" }}>
+          The payment did not complete — you have not been charged.
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-4">
         <Stat label="Available" value={points.available} tone="brand" />
         <Stat label="Allowance" value={points.allowance} />
@@ -16,12 +31,21 @@ export default function WalletPage() {
         <Stat label="Held" value={points.held} hint="In flight on active runs" />
       </div>
 
-      <div className="card flex flex-col items-start gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold">Monthly allowance: {points.monthlyAllowance.toLocaleString()}</p>
-          <p className="muted text-xs">Resets each billing cycle. Unused allowance does not roll over.</p>
+      <div className="card p-6">
+        <p className="text-sm font-semibold">Monthly allowance: {points.monthlyAllowance.toLocaleString()}</p>
+        <p className="muted mt-1 text-xs">Resets each billing cycle. Unused allowance does not roll over.</p>
+
+        <div className="mt-4 grid gap-2">
+          {POINT_PACKAGES.map((p) => (
+            <div key={p.points} className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2" style={{ borderColor: "var(--line-soft)" }}>
+              <span className="text-sm">
+                <span className="font-semibold">{p.points.toLocaleString()} points</span>
+                <span className="faint ml-2 text-xs">${p.usd} · ${p.perPoint.toFixed(2)} each</span>
+              </span>
+              <BuyPointsButton points={p.points} />
+            </div>
+          ))}
         </div>
-        <Link href="/pricing#points" className="btn btn-primary !px-4 !py-2 text-xs">Buy points</Link>
       </div>
 
       <section>

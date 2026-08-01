@@ -14,7 +14,7 @@ import { SUITES } from "@/content/suites";
 import { PLATFORM_AGENTS, POINTS_EXPLAINER } from "@/content/agents";
 import { INTEGRATIONS } from "@/content/platform";
 import { HOME_FAQ, HOME_COMPARISON } from "@/content/home";
-import { DashboardMock, AgentMock, BarChartMock } from "@/components/mock/ProductMock";
+import { ScreenshotFrame } from "@/components/mock/ProductMock";
 
 /**
  * Homepage.
@@ -54,12 +54,15 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Product imagery below the fold-line, cropped at the frame
-                edge so it reads as a window onto something larger. */}
+            {/* Real screenshots from a seeded demo account — the one
+                imagery slot on the site that isn't the theme-aware SVG
+                mock system, because the homepage hero is worth the
+                staleness/theme tradeoff. Every other product-imagery
+                slot (suite pages, agents directory) stays SVG. */}
             <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <DashboardMock label="LAMID CORE — operating dashboard" />
-              <AgentMock />
-              <BarChartMock label="LAMID FINANCE — cost by period" />
+              <ScreenshotFrame src="/hero/dashboard-overview.png" label="Dashboard — overview" width={900} height={640} />
+              <ScreenshotFrame src="/hero/diagnostic-result.png" label="Catalyst — Decision Clarity Score" width={900} height={640} />
+              <ScreenshotFrame src="/hero/budget-result.png" label="LAMID FINANCE — budget calculator" width={900} height={640} />
             </div>
           </div>
         </section>

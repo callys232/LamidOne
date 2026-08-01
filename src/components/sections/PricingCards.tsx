@@ -164,10 +164,10 @@ export function TierCard({
         ) : (
           <>
             <div className="flex items-baseline gap-2">
-              {tier.price.was && annual && (
+              {tier.price.was && (
                 <span className="faint text-lg line-through">${tier.price.was}</span>
               )}
-              <span className="font-display text-4xl">${price}</span>
+              <span className="font-display text-4xl text-brand">${price}</span>
               {tier.price.unit && <span className="muted text-sm">{tier.price.unit}</span>}
             </div>
             {!tier.price.confirmed && (

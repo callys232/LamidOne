@@ -116,6 +116,10 @@ export async function ensureIndexes(): Promise<void> {
     db.collection("notifications").createIndex({ userId: 1, at: -1 }),
     db.collection("notificationPrefs").createIndex({ userId: 1 }, { unique: true }),
 
+    db.collection("events").createIndex({ id: 1 }, { unique: true }),
+    db.collection("events").createIndex({ category: 1, startAt: 1 }),
+    db.collection("events").createIndex({ hostId: 1, startAt: -1 }),
+
     db.collection("supportTickets").createIndex({ id: 1 }, { unique: true }),
     db.collection("supportTickets").createIndex({ userId: 1, createdAt: -1 }),
 
@@ -124,6 +128,9 @@ export async function ensureIndexes(): Promise<void> {
     db.collection("withdrawals").createIndex({ userId: 1, createdAt: -1 }),
 
     db.collection("verifications").createIndex({ userId: 1 }, { unique: true }),
+    db.collection("integrations").createIndex({ userId: 1 }, { unique: true }),
+    db.collection("checkoutOrders").createIndex({ reference: 1 }, { unique: true }),
+    db.collection("checkoutOrders").createIndex({ userId: 1, createdAt: -1 }),
 
     db.collection("auditLog").createIndex({ orgId: 1, at: -1 }),
     db.collection("auditLog").createIndex({ actorId: 1, at: -1 }),

@@ -10,6 +10,7 @@ import { PricingSidebar } from "@/components/sections/PricingSidebar";
 import { BundleBuilder } from "@/components/sections/BundleBuilder";
 import { Faq } from "@/components/sections/Faq";
 import { PointsEstimator } from "@/components/sections/PointsEstimator";
+import { BuyPointsButton } from "@/components/sections/BuyPointsButton";
 import { EXPERT_PROGRAM } from "@/content/tiers";
 import { POINTS_EXPLAINER, ACTION_COSTS, POINT_PACKAGES } from "@/content/agents";
 import { PRICING_FAQ } from "@/content/pricingFaq";
@@ -41,7 +42,7 @@ export default function PricingPage() {
         <div style={{ background: "var(--line-soft)" }}>
           <div className="shell flex flex-col items-start gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm">
-              <strong className="font-semibold">Save up to 43% on Starter.</strong>{" "}
+              <strong className="font-semibold">Save up to 43% across every plan.</strong>{" "}
               <span className="muted">New customers only. Available for a limited time.</span>
             </p>
             <Button href="/signup?plan=starter" variant="contrast">Buy now</Button>
@@ -121,12 +122,13 @@ export default function PricingPage() {
                 <h3 className="font-semibold">Point packages</h3>
                 <dl className="mt-4 space-y-2.5 text-sm">
                   {POINT_PACKAGES.map((p) => (
-                    <div key={p.points} className="flex items-baseline justify-between gap-4">
+                    <div key={p.points} className="flex items-center justify-between gap-4">
                       <dt className="muted">
                         {p.points.toLocaleString()} points
                         <span className="faint ml-1.5 text-xs">${p.perPoint.toFixed(2)} each</span>
+                        <span className="ml-2 font-semibold tabular-nums" style={{ color: "var(--ink)" }}>${p.usd}</span>
                       </dt>
-                      <dd className="font-semibold tabular-nums">${p.usd}</dd>
+                      <dd><BuyPointsButton points={p.points} /></dd>
                     </div>
                   ))}
                 </dl>

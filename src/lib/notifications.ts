@@ -1,4 +1,5 @@
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
+import { dispatchEvent } from "./integrations";
 
 /** NOTIFICATIONS — recent alerts and delivery preferences. */
 
@@ -37,9 +38,17 @@ export async function notify(userId: string, title: string, body: string): Promi
   if (persistenceEnabled()) {
     await ensureIndexes();
     const col = await collection<Notification>("notifications");
-    if (col) { await col.insertOne(n); return; }
+    if (col) { await col.insertOne(n); }
+  } else {
+    store.set(n.id, n);
   }
-  store.set(n.id, n);
+
+  /* Every in-app notification also fires to any webhook the user has
+     configured (Slack/Discord/generic) — one choke point rather than
+     wiring dispatchEvent into every place that calls notify(). Best
+     effort: dispatchEvent never throws, so a broken webhook cannot
+     break whatever action triggered this notification. */
+  await dispatchEvent(userId, title, n.body);
 }
 
 export async function markRead(userId: string, notificationId: string): Promise<void> {

@@ -108,7 +108,7 @@ export const TIERS: Tier[] = [
     id: "growth",
     name: "Growth",
     positioning: "Comprehensive intelligence across every suite, with the full agent layer.",
-    price: { monthly: 149, annual: 119, unit: "per seat / month", confirmed: true },
+    price: { monthly: 149, annual: 119, was: 199, unit: "per seat / month", confirmed: true },
     rank: 2,
     seatsIncluded: null,
     extraSeat: null,
@@ -125,7 +125,7 @@ export const TIERS: Tier[] = [
     /* Publishing a floor pre-qualifies enterprise leads and stops
        wasted calls (teardown §3). Derived from ProdLamid's $18,500/mo
        marketplace enterprise contract — NEEDS CONFIRMATION. */
-    price: { monthly: 1850, annual: 1550, unit: "per month", confirmed: false },
+    price: { monthly: 1850, annual: 1550, was: 2200, unit: "per month", confirmed: false },
     rank: 3,
     seatsIncluded: 25,
     extraSeat: 65,

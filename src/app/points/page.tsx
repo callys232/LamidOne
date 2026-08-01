@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { PointsEstimator } from "@/components/sections/PointsEstimator";
+import { BuyPointsButton } from "@/components/sections/BuyPointsButton";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { Faq } from "@/components/sections/Faq";
 import { PLATFORM_AGENTS, ACTION_COSTS, POINT_PACKAGES, SIGNUP_GRANTS, POINTS_EXPLAINER } from "@/content/agents";
@@ -57,12 +58,13 @@ export default function PointsPage() {
                 <h3 className="font-semibold">Buy more, any time</h3>
                 <dl className="mt-4 space-y-2.5 text-sm">
                   {POINT_PACKAGES.map((p) => (
-                    <div key={p.points} className="flex items-baseline justify-between gap-4">
+                    <div key={p.points} className="flex items-center justify-between gap-4">
                       <dt className="muted">
                         {p.points.toLocaleString()} points
                         <span className="faint ml-1.5 text-xs">${p.perPoint.toFixed(2)} each</span>
+                        <span className="ml-2 font-semibold tabular-nums" style={{ color: "var(--ink)" }}>${p.usd}</span>
                       </dt>
-                      <dd className="font-semibold tabular-nums">${p.usd}</dd>
+                      <dd><BuyPointsButton points={p.points} /></dd>
                     </div>
                   ))}
                 </dl>

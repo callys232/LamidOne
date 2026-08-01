@@ -1,15 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
-import { TIERS_BY_ID } from "@/content/tiers";
+import { authHeaders } from "@/lib/useApi";
+import { TIERS, TIERS_BY_ID, type TierId } from "@/content/tiers";
 
 export default function BillingPage() {
   const v = useDashboard();
   const tier = TIERS_BY_ID[v.tier];
+  const params = useSearchParams();
+  const purchase = params.get("purchase");
+  const upgradable = TIERS.filter((t) => t.motion === "self-serve" && t.price.monthly !== null && t.rank > tier.rank);
+  const purchasedTierId = params.get("tier") as TierId | null;
+  const purchasedTierName = purchasedTierId && purchasedTierId in TIERS_BY_ID ? TIERS_BY_ID[purchasedTierId].name : purchasedTierId;
 
   return (
     <div className="space-y-8">
+      {purchase === "success" && (
+        <div className="card p-4 text-sm" style={{ borderColor: "var(--good)", color: "var(--good)" }}>
+          Payment confirmed{purchasedTierName ? ` — you're now on ${purchasedTierName}.` : "."}
+        </div>
+      )}
+      {purchase === "failed" && (
+        <div className="card p-4 text-sm" style={{ borderColor: "var(--bad)", color: "var(--bad)" }}>
+          The payment did not complete — you have not been charged, and your plan has not changed.
+        </div>
+      )}
+
       <div className="card p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -53,6 +72,19 @@ export default function BillingPage() {
         )}
       </div>
 
+      {upgradable.length > 0 && (
+        <div className="card p-6">
+          <h2 className="font-display text-lg">Upgrade</h2>
+          <p className="muted mt-2 text-sm leading-relaxed">
+            One payment activates the plan immediately — this charges you now for the first period,
+            not a recurring subscription yet.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {upgradable.map((t) => <UpgradeCard key={t.id} tierId={t.id} name={t.name} price={t.price.monthly!} />)}
+          </div>
+        </div>
+      )}
+
       <div className="card p-6">
         <h2 className="font-display text-lg">Invoices</h2>
         <p className="muted mt-2 text-sm">
@@ -60,6 +92,37 @@ export default function BillingPage() {
           subscription payment is taken.
         </p>
       </div>
+    </div>
+  );
+}
+
+function UpgradeCard({ tierId, name, price }: { tierId: string; name: string; price: number }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function upgrade() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/checkout/tier", { method: "POST", headers: authHeaders(), body: JSON.stringify({ tier: tierId }) });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? "Could not start checkout.");
+      window.location.href = body.authorizationUrl;
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border p-4" style={{ borderColor: "var(--line-soft)" }}>
+      <p className="font-semibold">{name}</p>
+      <p className="faint text-xs">${price} / seat / month</p>
+      <button type="button" onClick={upgrade} disabled={busy} className="btn btn-primary mt-3 !px-3 !py-1.5 text-xs disabled:opacity-50">
+        {busy ? "Starting…" : `Upgrade to ${name}`}
+      </button>
+      {error && <p className="mt-2 text-xs" style={{ color: "var(--bad)" }}>{error}</p>}
     </div>
   );
 }

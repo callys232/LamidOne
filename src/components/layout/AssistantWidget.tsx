@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Bot, X, Send } from "lucide-react";
+import Link from "next/link";
+import { Bot, X, Send, Calendar, Rocket, MessageCircle, Wrench } from "lucide-react";
 import { routeIntent, AGENT_LABELS, ROUTABLE_AGENTS, type RoutableAgent } from "@/lib/intentRouter";
+import { CTA } from "@/content/brand";
 
 /**
  * THE SITE-WIDE ASSISTANT — proactive, not just available.
@@ -35,6 +37,17 @@ const PROMPTS = [
   "How does pricing actually work?",
   "What's the difference from a consulting firm?",
 ];
+
+/** Quick links — same pattern as HubSpot's chat widget: a 2x2 grid of
+ *  direct actions above the free-text prompts, for a visitor who
+ *  already knows what they want and would rather not phrase it as a
+ *  question. Every href is a real, existing page. */
+const QUICK_LINKS = [
+  { Icon: Calendar, label: "Book a diagnostic", href: CTA.primary.href },
+  { Icon: Rocket, label: "Get started free", href: "/signup" },
+  { Icon: Wrench, label: "Try a free tool", href: "/free-tools" },
+  { Icon: MessageCircle, label: "Talk to sales", href: "/contact-sales" },
+] as const;
 
 const PROACTIVE_DELAY_MS = 26_000;
 const SESSION_KEY = "lamid-assistant-offered";
@@ -181,6 +194,21 @@ export function AssistantWidget() {
             <p className="text-sm font-medium leading-relaxed">
               {proactive ? "Still deciding, or looking for something specific?" : "What can I help with?"}
             </p>
+
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {QUICK_LINKS.map(({ Icon, label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[color:var(--brand-soft)]"
+                  style={{ border: "1px solid var(--line)" }}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-brand" aria-hidden="true" />
+                  <span className="truncate">{label}</span>
+                </Link>
+              ))}
+            </div>
+
             <div className="mt-3 flex flex-col gap-2">
               {PROMPTS.map((p) => (
                 <button

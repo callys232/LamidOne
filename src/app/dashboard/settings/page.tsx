@@ -26,6 +26,8 @@ export default function SettingsPage() {
       {error && <p className="text-sm" style={{ color: "var(--bad)" }}>{error}</p>}
       {data && <ProfileForm profile={data.user} onSaved={reload} />}
 
+      <IntegrationsForm />
+
       <div className="card p-6">
         <h2 className="font-semibold">Account</h2>
         <dl className="mt-3 space-y-2 text-sm">
@@ -124,6 +126,91 @@ function ProfileForm({ profile, onSaved }: { profile: ProfileResponse["user"]; o
           className="btn btn-primary !px-4 !py-2 text-xs disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save changes"}
+        </button>
+        {status && <span className="faint text-xs">{status}</span>}
+      </div>
+    </div>
+  );
+}
+
+type IntegrationField = { connected: boolean; masked: string | null };
+type IntegrationsResponse = { slack: IntegrationField; discord: IntegrationField; generic: IntegrationField };
+
+const INTEGRATION_FIELDS = [
+  { key: "slackWebhookUrl", source: "slack" as const, label: "Slack", hint: "Incoming Webhook URL from your Slack workspace" },
+  { key: "discordWebhookUrl", source: "discord" as const, label: "Discord", hint: "Webhook URL from a Discord channel's Integrations settings" },
+  { key: "genericWebhookUrl", source: "generic" as const, label: "Generic webhook", hint: "Any URL that accepts a POST — Zapier, Make, n8n or your own endpoint" },
+];
+
+/** Webhook-based, not OAuth — no app registration needed. Fires on
+ *  every notification this account would otherwise only see in-app
+ *  (new bid, project awarded, ticket reply, and so on). */
+function IntegrationsForm() {
+  const [data, setData] = useState<IntegrationsResponse | null>(null);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/integrations", { headers: authHeaders() })
+      .then((r) => r.json())
+      .then(setData)
+      .catch(() => setStatus("Could not load integrations."));
+  }, []);
+
+  async function save() {
+    setSaving(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/integrations", { method: "PATCH", headers: authHeaders(), body: JSON.stringify(values) });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? "Could not save integrations.");
+      setStatus("Saved.");
+      setValues({});
+      const fresh = await fetch("/api/integrations", { headers: authHeaders() }).then((r) => r.json());
+      setData(fresh);
+    } catch (e) {
+      setStatus((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="card p-6">
+      <h2 className="font-semibold">Integrations</h2>
+      <p className="muted mt-2 text-sm leading-relaxed">
+        Send real platform events — a new bid, an awarded project, a ticket reply — to a channel you already
+        use. Paste a webhook URL from Slack, Discord, or any endpoint that accepts a POST (Zapier, Make, n8n).
+      </p>
+
+      <div className="mt-4 space-y-4">
+        {INTEGRATION_FIELDS.map((f) => {
+          const current = data?.[f.source];
+          return (
+            <label key={f.key} className="block text-sm">
+              <span className="mb-1.5 flex items-center justify-between text-xs font-medium">
+                <span className="muted">{f.label}</span>
+                {current?.connected && <span style={{ color: "var(--good)" }}>Connected · {current.masked}</span>}
+              </span>
+              <input
+                value={values[f.key] ?? ""}
+                onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                placeholder={current?.connected ? "Paste a new URL to replace it" : `https://…${f.hint ? ` — ${f.hint}` : ""}`}
+                className="w-full rounded-lg border px-3 py-2 text-sm"
+                style={{ borderColor: "var(--line)", background: "var(--page)" }}
+              />
+            </label>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="button" onClick={save} disabled={saving || Object.keys(values).length === 0}
+          className="btn btn-primary !px-4 !py-2 text-xs disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Save integrations"}
         </button>
         {status && <span className="faint text-xs">{status}</span>}
       </div>

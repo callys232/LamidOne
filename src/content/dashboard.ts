@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard, FolderKanban, ShieldCheck, Wallet, Users2, Building2,
   Bot, Boxes, FileText, Bell, Settings, Gauge, Timer, LifeBuoy,
-  BarChart3, ScrollText, UserCheck, Send,
+  BarChart3, ScrollText, UserCheck, Send, Calendar,
 } from "lucide-react";
 
 /**
@@ -29,7 +29,7 @@ export type SectionId =
   | "engines" | "agents" | "bundles" | "documents" | "experts"
   | "members" | "teams" | "billing" | "analytics" | "sla"
   | "approvals" | "audit" | "invitations" | "notifications"
-  | "verification" | "earnings" | "bids" | "support" | "settings";
+  | "verification" | "earnings" | "bids" | "support" | "settings" | "events";
 
 export type Section = {
   id: SectionId;
@@ -68,6 +68,10 @@ export const SECTIONS: Section[] = [
   { id: "documents", label: "Documents", Icon: FileText, group: "Work",
     blurb: "Contracts, deliverables and shared files.",
     roles: ["client", "expert", "enterprise", "concierge"] },
+
+  { id: "events", label: "Events", Icon: Calendar, group: "Work",
+    blurb: "Workshops, seminars and networking — host one or register for one.",
+    roles: ["client", "expert", "enterprise", "concierge", "operator"] },
 
   /* ── Money ────────────────────────────────────────────── */
   { id: "escrow", label: "Escrow", Icon: ShieldCheck, group: "Money",

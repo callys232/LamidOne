@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 
 /**
  * UI MINIATURES — product imagery, built rather than photographed.
@@ -251,4 +252,42 @@ export function SuiteMock({ index, suiteId }: { index: number; suiteId: string }
   const marketish = ["market", "desk"].includes(suiteId);
   const Chosen = marketish && index === 0 ? TableMock : byIndex[index % byIndex.length];
   return <Chosen />;
+}
+
+/**
+ * A REAL captured screenshot, in the same Frame chrome as the SVG
+ * mocks above. Used only on the homepage hero — every other product
+ * imagery slot stays theme-aware SVG on purpose (dark mode, per-suite
+ * tint, never stale against a redesign; a screenshot has none of
+ * that and needs re-capturing by hand).
+ *
+ * The account behind these is a seeded demo account, not a live
+ * customer's — said plainly in the caption rather than left
+ * ambiguous, the same discipline applied to every other claim on
+ * this site.
+ */
+export function ScreenshotFrame({
+  src, label, width = 640, height = 480,
+}: { src: string; label: string; width?: number; height?: number }) {
+  return (
+    <figure className="overflow-hidden rounded-2xl"
+            style={{ background: "var(--raised)", border: "1px solid var(--line)", boxShadow: "0 12px 32px -18px rgba(0,0,0,.35)" }}>
+      <div className="flex items-center gap-2 border-b px-4 py-2.5" style={{ borderColor: "var(--line-soft)" }}>
+        <span className="flex gap-1.5" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="h-2 w-2 rounded-full" style={{ background: "var(--line)" }} />
+          ))}
+        </span>
+        <span className="faint truncate text-[11px] font-medium">{label}</span>
+      </div>
+      <Image
+        src={src} alt={`${label} — real product screenshot, seeded demo account.`}
+        width={width} height={height}
+        sizes="(min-width: 1024px) 33vw, 100vw"
+        className="block h-auto w-full"
+        style={{ objectFit: "cover", objectPosition: "top" }}
+      />
+      <figcaption className="sr-only">{label} — real product screenshot, from a seeded demo account.</figcaption>
+    </figure>
+  );
 }

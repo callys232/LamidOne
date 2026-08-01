@@ -42,9 +42,9 @@ export type Countable = {
 /** Facts we can count today without waiting for outcome data. */
 export const REACH: Countable[] = [
   { value: "30+", label: "industries covered by the expert network", verified: false },
-  { value: "9",   label: "currencies supported at checkout",          verified: true  },
+  { value: "5",   label: "plans, from free to concierge",             verified: true  },
   { value: "10",  label: "AI agents running across the platform",     verified: true  },
-  { value: "6",   label: "suites on one operating layer",             verified: true  },
+  { value: "9",   label: "suites on one operating layer",             verified: true  },
 ];
 
 /** Outcome claims. All unverified until a real engagement is measured. */

@@ -59,10 +59,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  *  diagnostics — a scored assessment of where you stand. FINANCE (F02)
  *  is a calculator, not an assessment, so it never says "diagnostic". */
 const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, { label: string; href: string; external?: boolean }>> = {
-  core: { label: "Book a diagnostic", href: "/dashboard/engines/q44" },
-  grow: { label: "Assess your digital maturity", href: "/dashboard/engines/g06" },
-  talent: { label: "Book a diagnostic", href: "/dashboard/engines/a07" },
-  finance: { label: "Build a budget", href: "/dashboard/budget" },
+  core: { label: "Book a diagnostic", href: "/diagnostics/q44" },
+  grow: { label: "Assess your digital maturity", href: "/diagnostics/g06" },
+  talent: { label: "Book a diagnostic", href: "/diagnostics/a07" },
+  finance: { label: "Build a budget", href: "/diagnostics/budget" },
 };
 
 export default async function SuitePage({ params }: { params: Promise<{ id: string }> }) {
