@@ -49,15 +49,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: `${suite.name} — ${suite.kind}`, description: suite.subhead };
 }
 
-/** The four suites with a real, working flagship diagnostic. The other
+/** The four suites with a real, working flagship engine. The other
  *  five have their own natural CTA already (open the app, post a
  *  brief, run a visibility check) — this is deliberately not filled
- *  in for every suite. */
-const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, string>> = {
-  core: "/dashboard/engines/q44",
-  grow: "/dashboard/engines/g06",
-  talent: "/dashboard/engines/a15",
-  finance: "/dashboard/budget",
+ *  in for every suite.
+ *
+ *  Labels are per-suite rather than the generic CTA.primary label
+ *  reused everywhere: CORE (Q44) and TALENT (A07) are genuinely
+ *  diagnostics — a scored assessment of where you stand. FINANCE (F02)
+ *  is a calculator, not an assessment, so it never says "diagnostic". */
+const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, { label: string; href: string; external?: boolean }>> = {
+  core: { label: "Book a diagnostic", href: "/dashboard/engines/q44" },
+  grow: { label: "Assess your digital maturity", href: "/dashboard/engines/g06" },
+  talent: { label: "Book a diagnostic", href: "/dashboard/engines/a07" },
+  finance: { label: "Build a budget", href: "/dashboard/budget" },
 };
 
 export default async function SuitePage({ params }: { params: Promise<{ id: string }> }) {
@@ -86,7 +91,7 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
   const primaryCta = suite.external
     ? { label: suite.external.label, href: suite.external.url, external: true }
     : SUITE_DIAGNOSTIC[suite.id]
-      ? { label: CTA.primary.label, href: SUITE_DIAGNOSTIC[suite.id]! }
+      ? SUITE_DIAGNOSTIC[suite.id]!
       : CTA.primary;
   const secondaryCta = suite.external ? CTA.secondary : CTA.secondary;
 

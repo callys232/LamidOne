@@ -359,6 +359,81 @@ export const MODULE_REGISTRY: Record<string, ModuleConfig> = {
     backHref: "/r29-executive-cadence-report", backLabel: "Executive Cadence Report", nextHref: "/intelligence-hub", nextLabel: "Intelligence Hub",
   },
 
+  /* ── C-SERIES — CORE console pages ─────────────────
+     Verified against ProdLamid's own source: these 8 core-*.tsx pages
+     each reference MODULE_REGISTRY["C0x"], and none of those codes
+     exist there either — same gap as G06/A07, just larger. CORE's
+     depth sits almost entirely in the 178 real Q/R/S/P/X/Z modules
+     below; these 8 are the suite-level console pages that sit above
+     them, so each gets its own standalone entry-point assessment in
+     that console's specific domain rather than literally aggregating
+     the sub-series (a different compute shape this registry doesn't
+     model, and not what any of the other consoles do either). */
+  C02: {
+    id: "C02", seriesName: "C-Series — CORE Console", engineName: "Workflow Intelligence",
+    purpose: "Scores how well work actually moves through your organisation — handoffs, bottlenecks, and where process breaks down under real load.",
+    dimensionLabels: ["Process Definition Clarity", "Handoff Efficiency", "Bottleneck Visibility", "Workflow Compliance"],
+    driverContext: "Structural Drivers determine whether process is actually followed. Timing Drivers reveal where handoffs stall. Human Drivers govern whether people work around the process or through it.",
+    correctionProtocols: ["Workflow Stabilisation", "Handoff Redesign", "Bottleneck Resolution", "Compliance Improvement", "Workflow Amplification", "Process Lock-In"],
+    backHref: "/suites/core", backLabel: "LAMID CORE", nextHref: "/core-diagnostic", nextLabel: "Core Diagnostic",
+  },
+  C03: {
+    id: "C03", seriesName: "C-Series — CORE Console", engineName: "Core Diagnostic",
+    purpose: "The single-score read on CORE as a whole — decision quality, execution cadence and governance posture combined into one number before you go deep on any one of them.",
+    dimensionLabels: ["Decision Health", "Execution Cadence", "Governance Posture", "Strategic Coherence"],
+    driverContext: "All seven drivers contribute to this composite read. Direction Drivers set what 'coherent' means for this organisation. Identity Drivers determine how honestly the other three dimensions get scored.",
+    correctionProtocols: ["Diagnostic Stabilisation", "Decision Improvement", "Cadence Correction", "Governance Reinforcement", "Coherence Amplification", "Core Lock-In"],
+    backHref: "/core-workflow", backLabel: "Workflow Intelligence", nextHref: "/core-transformation", nextLabel: "Transformation Console",
+  },
+  C04: {
+    id: "C04", seriesName: "C-Series — CORE Console", engineName: "Transformation Console",
+    purpose: "Rolls transformation pace and stability up into one executive read — is change actually landing, or just being announced.",
+    dimensionLabels: ["Transformation Velocity", "Adoption Depth", "Stability Under Change", "Value Realisation"],
+    driverContext: "Timing Drivers govern velocity. Cultural Drivers determine whether adoption is genuine or performed. Direction Drivers define what value the transformation was for in the first place.",
+    correctionProtocols: ["Transformation Stabilisation", "Adoption Acceleration", "Stability Reinforcement", "Value Realisation Improvement", "Velocity Amplification", "Transformation Lock-In"],
+    backHref: "/core-diagnostic", backLabel: "Core Diagnostic", nextHref: "/core-operating-rhythm", nextLabel: "Operating Rhythm Console",
+  },
+  C05: {
+    id: "C05", seriesName: "C-Series — CORE Console", engineName: "Operating Rhythm Console",
+    purpose: "The executive view of delivery tempo across every team — where cadence holds, where it is drifting, and what that is costing.",
+    dimensionLabels: ["Cross-Team Cadence Fit", "Rhythm Consistency", "Drift Exposure", "Recovery Speed"],
+    driverContext: "Timing Drivers are the primary signal here. Structural Drivers determine whether teams can even keep the same rhythm. Direction Drivers set the tempo the organisation should be running at.",
+    correctionProtocols: ["Rhythm Stabilisation", "Cadence Synchronisation", "Drift Correction", "Recovery Improvement", "Consistency Amplification", "Rhythm Lock-In"],
+    backHref: "/core-transformation", backLabel: "Transformation Console", nextHref: "/core-strategic-alignment", nextLabel: "Strategic Alignment Console",
+  },
+  C06: {
+    id: "C06", seriesName: "C-Series — CORE Console", engineName: "Operating Model Blueprint",
+    purpose: "Assesses how well your operating model — structure, decision rights, delivery rhythm — actually fits the strategy it is meant to carry.",
+    dimensionLabels: ["Structural Fit", "Decision Rights Clarity", "Capacity Alignment", "Model Adaptability"],
+    driverContext: "Structural Drivers are the model itself. Direction Drivers define what the model has to be fit for. Identity Drivers determine how much resistance a redesign will meet.",
+    correctionProtocols: ["Blueprint Stabilisation", "Structural Realignment", "Decision Rights Clarification", "Capacity Correction", "Adaptability Improvement", "Model Lock-In"],
+    backHref: "/core-strategic-alignment", backLabel: "Strategic Alignment Console", nextHref: "/core-change-management", nextLabel: "Change Management Console",
+  },
+  C07: {
+    id: "C07", seriesName: "C-Series — CORE Console", engineName: "Strategic Alignment Console",
+    purpose: "Checks whether strategy, priorities and the work actually being done are still the same thing, or have quietly diverged.",
+    dimensionLabels: ["Priority Coherence", "Resource-Strategy Fit", "Cascade Clarity", "Alignment Durability"],
+    driverContext: "Direction Drivers set the strategy being aligned to. Structural Drivers determine whether resourcing actually follows it. Cultural Drivers govern how the strategy cascades below the top team.",
+    correctionProtocols: ["Alignment Stabilisation", "Priority Correction", "Resource Realignment", "Cascade Improvement", "Durability Amplification", "Strategic Lock-In"],
+    backHref: "/core-operating-rhythm", backLabel: "Operating Rhythm Console", nextHref: "/core-blueprint", nextLabel: "Operating Model Blueprint",
+  },
+  C08: {
+    id: "C08", seriesName: "C-Series — CORE Console", engineName: "Change Management Console",
+    purpose: "Scores the health of a change programme itself — sponsorship, adoption, resistance and sustainment — separately from whether the change was the right call.",
+    dimensionLabels: ["Sponsorship Strength", "Adoption Rate", "Resistance Management", "Sustainment Readiness"],
+    driverContext: "Identity Drivers reveal how much sponsors are actually willing to spend on this. Cultural Drivers govern resistance. Timing Drivers determine whether the programme is sequenced to actually stick.",
+    correctionProtocols: ["Change Stabilisation", "Sponsorship Reinforcement", "Adoption Acceleration", "Resistance Resolution", "Sustainment Improvement", "Change Lock-In"],
+    backHref: "/core-blueprint", backLabel: "Operating Model Blueprint", nextHref: "/core-executive-console", nextLabel: "Executive Console",
+  },
+  C09: {
+    id: "C09", seriesName: "C-Series — CORE Console", engineName: "Executive Console",
+    purpose: "One board-level score combining decision quality, delivery confidence, risk exposure and governance assurance — the number a director asks for before the detail.",
+    dimensionLabels: ["Decision Quality", "Delivery Confidence", "Risk Exposure", "Governance Assurance"],
+    driverContext: "All seven drivers roll up here. Direction Drivers set what the board should actually be worried about. Identity Drivers determine whether this reads as an honest score or a managed one.",
+    correctionProtocols: ["Executive Stabilisation", "Decision Reinforcement", "Confidence Building", "Risk Mitigation", "Assurance Improvement", "Executive Lock-In"],
+    backHref: "/core-change-management", backLabel: "Change Management Console", nextHref: "/suites/core", nextLabel: "LAMID CORE",
+  },
+
   /* ── Q-SERIES — Decision Intelligence ─────────────── */
   Q01: {
     id: "Q01", seriesName: "Q-Series — Decision Intelligence", engineName: "Decision Landscape Mapping",
@@ -1220,6 +1295,64 @@ export const MODULE_REGISTRY: Record<string, ModuleConfig> = {
   },
 
   /* ── A-SERIES ─────────────────────────────────────────────── */
+  /* A07 does not exist in ProdLamid's own registry either — verified
+     against ProdLamid's source directly, same as G06. Its
+     talent-diagnostics page references MODULE_REGISTRY["A07"] and
+     falls back to the generic placeholder in both apps. This is the
+     suite's actual named entry-point diagnostic (parallel to Q44 for
+     CORE) — broader than A08's risk focus or A15's capability-uplift
+     planning focus, so it needed its own dimensions rather than
+     reusing either. A standard workforce-health scorecard shape:
+     capability coverage, retention risk, succession readiness, and
+     engagement signal — the four things a talent leader checks first. */
+  A02: {
+    id: "A02", seriesName: "A-Series — TALENT Intelligence", engineName: "Capability Assessment",
+    purpose: "Scores whether your people actually have the skills your strategy needs next — not the skills on file, the skills in practice.",
+    dimensionLabels: ["Skill-Strategy Fit", "Depth Beyond Named Experts", "Capability Currency", "Development Trajectory"],
+    driverContext: "Direction Drivers define the skills the strategy actually needs. Human Drivers reveal true depth versus single points of expertise. Timing Drivers govern how fast capability is decaying or growing.",
+    correctionProtocols: ["Capability Stabilisation", "Skill Gap Closure", "Depth Building", "Currency Improvement", "Trajectory Amplification", "Capability Lock-In"],
+    backHref: "/suites/talent", backLabel: "LAMID TALENT", nextHref: "/talent-workforce-planning", nextLabel: "Workforce Planning",
+  },
+  A03: {
+    id: "A03", seriesName: "A-Series — TALENT Intelligence", engineName: "Workforce Planning",
+    purpose: "Assesses whether your headcount and capability plan actually matches where the business is going, not where it has been.",
+    dimensionLabels: ["Demand Forecast Accuracy", "Supply Pipeline Health", "Scenario Coverage", "Planning Cycle Discipline"],
+    driverContext: "Direction Drivers set the demand the plan has to meet. Timing Drivers govern how far ahead the plan can see reliably. Structural Drivers determine whether the pipeline can actually deliver against it.",
+    correctionProtocols: ["Planning Stabilisation", "Forecast Correction", "Pipeline Strengthening", "Scenario Expansion", "Discipline Improvement", "Workforce Lock-In"],
+    backHref: "/talent-capability", backLabel: "Capability Assessment", nextHref: "/talent-leadership-pipeline", nextLabel: "Leadership Pipeline",
+  },
+  A04: {
+    id: "A04", seriesName: "A-Series — TALENT Intelligence", engineName: "Leadership Pipeline",
+    purpose: "Scores how real your leadership bench actually is — named successors with genuine readiness, not an org chart that only looks complete.",
+    dimensionLabels: ["Pipeline Depth", "Readiness Accuracy", "Development Velocity", "Retention of Key Successors"],
+    driverContext: "Human Drivers reveal who is genuinely ready versus assumed ready. Identity Drivers determine succession character — bold or conservative. Timing Drivers govern how fast readiness gaps are closing.",
+    correctionProtocols: ["Pipeline Stabilisation", "Depth Building", "Readiness Verification", "Velocity Improvement", "Retention Reinforcement", "Leadership Lock-In"],
+    backHref: "/talent-workforce-planning", backLabel: "Workforce Planning", nextHref: "/talent-culture-intelligence", nextLabel: "Culture Intelligence",
+  },
+  A05: {
+    id: "A05", seriesName: "A-Series — TALENT Intelligence", engineName: "Culture Intelligence",
+    purpose: "Reads culture from behaviour and outcomes rather than survey sentiment alone — what is actually being rewarded and repeated, not what people say they value.",
+    dimensionLabels: ["Behavioural Consistency", "Values-Action Alignment", "Psychological Safety Signal", "Culture-Performance Link"],
+    driverContext: "Cultural Drivers are the direct subject here. Identity Drivers determine whether stated values match lived ones. Human Drivers surface the behavioural evidence underneath the sentiment.",
+    correctionProtocols: ["Culture Stabilisation", "Consistency Improvement", "Alignment Correction", "Safety Reinforcement", "Performance Linkage", "Culture Lock-In"],
+    backHref: "/talent-leadership-pipeline", backLabel: "Leadership Pipeline", nextHref: "/talent-workforce-readiness", nextLabel: "Workforce Readiness",
+  },
+  A06: {
+    id: "A06", seriesName: "A-Series — TALENT Intelligence", engineName: "Workforce Readiness",
+    purpose: "Scores whether the workforce is ready for what is coming next — not what already happened.",
+    dimensionLabels: ["Skill Readiness", "Capacity Headroom", "Change Absorption Capacity", "Critical Role Coverage"],
+    driverContext: "Direction Drivers define what 'ready' has to mean. Timing Drivers reveal how much runway there actually is. Structural Drivers determine whether critical roles have real cover.",
+    correctionProtocols: ["Readiness Stabilisation", "Skill Acceleration", "Headroom Creation", "Absorption Improvement", "Coverage Reinforcement", "Readiness Lock-In"],
+    backHref: "/talent-culture-intelligence", backLabel: "Culture Intelligence", nextHref: "/talent-diagnostics", nextLabel: "Talent Diagnostics",
+  },
+  A07: {
+    id: "A07", seriesName: "A-Series — TALENT Intelligence", engineName: "Talent Diagnostics",
+    purpose: "The entry-point read on workforce health — capability coverage, flight risk, succession depth and engagement signal, in one score before you go looking for any one of them individually.",
+    dimensionLabels: ["Capability Coverage", "Retention & Flight Risk", "Succession Readiness", "Engagement & Culture Signal"],
+    driverContext: "Human Drivers generate the underlying workforce signal. Structural Drivers determine whether capability and succession are actually covered or only look covered. Cultural Drivers shape engagement and retention. Direction Drivers reveal the workforce the strategy will need next.",
+    correctionProtocols: ["Diagnostic Stabilisation", "Coverage Correction", "Retention Intervention", "Succession Build-Out", "Engagement Improvement", "Workforce Lock-In"],
+    backHref: "/talent-workforce-readiness", backLabel: "Workforce Readiness", nextHref: "/a08-talent-risk", nextLabel: "Talent Risk Intelligence",
+  },
   A08: {
     id: "A08", seriesName: "A-Series — TALENT Intelligence", engineName: "Talent Risk Intelligence",
     purpose: "Measures the people risk in your organization — who might leave, what leaves with them, and which roles have no cover.",
@@ -1794,21 +1927,78 @@ export const MODULE_REGISTRY: Record<string, ModuleConfig> = {
     correctionProtocols: ["Visibility Installation","Dashboard Deployment","Data Unification","Blind Spot Elimination","Visibility Improvement","Financial Truth Lock-In"],
     backHref: "/finance-dashboard", backLabel: "Finance Dashboard", nextHref: "/f02-budgeting-forecasting", nextLabel: "Budgeting & Forecasting Engine",
   },
-  /* G06 does not exist in ProdLamid's own registry — its grow-digital-maturity
-     page references MODULE_REGISTRY["G06"] and silently falls back to a generic
-     "Primary/Secondary/Tertiary/Quaternary Dimension" placeholder, in BOTH
-     ProdLamid and this app, until now. GROW's flagship diagnostic was never
-     actually given real assessment dimensions. These four are a standard
-     digital-maturity framework (strategy, infrastructure, operating model,
-     customer experience — the same shape MIT CISR's and Gartner's models use),
-     not a port of anything, because there was nothing to port. */
+  /* None of GROW's 9 module pages exist in ProdLamid's own registry —
+     verified directly against its source, not just this clone. Every
+     grow-*.tsx page there references a MODULE_REGISTRY["G0x"] code and
+     falls back to the generic "Primary/Secondary/Tertiary/Quaternary
+     Dimension" placeholder, in both apps, until now. GROW's entire
+     diagnostic layer was never given real content — these 9 are
+     original designs for what each page's own name and purpose
+     already promise, not a port of anything, because there was
+     nothing to port. */
+  G02: {
+    id: "G02", seriesName: "LAMID GROW Intelligence", engineName: "Opportunity Signals",
+    purpose: "Surfaces market openings while they are still open — scored on how early, how credible, and how ready you are to act on them.",
+    dimensionLabels: ["Signal Detection Speed", "Signal Credibility", "Market Timing", "Readiness to Act"],
+    driverContext: "Market Drivers generate the raw signal. Timing Drivers determine whether it is caught early enough to matter. Direction Drivers decide whether the organisation is even looking for this kind of opportunity.",
+    correctionProtocols: ["Signal Stabilisation", "Detection Acceleration", "Credibility Verification", "Timing Correction", "Readiness Improvement", "Opportunity Lock-In"],
+    backHref: "/suites/grow", backLabel: "LAMID GROW", nextHref: "/grow-pathways", nextLabel: "Growth Pathways",
+  },
+  G03: {
+    id: "G03", seriesName: "LAMID GROW Intelligence", engineName: "Growth Pathways",
+    purpose: "Scores which growth paths are genuinely open to you against your actual capacity, not just which look attractive on a slide.",
+    dimensionLabels: ["Pathway Viability", "Capacity Fit", "Competitive Exposure", "Time-to-Value"],
+    driverContext: "Direction Drivers narrow the field of real options. Structural Drivers determine which paths your capacity can actually carry. Market Drivers reveal how exposed each path is to competitive response.",
+    correctionProtocols: ["Pathway Stabilisation", "Viability Correction", "Capacity Realignment", "Exposure Mitigation", "Value Acceleration", "Pathway Lock-In"],
+    backHref: "/grow-opportunity-signals", backLabel: "Opportunity Signals", nextHref: "/grow-modernisation", nextLabel: "Modernisation Planning",
+  },
+  G04: {
+    id: "G04", seriesName: "LAMID GROW Intelligence", engineName: "Modernisation Planning",
+    purpose: "Assesses how ready your systems, processes and people are for the modernisation route you are considering — before you commit budget to it.",
+    dimensionLabels: ["Technical Readiness", "Organisational Readiness", "Change Capacity", "Modernisation ROI Clarity"],
+    driverContext: "Structural Drivers determine technical readiness. Cultural Drivers govern organisational readiness. Timing Drivers reveal how much change capacity actually exists right now versus on paper.",
+    correctionProtocols: ["Modernisation Stabilisation", "Technical Uplift", "Readiness Building", "Capacity Expansion", "ROI Clarification", "Modernisation Lock-In"],
+    backHref: "/grow-pathways", backLabel: "Growth Pathways", nextHref: "/grow-market-intelligence", nextLabel: "Market Intelligence",
+  },
+  G05: {
+    id: "G05", seriesName: "LAMID GROW Intelligence", engineName: "Market Intelligence",
+    purpose: "Scores how good your read on the market actually is — current, sourced and acted on, versus assumed.",
+    dimensionLabels: ["Signal Currency", "Source Diversity", "Competitive Visibility", "Intelligence-to-Action Speed"],
+    driverContext: "Market Drivers are the direct subject. Timing Drivers reveal how stale the intelligence has become. Direction Drivers determine whether it is actually informing decisions or just being collected.",
+    correctionProtocols: ["Intelligence Stabilisation", "Currency Refresh", "Source Expansion", "Visibility Improvement", "Action Acceleration", "Intelligence Lock-In"],
+    backHref: "/grow-modernisation", backLabel: "Modernisation Planning", nextHref: "/grow-digital-maturity", nextLabel: "Digital Maturity Model",
+  },
   G06: {
     id: "G06", seriesName: "LAMID GROW Intelligence", engineName: "Digital Maturity Model",
     purpose: "Scores how far digital capability has actually reached — not the roadmap, the operating reality — across strategy, infrastructure, people and the customer experience it produces.",
     dimensionLabels: ["Digital Strategy Alignment", "Technology & Data Infrastructure", "Operating Model Adaptability", "Customer & Market Digital Experience"],
     driverContext: "Direction Drivers set the digital strategy the organisation is converging toward. Structural Drivers determine whether infrastructure and process can carry that strategy. Cultural Drivers govern how readily people adopt new digital ways of working. Market Drivers reveal how the customer experiences the result.",
     correctionProtocols: ["Maturity Stabilisation", "Infrastructure Modernisation", "Operating Model Redesign", "Experience Uplift", "Maturity Improvement", "Digital Lock-In"],
-    backHref: "/suites/grow", backLabel: "LAMID GROW",
+    backHref: "/grow-market-intelligence", backLabel: "Market Intelligence", nextHref: "/grow-planner", nextLabel: "Growth Planner",
+  },
+  G07: {
+    id: "G07", seriesName: "LAMID GROW Intelligence", engineName: "Growth Planner",
+    purpose: "Checks whether the growth plan you are about to sign off is one your people, cash and operating rhythm can actually carry.",
+    dimensionLabels: ["Ambition-Capacity Fit", "Funding Certainty", "Execution Bandwidth", "Milestone Realism"],
+    driverContext: "Direction Drivers set the ambition. Structural Drivers determine whether capacity can carry it. Timing Drivers reveal whether the milestones in the plan are sequenced realistically.",
+    correctionProtocols: ["Planning Stabilisation", "Ambition Recalibration", "Funding Confirmation", "Bandwidth Expansion", "Milestone Correction", "Growth Lock-In"],
+    backHref: "/grow-digital-maturity", backLabel: "Digital Maturity Model", nextHref: "/grow-advisory-console", nextLabel: "Advisory Console",
+  },
+  G08: {
+    id: "G08", seriesName: "LAMID GROW Intelligence", engineName: "Advisory Console",
+    purpose: "The working view for running an advisory engagement against live growth data — how well the engagement's guidance is actually landing.",
+    dimensionLabels: ["Diagnostic Grounding", "Recommendation Specificity", "Client Adoption", "Measurable Impact"],
+    driverContext: "Direction Drivers reveal whether the advice matches the client's real strategy. Human Drivers govern whether the client actually adopts it. Timing Drivers determine how fast impact shows up.",
+    correctionProtocols: ["Advisory Stabilisation", "Grounding Improvement", "Specificity Correction", "Adoption Acceleration", "Impact Amplification", "Advisory Lock-In"],
+    backHref: "/grow-planner", backLabel: "Growth Planner", nextHref: "/grow-executive-report", nextLabel: "Executive Growth Report",
+  },
+  G09: {
+    id: "G09", seriesName: "LAMID GROW Intelligence", engineName: "Executive Growth Report",
+    purpose: "One board-ready score for growth performance — signal quality, plan execution and realised value combined.",
+    dimensionLabels: ["Signal-to-Plan Conversion", "Execution Fidelity", "Realised Value", "Forward Pipeline Strength"],
+    driverContext: "All drivers roll up here. Direction Drivers set what 'good growth' means for this board. Market Drivers determine how much of the pipeline is real versus optimistic.",
+    correctionProtocols: ["Report Stabilisation", "Conversion Improvement", "Fidelity Correction", "Value Reinforcement", "Pipeline Strengthening", "Growth Lock-In"],
+    backHref: "/grow-advisory-console", backLabel: "Advisory Console", nextHref: "/suites/grow", nextLabel: "LAMID GROW",
   },
 
   F02: {

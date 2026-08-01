@@ -16,9 +16,11 @@ export const dynamic = "force-dynamic";
  *   tier check → rate limit → reserve points → run → settle on success,
  *   release on any failure.
  *
- * Engine-backed agents (Catalyst) delegate to ProdLamid's compute layer
- * and return computed numbers. Language agents (Scribe) call the model.
- * Neither invents a figure the engines did not produce.
+ * Engine-backed agents (Catalyst) call runEngine() in-process — the
+ * 247 intelligence modules are cloned into this app under lib/intelligence,
+ * lib/budget and lib/talent, not fetched from ProdLamid at runtime.
+ * Language agents (Scribe) call the model. Neither invents a figure the
+ * engines did not produce.
  */
 export const POST = handler(async (req) => {
   const url = new URL(req.url);
