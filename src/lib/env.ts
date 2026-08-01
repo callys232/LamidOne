@@ -16,6 +16,10 @@ export const env = {
   get redisToken() { return process.env.UPSTASH_REDIS_REST_TOKEN ?? ""; },
   get jwtSecret() { return process.env.JWT_SECRET ?? ""; },
   get isProd() { return process.env.NODE_ENV === "production"; },
+  /** Canonical origin, used by robots.ts and sitemap.ts. Falls back to
+   *  localhost so `next dev` and `next build` never fail for lacking it —
+   *  only the deployed site needs the real value set. */
+  get siteUrl() { return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""); },
 } as const;
 
 export class ConfigError extends Error {
