@@ -76,6 +76,57 @@ export async function ensureIndexes(): Promise<void> {
     db.collection("ledger").createIndex({ userId: 1, at: -1 }),
     db.collection("bundles").createIndex({ id: 1 }, { unique: true }),
     db.collection("bundles").createIndex({ userId: 1, updatedAt: -1 }),
+
+    /* Every collection below was being queried with zero indexes —
+       a full collection scan on every request. `users.email` is the
+       one that matters beyond performance: without it, createUser()'s
+       check-then-insert (find by email, then insertOne) is a real
+       race — two concurrent signups with the same email could both
+       pass the "does not exist" check. The unique index makes the
+       second insert fail atomically instead. */
+    db.collection("users").createIndex({ id: 1 }, { unique: true }),
+    db.collection("users").createIndex({ email: 1 }, { unique: true }),
+
+    db.collection("projects").createIndex({ id: 1 }, { unique: true }),
+    db.collection("projects").createIndex({ clientId: 1, createdAt: -1 }),
+    db.collection("projects").createIndex({ status: 1, createdAt: -1 }),
+
+    db.collection("bids").createIndex({ id: 1 }, { unique: true }),
+    db.collection("bids").createIndex({ projectId: 1, boosted: -1, createdAt: 1 }),
+    db.collection("bids").createIndex({ expertId: 1, createdAt: -1 }),
+
+    db.collection("completedProjects").createIndex({ clientId: 1, completedAt: -1 }),
+    db.collection("completedProjects").createIndex({ expertId: 1, completedAt: -1 }),
+
+    db.collection("experts").createIndex({ id: 1 }, { unique: true }),
+    db.collection("experts").createIndex({ disciplines: 1, engagementsCompleted: -1 }),
+
+    db.collection("milestones").createIndex({ id: 1 }, { unique: true }),
+    db.collection("milestones").createIndex({ projectId: 1 }),
+    db.collection("milestones").createIndex({ status: 1, autoReleaseAt: 1 }),
+
+    db.collection("orgMembers").createIndex({ id: 1 }, { unique: true }),
+    db.collection("orgMembers").createIndex({ orgId: 1, joinedAt: 1 }),
+    db.collection("teams").createIndex({ id: 1 }, { unique: true }),
+    db.collection("teams").createIndex({ orgId: 1, createdAt: -1 }),
+    db.collection("invitations").createIndex({ id: 1 }, { unique: true }),
+    db.collection("invitations").createIndex({ orgId: 1, status: 1, createdAt: -1 }),
+
+    db.collection("notifications").createIndex({ id: 1 }, { unique: true }),
+    db.collection("notifications").createIndex({ userId: 1, at: -1 }),
+    db.collection("notificationPrefs").createIndex({ userId: 1 }, { unique: true }),
+
+    db.collection("supportTickets").createIndex({ id: 1 }, { unique: true }),
+    db.collection("supportTickets").createIndex({ userId: 1, createdAt: -1 }),
+
+    db.collection("payoutAccounts").createIndex({ userId: 1 }, { unique: true }),
+    db.collection("withdrawals").createIndex({ id: 1 }, { unique: true }),
+    db.collection("withdrawals").createIndex({ userId: 1, createdAt: -1 }),
+
+    db.collection("verifications").createIndex({ userId: 1 }, { unique: true }),
+
+    db.collection("auditLog").createIndex({ orgId: 1, at: -1 }),
+    db.collection("auditLog").createIndex({ actorId: 1, at: -1 }),
   ]).catch((e) => console.error("[store] index creation failed:", (e as Error).message));
 }
 

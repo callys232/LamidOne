@@ -617,7 +617,7 @@ export const LEARN: Suite = {
   features: [
     { name: "Course catalogue", description: "Browse and enrol across the full programme library." },
     { name: "Structured programmes", description: "Sequenced paths with prerequisites and milestones." },
-    { name: "Live events", description: "Scheduled cohort sessions, workshops and clinics." },
+    { name: "Live events", description: "Cohort sessions, workshops, seminars and reskilling clinics — career and business topics both." },
     { name: "AI tutor", description: "Answers questions in context as the learner works." },
     { name: "Certified outcomes", description: "Assessed certification, not attendance badges." },
     { name: "Multi-tenant workspaces", description: "Separate learning environments per organisation." },

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { BRAND } from "@/content/brand";
 import { AssistantWidget } from "@/components/layout/AssistantWidget";
+import { BizSphereModalWrapper } from "@/components/layout/BizSphereModalWrapper";
 
 export const metadata: Metadata = {
   title: {
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         {children}
         <AssistantWidget />
+        <BizSphereModalWrapper />
       </body>
     </html>
   );
