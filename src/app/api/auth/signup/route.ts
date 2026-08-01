@@ -1,6 +1,9 @@
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { createUser, publicUser, SignupError } from "@/lib/users";
+import { ensureExpertProfile } from "@/lib/marketplace";
+import { creditAsync } from "@/lib/points";
+import { SIGNUP_GRANTS } from "@/content/agents";
 import { signAccessToken } from "@/lib/auth";
 import type { DashboardRole } from "@/content/dashboard";
 
@@ -46,6 +49,25 @@ export const POST = handler(async (req) => {
     const user = await createUser({
       email: body.email, password: body.password, name: body.name, role, organisation: body.organisation,
     });
+
+    /* Without this, an expert account existed with no way to ever
+       appear in "browse the vetted expert network" — nothing else
+       ever wrote to the experts collection. See marketplace.ts. */
+    if (role === "expert") {
+      await ensureExpertProfile(user.id, user.name);
+    }
+
+    /* The free plan's entire pitch is "one diagnostic" / "one bid" —
+       content/agents.ts's SIGNUP_GRANTS and FREE_GRANT both describe
+       this as already true. Nothing actually credited it: every new
+       account started at 0 points regardless of role, unable to do
+       the one free thing the platform promises. */
+    await creditAsync(
+      user.id,
+      role === "expert" ? SIGNUP_GRANTS.expertFree : SIGNUP_GRANTS.clientFree,
+      "allowance",
+      "signup grant",
+    );
 
     const token = signAccessToken({
       sub: user.id, email: user.email, role: "user",

@@ -28,6 +28,11 @@ export type Project = {
   deadline?: string;
   status: ProjectStatus;
   bidCount: number;
+  /** Set by awardBid(). The one expert authorised to deliver this
+   *  project — completeProject() validates against this rather than
+   *  trusting a client-supplied expertId. */
+  awardedExpertId?: string;
+  awardedAt?: number;
   createdAt: number;
   updatedAt: number;
 };
@@ -72,6 +77,7 @@ const id = (p: string) => `${p}_${Date.now().toString(36)}_${Math.random().toStr
 /* ── In-memory fallback ───────────────────────────────────── */
 const projects = new Map<string, Project>();
 const bids = new Map<string, Bid>();
+const experts = new Map<string, Expert>();
 
 /* ── Validation ───────────────────────────────────────────── */
 
@@ -235,6 +241,98 @@ export async function listBids(projectId: string, take = 50): Promise<Bid[]> {
     .slice(0, take);
 }
 
+async function getBid(bidId: string): Promise<Bid | null> {
+  if (persistenceEnabled()) {
+    const col = await collection<Bid>("bids");
+    if (col) return col.findOne({ id: bidId });
+  }
+  return bids.get(bidId) ?? null;
+}
+
+/**
+ * Award a bid — the missing handoff between "receive bids" and "the
+ * engagement actually starts." Only the project's own client can
+ * award, only while the project is still open, and only a bid that is
+ * still live. Every other live bid on the project is declined in the
+ * same call, so a project can never end up with two accepted bids.
+ */
+export async function awardBid(clientId: string, projectId: string, bidId: string): Promise<{ project: Project; bid: Bid }> {
+  const project = await getProject(projectId);
+  if (!project) throw new MarketplaceError("No such project.");
+  if (project.clientId !== clientId) throw new MarketplaceError("Only the client who posted this project can award a bid.");
+  if (project.status !== "open") throw new MarketplaceError("This project is not open for award — it may already be awarded or closed.");
+
+  const bid = await getBid(bidId);
+  if (!bid || bid.projectId !== projectId) throw new MarketplaceError("No such bid on this project.");
+  if (bid.status !== "submitted" && bid.status !== "shortlisted") {
+    throw new MarketplaceError("This bid can no longer be awarded.");
+  }
+
+  const now = Date.now();
+
+  if (persistenceEnabled()) {
+    const prjCol = await collection<Project>("projects");
+    const bidCol = await collection<Bid>("bids");
+    if (prjCol && bidCol) {
+      /* The `status: "open"` guard in the filter closes the race
+         between two concurrent award attempts on the same project —
+         only the first one finds a match. */
+      const updatedProject = await prjCol.findOneAndUpdate(
+        { id: projectId, status: "open" },
+        { $set: { status: "awarded", awardedExpertId: bid.expertId, awardedAt: now, updatedAt: now } },
+        { returnDocument: "after" },
+      );
+      if (!updatedProject) throw new MarketplaceError("This project was just awarded by another request.");
+
+      await bidCol.updateOne({ id: bidId }, { $set: { status: "accepted" } });
+      await bidCol.updateMany(
+        { projectId, id: { $ne: bidId }, status: { $in: ["submitted", "shortlisted"] } },
+        { $set: { status: "declined" } },
+      );
+
+      return { project: updatedProject, bid: { ...bid, status: "accepted" } };
+    }
+  }
+
+  if (project.status !== "open") throw new MarketplaceError("This project was just awarded by another request.");
+  project.status = "awarded";
+  project.awardedExpertId = bid.expertId;
+  project.awardedAt = now;
+  project.updatedAt = now;
+  bid.status = "accepted";
+  for (const b of bids.values()) {
+    if (b.projectId === projectId && b.id !== bidId && (b.status === "submitted" || b.status === "shortlisted")) {
+      b.status = "declined";
+    }
+  }
+  return { project, bid };
+}
+
+/** Withdraw your own bid — only while it is still live. You cannot
+ *  withdraw a bid that has already been accepted or declined. */
+export async function withdrawBid(expertId: string, bidId: string): Promise<Bid> {
+  const bid = await getBid(bidId);
+  if (!bid) throw new MarketplaceError("No such bid.");
+  if (bid.expertId !== expertId) throw new MarketplaceError("You can only withdraw your own bid.");
+  if (bid.status !== "submitted" && bid.status !== "shortlisted") {
+    throw new MarketplaceError("This bid can no longer be withdrawn.");
+  }
+
+  if (persistenceEnabled()) {
+    const col = await collection<Bid>("bids");
+    if (col) {
+      const updated = await col.findOneAndUpdate(
+        { id: bidId, status: bid.status },
+        { $set: { status: "withdrawn" } },
+        { returnDocument: "after" },
+      );
+      if (updated) return updated;
+    }
+  }
+  bid.status = "withdrawn";
+  return bid;
+}
+
 /* ── Completed work ───────────────────────────────────────── */
 
 export type CompletedProject = Project & {
@@ -262,7 +360,7 @@ const completed = new Map<string, CompletedProject>();
 export async function completeProject(
   projectId: string,
   clientId: string,
-  input: { expertId: string; finalValue: number; milestonesApproved: number;
+  input: { finalValue: number; milestonesApproved: number;
            outcome?: { summary: string; verifiedByClient?: boolean; publishConsent?: boolean };
            rating?: number },
 ): Promise<CompletedProject> {
@@ -270,11 +368,18 @@ export async function completeProject(
   if (!project) throw new MarketplaceError("No such project.");
   if (project.clientId !== clientId) throw new MarketplaceError("Only the client can close a project.");
   if (project.status === "complete") throw new MarketplaceError("This project is already closed.");
+  /* The expert is read from the project's own award record, never from
+     the request body — a caller used to be able to name an arbitrary
+     expertId here and credit them with an engagement they never did,
+     which fed straight into their public track record. */
+  if (project.status !== "awarded" || !project.awardedExpertId) {
+    throw new MarketplaceError("This project has no awarded bid yet — award one before closing it.");
+  }
 
   const record: CompletedProject = {
     ...project,
     status: "complete",
-    expertId: input.expertId,
+    expertId: project.awardedExpertId,
     completedAt: Date.now(),
     finalValue: Number(input.finalValue) || 0,
     milestonesApproved: Number(input.milestonesApproved) || 0,
@@ -297,6 +402,7 @@ export async function completeProject(
     if (prj && done) {
       await prj.updateOne({ id: projectId }, { $set: { status: "complete", updatedAt: Date.now() } });
       await done.insertOne(record);
+      await syncExpertStats(record.expertId);
       return record;
     }
   }
@@ -304,6 +410,7 @@ export async function completeProject(
   const p = projects.get(projectId);
   if (p) { p.status = "complete"; p.updatedAt = Date.now(); }
   completed.set(projectId, record);
+  await syncExpertStats(record.expertId);
   return record;
 }
 
@@ -351,6 +458,23 @@ export async function trackRecord(expertId: string) {
   };
 }
 
+/** Keeps the Expert directory's denormalised stats current after a
+ *  completion. `trackRecord()` computes the true figures live from
+ *  `completedProjects`; this just writes them onto the Expert doc so
+ *  `listExperts()`'s sort (`engagementsCompleted: -1`) reflects reality
+ *  without recomputing it for every browse request. */
+async function syncExpertStats(expertId: string): Promise<void> {
+  const record = await trackRecord(expertId);
+  const patch = { engagementsCompleted: record.engagementsCompleted, rating: record.averageRating };
+
+  if (persistenceEnabled()) {
+    const col = await collection<Expert>("experts");
+    if (col) { await col.updateOne({ id: expertId }, { $set: patch }); return; }
+  }
+  const e = experts.get(expertId);
+  if (e) Object.assign(e, patch);
+}
+
 /** An expert's own bids, across every project — the "Bids" section. */
 export async function listBidsByExpert(expertId: string, take = 50): Promise<Bid[]> {
   if (persistenceEnabled()) {
@@ -369,7 +493,69 @@ export async function listExperts(filter: { discipline?: string; take?: number }
       return col.find(q).sort({ engagementsCompleted: -1 }).limit(take).toArray();
     }
   }
-  /* No fabricated directory. An empty network is an honest empty
-     state; inventing experts would put fake people in front of buyers. */
-  return [];
+  /* Real profiles created this process (via ensureExpertProfile) — not
+     fabricated sample data. An empty network is still an honest empty
+     state; the difference is this now reflects what was actually
+     created rather than always reading as empty regardless. */
+  return [...experts.values()]
+    .filter((e) => !filter.discipline || e.disciplines.includes(filter.discipline))
+    .sort((a, b) => b.engagementsCompleted - a.engagementsCompleted)
+    .slice(0, take);
+}
+
+/**
+ * Create the Expert directory profile a signup never used to produce.
+ * `listExperts()` reads only this collection — nothing else ever wrote
+ * to it, so an expert account existed with no way to appear in "browse
+ * the vetted expert network". Idempotent: safe to call on every
+ * expert sign-in, not just once at signup.
+ */
+export async function ensureExpertProfile(userId: string, name: string): Promise<Expert> {
+  const existing = await getExpertProfile(userId);
+  if (existing) return existing;
+
+  const expert: Expert = {
+    id: userId,
+    name,
+    headline: "New on LAMID MARKET — profile not yet completed",
+    disciplines: [],
+    industries: [],
+    engagementsCompleted: 0,
+    rating: null,
+    verified: false,
+    certified: false,
+  };
+
+  if (persistenceEnabled()) {
+    await ensureIndexes();
+    const col = await collection<Expert>("experts");
+    if (col) { await col.insertOne(expert); return expert; }
+  }
+  experts.set(expert.id, expert);
+  return expert;
+}
+
+export async function getExpertProfile(id: string): Promise<Expert | null> {
+  if (persistenceEnabled()) {
+    const col = await collection<Expert>("experts");
+    if (col) return col.findOne({ id });
+  }
+  return experts.get(id) ?? null;
+}
+
+export async function updateExpertProfile(
+  id: string,
+  patch: Partial<Pick<Expert, "headline" | "disciplines" | "industries" | "availableFrom" | "dayRate">>,
+): Promise<Expert | null> {
+  if (persistenceEnabled()) {
+    const col = await collection<Expert>("experts");
+    if (col) {
+      const after = await col.findOneAndUpdate({ id }, { $set: patch }, { returnDocument: "after" });
+      return after ?? null;
+    }
+  }
+  const e = experts.get(id);
+  if (!e) return null;
+  Object.assign(e, patch);
+  return e;
 }

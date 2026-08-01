@@ -3,7 +3,7 @@ import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { withMeterCost, available, getBalanceAsync } from "@/lib/points";
 import {
-  placeBid, listBids, MarketplaceError, PLACE_BID_COST, BOOST_BID_COST,
+  placeBid, listBids, getProject, MarketplaceError, PLACE_BID_COST, BOOST_BID_COST,
 } from "@/lib/marketplace";
 
 export const runtime = "nodejs";
@@ -19,8 +19,12 @@ export const GET = handler(async (req) => {
   const rl = await limit("read", identity.userId);
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
+  const projectId = projectIdFrom(req);
+  const [project, bids] = await Promise.all([getProject(projectId), listBids(projectId)]);
+
   return ok({
-    bids: await listBids(projectIdFrom(req)),
+    project,
+    bids,
     costs: { bid: PLACE_BID_COST, boost: BOOST_BID_COST },
   });
 });

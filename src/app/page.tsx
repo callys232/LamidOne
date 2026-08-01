@@ -40,7 +40,7 @@ export default function HomePage() {
         <section className="border-b" style={{ borderColor: "var(--line-soft)" }}>
           <div className="shell py-20 sm:py-28">
             <div className="max-w-4xl">
-              <Eyebrow>LAMID ONE — HumanAI Consulting Operating System</Eyebrow>
+              <Eyebrow>LAMID ONE — Human-AI Consulting Operating System</Eyebrow>
               <h1 className="h-hero mt-6">
                 Where organisations go to decide<span className="text-brand">.</span>
               </h1>

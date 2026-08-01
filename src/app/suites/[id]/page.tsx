@@ -12,7 +12,7 @@ import { PricingCards } from "@/components/sections/PricingCards";
 import { Faq } from "@/components/sections/Faq";
 import { ExternalLaunch } from "@/components/sections/SuiteGrid";
 import { SuiteMock } from "@/components/mock/ProductMock";
-import { SUITES, getSuite } from "@/content/suites";
+import { SUITES, getSuite, type SuiteId } from "@/content/suites";
 import { PLATFORM_AGENTS } from "@/content/agents";
 import { CTA } from "@/content/brand";
 import { suiteFaq } from "@/content/suiteFaq";
@@ -49,6 +49,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: `${suite.name} — ${suite.kind}`, description: suite.subhead };
 }
 
+/** The four suites with a real, working flagship diagnostic. The other
+ *  five have their own natural CTA already (open the app, post a
+ *  brief, run a visibility check) — this is deliberately not filled
+ *  in for every suite. */
+const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, string>> = {
+  core: "/dashboard/engines/q44",
+  grow: "/dashboard/engines/g06",
+  talent: "/dashboard/engines/a15",
+  finance: "/dashboard/budget",
+};
+
 export default async function SuitePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const suite = getSuite(id);
@@ -69,10 +80,14 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
   ];
 
   /* The CTA reflects what is genuinely purchasable. An external product
-     leads with "open the app"; an internal suite leads with a diagnostic. */
+     leads with "open the app"; an internal suite leads with a diagnostic.
+     For the four suites with a real flagship engine, that diagnostic is
+     an actual tool — not a booking form for a call. */
   const primaryCta = suite.external
     ? { label: suite.external.label, href: suite.external.url, external: true }
-    : CTA.primary;
+    : SUITE_DIAGNOSTIC[suite.id]
+      ? { label: CTA.primary.label, href: SUITE_DIAGNOSTIC[suite.id]! }
+      : CTA.primary;
   const secondaryCta = suite.external ? CTA.secondary : CTA.secondary;
 
   return (

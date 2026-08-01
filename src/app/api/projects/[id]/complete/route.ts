@@ -25,16 +25,17 @@ export const POST = handler(async (req) => {
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
   const body = await req.json().catch(() => null) as {
-    expertId?: string; finalValue?: number; milestonesApproved?: number;
+    finalValue?: number; milestonesApproved?: number;
     outcome?: { summary?: string; verifiedByClient?: boolean; publishConsent?: boolean };
     rating?: number;
   } | null;
-
-  if (!body?.expertId) return badRequest("`expertId` is required to close a project.");
+  if (!body) return badRequest("Body must be JSON.");
 
   try {
+    /* Which expert gets credited comes from the project's own award
+       record (set by POST /api/projects/[id]/award), never from this
+       body — see completeProject()'s own guard. */
     const record = await completeProject(projectId, identity.userId, {
-      expertId: body.expertId,
       finalValue: Number(body.finalValue ?? 0),
       milestonesApproved: Number(body.milestonesApproved ?? 0),
       outcome: body.outcome?.summary

@@ -1794,6 +1794,23 @@ export const MODULE_REGISTRY: Record<string, ModuleConfig> = {
     correctionProtocols: ["Visibility Installation","Dashboard Deployment","Data Unification","Blind Spot Elimination","Visibility Improvement","Financial Truth Lock-In"],
     backHref: "/finance-dashboard", backLabel: "Finance Dashboard", nextHref: "/f02-budgeting-forecasting", nextLabel: "Budgeting & Forecasting Engine",
   },
+  /* G06 does not exist in ProdLamid's own registry — its grow-digital-maturity
+     page references MODULE_REGISTRY["G06"] and silently falls back to a generic
+     "Primary/Secondary/Tertiary/Quaternary Dimension" placeholder, in BOTH
+     ProdLamid and this app, until now. GROW's flagship diagnostic was never
+     actually given real assessment dimensions. These four are a standard
+     digital-maturity framework (strategy, infrastructure, operating model,
+     customer experience — the same shape MIT CISR's and Gartner's models use),
+     not a port of anything, because there was nothing to port. */
+  G06: {
+    id: "G06", seriesName: "LAMID GROW Intelligence", engineName: "Digital Maturity Model",
+    purpose: "Scores how far digital capability has actually reached — not the roadmap, the operating reality — across strategy, infrastructure, people and the customer experience it produces.",
+    dimensionLabels: ["Digital Strategy Alignment", "Technology & Data Infrastructure", "Operating Model Adaptability", "Customer & Market Digital Experience"],
+    driverContext: "Direction Drivers set the digital strategy the organisation is converging toward. Structural Drivers determine whether infrastructure and process can carry that strategy. Cultural Drivers govern how readily people adopt new digital ways of working. Market Drivers reveal how the customer experiences the result.",
+    correctionProtocols: ["Maturity Stabilisation", "Infrastructure Modernisation", "Operating Model Redesign", "Experience Uplift", "Maturity Improvement", "Digital Lock-In"],
+    backHref: "/suites/grow", backLabel: "LAMID GROW",
+  },
+
   F02: {
     id: "F02", seriesName: "F-Series — Financial Intelligence", engineName: "Budgeting & Forecasting",
     purpose: "Replaces guesswork in your numbers — budgets, forecasts, cash-flow projections and margin models that make your financial future predictable.",

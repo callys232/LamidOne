@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
 import { EmptyState } from "@/app/dashboard/page";
 
@@ -26,7 +27,7 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid gap-3">
           {v.work.projects.map((p) => (
-            <div key={p.id} className="card flex items-center justify-between gap-4 p-5">
+            <Link key={p.id} href={`/dashboard/projects/${p.id}`} className="card card-interactive flex items-center justify-between gap-4 p-5">
               <div className="min-w-0">
                 <p className="truncate font-semibold">{p.title}</p>
                 <p className="faint mt-1 text-xs">
@@ -34,7 +35,7 @@ export default function ProjectsPage() {
                 </p>
               </div>
               <StatusBadge status={p.status} />
-            </div>
+            </Link>
           ))}
         </div>
       )}
