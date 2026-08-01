@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="t d">
+  <title id="t">LAMID GROW — growth dashboard preview</title>
+  <desc id="d">Illustrative dashboard preview: opportunity signals, digital maturity score, and growth by period.</desc>
+  <rect x="1" y="1" width="958" height="598" rx="18" fill="#FBF9F8" stroke="#E7E4E1" stroke-width="2"/>
+  <rect x="1" y="1" width="958" height="52" rx="18" fill="#FFFFFF"/>
+  <rect x="1" y="35" width="958" height="18" fill="#FFFFFF"/>
+  <line x1="1" y1="53" x2="959" y2="53" stroke="#EFEDEA" stroke-width="1.5"/>
+  <circle cx="30" cy="27" r="5" fill="#E7E4E1"/><circle cx="48" cy="27" r="5" fill="#E7E4E1"/><circle cx="66" cy="27" r="5" fill="#E7E4E1"/>
+  <text x="92" y="32" font-family="system-ui,sans-serif" font-size="13" fill="#8A8A94">LAMID GROW — Growth dashboard</text>
+
+  <g font-family="system-ui,sans-serif">
+    <rect x="40" y="88" width="270" height="108" rx="12" fill="#0E7A5F" fill-opacity=".08"/>
+    <text x="64" y="150" font-size="44" fill="#0E7A5F" font-weight="600">7</text>
+    <text x="64" y="176" font-size="13" fill="#5C5C66">Open opportunity signals</text>
+
+    <rect x="330" y="88" width="270" height="108" rx="12" fill="#0E7A5F" fill-opacity=".05"/>
+    <text x="354" y="150" font-size="44" fill="#16161A" font-weight="600">61%</text>
+    <text x="354" y="176" font-size="13" fill="#5C5C66">Digital maturity</text>
+
+    <rect x="620" y="88" width="300" height="108" rx="12" fill="#0E7A5F" fill-opacity=".05"/>
+    <text x="644" y="150" font-size="44" fill="#16161A" font-weight="600">3</text>
+    <text x="644" y="176" font-size="13" fill="#5C5C66">Modernisation pathways open</text>
+  </g>
+
+  <g>
+    <rect x="40" y="228" width="880" height="220" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <text x="64" y="260" font-family="system-ui,sans-serif" font-size="13" fill="#5C5C66">Growth by period, indexed</text>
+    <g stroke="#EFEDEA" stroke-width="1"><line x1="64" y1="300" x2="856" y2="300"/><line x1="64" y1="350" x2="856" y2="350"/><line x1="64" y1="400" x2="856" y2="400"/></g>
+    <g fill="#0E7A5F" fill-opacity=".85">
+      <rect x="90" y="330" width="70" height="90" rx="4"/>
+      <rect x="200" y="360" width="70" height="60" rx="4"/>
+      <rect x="310" y="300" width="70" height="120" rx="4"/>
+      <rect x="420" y="280" width="70" height="140" rx="4"/>
+      <rect x="530" y="250" width="70" height="170" rx="4"/>
+      <rect x="640" y="230" width="70" height="190" rx="4" fill="#0E7A5F"/>
+      <rect x="750" y="210" width="70" height="210" rx="4" fill="#0E7A5F"/>
+    </g>
+  </g>
+
+  <g font-family="system-ui,sans-serif" font-size="13">
+    <rect x="40" y="470" width="880" height="100" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <text x="64" y="496" fill="#8A8A94" font-size="11">SIGNAL</text><text x="480" y="496" fill="#8A8A94" font-size="11">MARKET</text><text x="680" y="496" fill="#8A8A94" font-size="11">CONFIDENCE</text>
+    <line x1="64" y1="508" x2="856" y2="508" stroke="#EFEDEA"/>
+    <text x="64" y="532" fill="#16161A">Mid-market demand shift — logistics</text><text x="480" y="532" fill="#5C5C66">DE, NL</text><text x="680" y="532" fill="#0E7A5F">High</text>
+    <text x="64" y="556" fill="#16161A">Adjacent-category opportunity</text><text x="480" y="556" fill="#5C5C66">UK</text><text x="680" y="556" fill="#B45309">Medium</text>
+  </g>
+</svg>

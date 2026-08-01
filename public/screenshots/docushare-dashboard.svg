@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="t d">
+  <title id="t">LAMID DOCUSHARE — file workspace dashboard preview</title>
+  <desc id="d">Illustrative dashboard preview: workspace files, share analytics and version history.</desc>
+  <rect x="1" y="1" width="958" height="598" rx="18" fill="#FBF9F8" stroke="#E7E4E1" stroke-width="2"/>
+  <rect x="1" y="1" width="958" height="52" rx="18" fill="#FFFFFF"/>
+  <rect x="1" y="35" width="958" height="18" fill="#FFFFFF"/>
+  <line x1="1" y1="53" x2="959" y2="53" stroke="#EFEDEA" stroke-width="1.5"/>
+  <circle cx="30" cy="27" r="5" fill="#E7E4E1"/><circle cx="48" cy="27" r="5" fill="#E7E4E1"/><circle cx="66" cy="27" r="5" fill="#E7E4E1"/>
+  <text x="92" y="32" font-family="system-ui,sans-serif" font-size="13" fill="#8A8A94">LAMID DOCUSHARE — Workspace</text>
+
+  <g font-family="system-ui,sans-serif">
+    <rect x="40" y="88" width="270" height="108" rx="12" fill="#0F766E" fill-opacity=".07"/>
+    <text x="64" y="146" font-size="34" fill="#0F766E" font-weight="600">1.4 GB</text>
+    <text x="64" y="176" font-size="13" fill="#5C5C66">Used of 5 GB</text>
+
+    <rect x="330" y="88" width="270" height="108" rx="12" fill="#0F766E" fill-opacity=".05"/>
+    <text x="354" y="150" font-size="44" fill="#16161A" font-weight="600">18</text>
+    <text x="354" y="176" font-size="13" fill="#5C5C66">Files across 3 workspaces</text>
+
+    <rect x="620" y="88" width="300" height="108" rx="12" fill="#0F766E" fill-opacity=".05"/>
+    <text x="644" y="150" font-size="44" fill="#16161A" font-weight="600">6</text>
+    <text x="644" y="176" font-size="13" fill="#5C5C66">Active share links</text>
+  </g>
+
+  <g font-family="system-ui,sans-serif" font-size="13">
+    <rect x="40" y="228" width="880" height="342" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <text x="64" y="260" fill="#8A8A94" font-size="11">NAME</text>
+    <text x="460" y="260" fill="#8A8A94" font-size="11">SHARED WITH</text>
+    <text x="660" y="260" fill="#8A8A94" font-size="11">VERSION</text>
+    <text x="800" y="260" fill="#8A8A94" font-size="11">MODIFIED</text>
+    <line x1="64" y1="272" x2="856" y2="272" stroke="#EFEDEA"/>
+
+    <g fill="#16161A">
+      <rect x="64" y="286" width="18" height="22" rx="3" fill="#0F766E" fill-opacity=".18"/>
+      <text x="92" y="302">Northwind — diagnostic report.pdf</text>
+    </g>
+    <text x="460" y="302" fill="#5C5C66">Client + 2 experts</text><text x="660" y="302" fill="#5C5C66">v3</text><text x="800" y="302" fill="#5C5C66">2 days ago</text>
+    <line x1="64" y1="322" x2="856" y2="322" stroke="#F5F3F1"/>
+
+    <g fill="#16161A">
+      <rect x="64" y="336" width="18" height="22" rx="3" fill="#0F766E" fill-opacity=".18"/>
+      <text x="92" y="352">Milestone 2 — deliverable.docx</text>
+    </g>
+    <text x="460" y="352" fill="#5C5C66">Client only</text><text x="660" y="352" fill="#5C5C66">v1</text><text x="800" y="352" fill="#5C5C66">Today</text>
+    <line x1="64" y1="372" x2="856" y2="372" stroke="#F5F3F1"/>
+
+    <g fill="#16161A">
+      <rect x="64" y="386" width="18" height="22" rx="3" fill="#0F766E" fill-opacity=".18"/>
+      <text x="92" y="402">Engagement contract — signed.pdf</text>
+    </g>
+    <text x="460" y="402" fill="#5C5C66">Password-protected</text><text x="660" y="402" fill="#5C5C66">v2</text><text x="800" y="402" fill="#5C5C66">1 week ago</text>
+    <line x1="64" y1="422" x2="856" y2="422" stroke="#F5F3F1"/>
+
+    <text x="64" y="470" fill="#5C5C66">Link expiry, download limits and view analytics apply to every share.</text>
+  </g>
+</svg>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="t d">
+  <title id="t">LAMID MARKET — expert marketplace dashboard preview</title>
+  <desc id="d">Illustrative dashboard preview: matched expert shortlist with engagement counts and verification.</desc>
+  <rect x="1" y="1" width="958" height="598" rx="18" fill="#FBF9F8" stroke="#E7E4E1" stroke-width="2"/>
+  <rect x="1" y="1" width="958" height="52" rx="18" fill="#FFFFFF"/>
+  <rect x="1" y="35" width="958" height="18" fill="#FFFFFF"/>
+  <line x1="1" y1="53" x2="959" y2="53" stroke="#EFEDEA" stroke-width="1.5"/>
+  <circle cx="30" cy="27" r="5" fill="#E7E4E1"/><circle cx="48" cy="27" r="5" fill="#E7E4E1"/><circle cx="66" cy="27" r="5" fill="#E7E4E1"/>
+  <text x="92" y="32" font-family="system-ui,sans-serif" font-size="13" fill="#8A8A94">LAMID MARKET — Matched shortlist</text>
+
+  <g font-family="system-ui,sans-serif">
+    <rect x="40" y="88" width="880" height="46" rx="10" fill="#334155" fill-opacity=".06"/>
+    <text x="64" y="117" font-size="13" fill="#16161A">Brief: Post-merger integration review — financial services, $15k–30k</text>
+  </g>
+
+  <!-- expert cards -->
+  <g font-family="system-ui,sans-serif">
+    <rect x="40" y="150" width="280" height="180" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <circle cx="76" cy="192" r="20" fill="#334155" fill-opacity=".12"/>
+    <text x="104" y="190" font-size="15" fill="#16161A" font-weight="600">D. Okoye</text>
+    <text x="104" y="208" font-size="12" fill="#5C5C66">Post-merger integration</text>
+    <rect x="64" y="230" width="66" height="20" rx="10" fill="#334155" fill-opacity=".08"/>
+    <text x="76" y="244" font-size="10" fill="#334155">Verified</text>
+    <text x="64" y="286" font-size="12" fill="#5C5C66">14 engagements · 4.9/5</text>
+    <text x="64" y="308" font-size="12" fill="#5C5C66">Available in 9 days</text>
+
+    <rect x="340" y="150" width="280" height="180" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <circle cx="376" cy="192" r="20" fill="#334155" fill-opacity=".12"/>
+    <text x="404" y="190" font-size="15" fill="#16161A" font-weight="600">R. Vance</text>
+    <text x="404" y="208" font-size="12" fill="#5C5C66">Operating model design</text>
+    <rect x="364" y="230" width="66" height="20" rx="10" fill="#334155" fill-opacity=".08"/>
+    <text x="376" y="244" font-size="10" fill="#334155">Verified</text>
+    <text x="364" y="286" font-size="12" fill="#5C5C66">7 engagements · 4.7/5</text>
+    <text x="364" y="308" font-size="12" fill="#5C5C66">Available now</text>
+
+    <rect x="640" y="150" width="280" height="180" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <circle cx="676" cy="192" r="20" fill="#334155" fill-opacity=".12"/>
+    <text x="704" y="190" font-size="15" fill="#16161A" font-weight="600">S. Adeyemi</text>
+    <text x="704" y="208" font-size="12" fill="#5C5C66">Cadence and delivery</text>
+    <rect x="664" y="230" width="72" height="20" rx="10" fill="#EFEDEA"/>
+    <text x="676" y="244" font-size="10" fill="#8A8A94">Unverified</text>
+    <text x="664" y="286" font-size="12" fill="#5C5C66">2 engagements · —</text>
+    <text x="664" y="308" font-size="12" fill="#5C5C66">Available in 3 days</text>
+  </g>
+
+  <g font-family="system-ui,sans-serif" font-size="13">
+    <rect x="40" y="360" width="880" height="90" rx="12" fill="#FFFFFF" stroke="#EFEDEA" stroke-width="1.5"/>
+    <text x="64" y="390" fill="#16161A">Escrow ready — funds held on acceptance</text>
+    <text x="64" y="416" fill="#5C5C66">Milestone-based release, structured dispute path if needed.</text>
+    <rect x="700" y="378" width="180" height="36" rx="8" fill="#334155"/>
+    <text x="790" y="401" fill="#FFFFFF" text-anchor="middle" font-weight="600">Send to shortlist</text>
+  </g>
+</svg>

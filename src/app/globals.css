@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   LAMID ONE design system
+   Accent: #C12129 (red). Dark mode: true black.
+
+   Rationing rule, carried over from the HubSpot teardown (§6.3):
+   the accent appears on the mark, primary CTA fills, checkmarks,
+   suite glyphs, eyebrow dots and stat numerals — nowhere else.
+   Comparison-table ticks use `--good`, not the accent, so a table
+   of forty marks never spends the brand colour on rows nobody
+   clicks.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --font-display: ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --page: #FBF9F8;
+  --raised: #FFFFFF;
+  --ink: #16161A;
+  --ink-muted: #5C5C66;
+  --ink-faint: #8A8A94;
+  --line: rgba(22, 22, 26, 0.10);
+  --line-soft: rgba(22, 22, 26, 0.06);
+
+  --brand: #C12129;
+  --brand-ink: #FFFFFF;
+  --brand-soft: rgba(193, 33, 41, 0.08);
+  --brand-line: rgba(193, 33, 41, 0.22);
+
+  --good: #15803D;
+  --warn: #B45309;
+  --bad: #B91C1C;
+}
+
+.dark {
+  --page: #000000;
+  --raised: #0C0C0D;
+  --ink: #F5F5F6;
+  --ink-muted: #A1A1AA;
+  --ink-faint: #71717A;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-soft: rgba(255, 255, 255, 0.07);
+
+  /* Red lifts one step in dark so it clears contrast on true black
+     without glowing. Never reuse the light-mode step here. */
+  --brand: #E2555C;
+  --brand-ink: #140405;
+  --brand-soft: rgba(226, 85, 92, 0.12);
+  --brand-line: rgba(226, 85, 92, 0.28);
+
+  --good: #4ADE80;
+  --warn: #FBBF24;
+  --bad: #F87171;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 8.5rem; }
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+@layer components {
+  .shell { @apply mx-auto w-full max-w-shell px-5 sm:px-8; }
+
+  /* ── Type ──────────────────────────────────────────────── */
+  .h-hero    { font-family: var(--font-display); @apply text-hero font-normal; }
+  .h-display { font-family: var(--font-display); @apply text-display font-normal; }
+  .h-section { font-family: var(--font-display); @apply text-3xl sm:text-4xl font-normal leading-[1.1] tracking-[-0.01em]; }
+  .lead      { color: var(--ink-muted); @apply text-base sm:text-lg leading-relaxed; }
+  .muted     { color: var(--ink-muted); }
+  .faint     { color: var(--ink-faint); }
+
+  /* Eyebrow: red dot + caps label. The jargon lives here so the
+     headline can stay human (teardown §1). */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em];
+    color: var(--ink-muted);
+  }
+  .eyebrow::before {
+    content: ""; @apply h-[6px] w-[6px] rounded-full shrink-0;
+    background: var(--brand);
+  }
+
+  /* ── Surfaces ──────────────────────────────────────────── */
+  .card {
+    background: var(--raised);
+    border: 1px solid var(--line);
+    @apply rounded-2xl;
+  }
+  .card-quiet { background: var(--raised); border: 1px solid var(--line-soft); @apply rounded-2xl; }
+  .hairline { border-color: var(--line); }
+
+  /* ── Buttons — the dual CTA pair ───────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3
+           text-sm font-semibold transition-colors duration-150
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    outline-color: var(--brand);
+  }
+  .btn-primary { background: var(--brand); color: var(--brand-ink); }
+  .btn-primary:hover { filter: brightness(0.92); }
+  .btn-secondary {
+    background: transparent; color: var(--brand);
+    border: 1.5px solid var(--brand);
+  }
+  .btn-secondary:hover { background: var(--brand-soft); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn-ghost:hover { border-color: var(--brand-line); color: var(--brand); }
+  /* Used on tinted promo bands so the CTA never competes with the
+     header's red buttons directly above it (teardown §7.11). */
+  .btn-contrast { background: var(--ink); color: var(--page); }
+
+  .link-underline {
+    @apply inline-flex items-center gap-1.5 font-semibold;
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 0 var(--brand);
+  }
+  .link-underline:hover { color: var(--brand); }
+
+  /* ── Stat tile — a verdict, not a chart (teardown §6.4) ── */
+  .stat-value { font-family: var(--font-display); @apply text-stat font-normal; }
+  .stat-label { color: var(--ink-muted); @apply mt-2 text-sm leading-snug; }
+
+  /* ── Feature card ───────────────────────────────────────
+     Used by the "Everything in the suite" grid. Sits flat until
+     hovered, then lifts into a card tinted to the suite's own colour.
+     The tint comes from `--suite-tint`, set on the grid container, so
+     one rule serves all nine suites — the per-hub tint system applied
+     to an interaction state rather than to an image (teardown §7.8).
+     Falls back to brand red where no suite context exists. */
+  .feature-card {
+    @apply rounded-xl p-4 -m-1 transition-colors duration-150;
+    border: 1px solid transparent;
+  }
+  .feature-card:hover,
+  .feature-card:focus-within {
+    background: color-mix(in srgb, var(--suite-tint, var(--brand)) 8%, transparent);
+    border-color: color-mix(in srgb, var(--suite-tint, var(--brand)) 28%, transparent);
+  }
+
+  /* Same interaction on anything already built as a `.card` — agent
+     tiles, trust cards, module tiles. Keeps one hover language across
+     the ecosystem instead of three. Deliberately NOT applied to
+     container cards (pricing cards, the points estimator), where a
+     hover state would suggest the whole card is clickable. */
+  .card-interactive {
+    @apply transition-colors duration-150;
+  }
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    background: color-mix(in srgb, var(--suite-tint, var(--brand)) 6%, var(--raised));
+    border-color: color-mix(in srgb, var(--suite-tint, var(--brand)) 30%, transparent);
+  }
+
+  /* ── Tier rank dots (teardown §7.10) ───────────────────── */
+  .rank-dot { @apply inline-block h-[9px] w-[9px] rounded-full; background: var(--brand); }
+  .rank-dot-half {
+    @apply inline-block h-[9px] w-[9px] rounded-full;
+    background: linear-gradient(90deg, var(--brand) 0 50%, transparent 50% 100%);
+    border: 1px solid var(--brand);
+  }
+}
+
+@layer utilities {
+  /* Scrollable but chromeless — used by the suite grid's "4 visible,
+     scroll for the rest" pane, mirroring ProdLamid's EcosystemHubs. */
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  .text-brand { color: var(--brand); }
+  .bg-brand { background: var(--brand); }
+  .border-brand { border-color: var(--brand); }
+  .bg-brand-soft { background: var(--brand-soft); }
+  .text-good { color: var(--good); }
+  .divide-hairline > * + * { border-top: 1px solid var(--line-soft); }
+}
