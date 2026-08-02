@@ -7,23 +7,25 @@ import { BizSphereModal } from "./BizSphereModal";
 /**
  * Scroll-to-bottom trigger for BizSphereModal, ported from ProdLamid's
  * ModalWrapper.jsx: fires once per browser when the reader nears the
- * end of a page, never again after that (localStorage, not session —
- * matches ProdLamid's original persistence, and a promo you dismiss
- * once shouldn't return every visit).
+ * end of the homepage or pricing page, never again after that
+ * (localStorage, not session — matches ProdLamid's original
+ * persistence, and a promo you dismiss once shouldn't return every
+ * visit). Scoped to just those two pages, not sitewide.
  *
- * `href` has no live destination yet — until BizSphere has a real URL,
- * this renders nothing at all rather than linking a "Join our
- * community" button to a dead page. Same honest-degradation pattern as
- * the rest of the app when a dependency isn't configured (Paystack,
- * the model key): built and wired, inert until the real value exists.
+ * BizSphere has no live URL yet — it's coming soon — so `BIZSPHERE_URL`
+ * stays empty and `BizSphereModal` falls back to its waitlist form
+ * (`/api/waitlist`) instead of a "Join our community" link. Once a
+ * real URL exists, set it here and the modal switches back to linking
+ * out directly — no other change needed.
  */
 const STORAGE_KEY = "lamid-bizsphere-modal-shown";
-const BIZSPHERE_URL = ""; // set once a live BizSphere/BizPhere URL exists
+const BIZSPHERE_URL = ""; // set once a live BizSphere/BizPhere URL exists — until then, the modal collects waitlist emails instead
 const BOTTOM_THRESHOLD_PX = 100;
+const ELIGIBLE_PATHS = new Set(["/", "/pricing"]);
 
 export function BizSphereModalWrapper() {
   const pathname = usePathname();
-  const onDashboard = pathname?.startsWith("/dashboard");
+  const eligible = pathname !== undefined && ELIGIBLE_PATHS.has(pathname);
 
   const [open, setOpen] = useState(false);
   const [shown, setShown] = useState(true); // default true (hidden) until localStorage is checked, avoids a flash
@@ -45,12 +47,12 @@ export function BizSphereModalWrapper() {
   }, []);
 
   useEffect(() => {
-    if (shown) return;
+    if (shown || !eligible) return;
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [shown, handleScroll]);
+  }, [shown, eligible, handleScroll]);
 
-  if (!BIZSPHERE_URL || onDashboard) return null;
+  if (!eligible) return null;
 
-  return <BizSphereModal open={open} onClose={() => setOpen(false)} href={BIZSPHERE_URL} />;
+  return <BizSphereModal open={open} onClose={() => setOpen(false)} href={BIZSPHERE_URL || undefined} />;
 }

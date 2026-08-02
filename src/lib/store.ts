@@ -134,6 +134,8 @@ export async function ensureIndexes(): Promise<void> {
 
     db.collection("auditLog").createIndex({ orgId: 1, at: -1 }),
     db.collection("auditLog").createIndex({ actorId: 1, at: -1 }),
+
+    db.collection("waitlist").createIndex({ email: 1 }, { unique: true }),
   ]).catch((e) => console.error("[store] index creation failed:", (e as Error).message));
 }
 

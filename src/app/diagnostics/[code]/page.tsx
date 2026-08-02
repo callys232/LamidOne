@@ -27,6 +27,7 @@ import { authHeaders } from "@/lib/useApi";
 type EngineSpec = {
   code: string; suite: string; engineName: string; seriesName: string;
   purpose: string; inputs: { kind?: string } | null; dimensionLabels: string[]; registered: boolean;
+  minTier: string | null;
 };
 
 type Row = { label: string; rating: number; weight: number; evidence: 0 | 1 | 2; note: string };
@@ -57,6 +58,7 @@ export default function PublicDiagnosticPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [result, setResult] = useState<RunResult | null>(null);
   const [needsAuth, setNeedsAuth] = useState(false);
+  const [needsUpgrade, setNeedsUpgrade] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -81,6 +83,7 @@ export default function PublicDiagnosticPage() {
     setBusy(true);
     setRunError(null);
     setNeedsAuth(false);
+    setNeedsUpgrade(null);
     try {
       const res = await fetch(`/api/engines/${code}`, {
         method: "POST",
@@ -91,6 +94,7 @@ export default function PublicDiagnosticPage() {
       });
       const body = await res.json();
       if (res.status === 401) { setNeedsAuth(true); return; }
+      if (res.status === 403 && body?.code === "tier_required") { setNeedsUpgrade(body.remedy?.tier ?? spec?.minTier ?? null); return; }
       if (!res.ok) throw new Error(body?.error ?? "The engine could not complete.");
       setResult(body);
     } catch (e) {
@@ -119,7 +123,14 @@ export default function PublicDiagnosticPage() {
           {spec && !result && (
             <div className="mx-auto max-w-2xl space-y-8">
               <div>
-                <p className="faint text-xs font-semibold uppercase tracking-wide">{spec.seriesName}</p>
+                <div className="flex items-center gap-2">
+                  <p className="faint text-xs font-semibold uppercase tracking-wide">{spec.seriesName}</p>
+                  {spec.minTier && (
+                    <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide capitalize" style={{ background: "var(--brand-soft)", color: "var(--brand)" }}>
+                      {spec.minTier}+ plan
+                    </span>
+                  )}
+                </div>
                 <h1 className="h-section mt-2">{spec.engineName}</h1>
                 <p className="lead mt-3">{spec.purpose}</p>
               </div>
@@ -178,6 +189,17 @@ export default function PublicDiagnosticPage() {
                   <div className="mt-4 flex justify-center gap-3">
                     <Link href="/signup" target="_blank" className="btn btn-primary">Create a free account</Link>
                     <Link href="/signin" target="_blank" className="btn btn-ghost">Sign in</Link>
+                  </div>
+                </div>
+              )}
+              {needsUpgrade && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">This one needs the {needsUpgrade} plan.</p>
+                  <p className="muted mt-2 text-sm">
+                    Your ratings above stay as you left them — upgrade in another tab, then come back and run it.
+                  </p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href="/pricing" target="_blank" className="btn btn-primary">See plans</Link>
                   </div>
                 </div>
               )}

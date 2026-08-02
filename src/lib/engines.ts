@@ -2,6 +2,7 @@ import {
   getModuleConfig, buildFallbackConfig, MODULE_REGISTRY,
   type ModuleConfig,
 } from "./intelligence/moduleRegistry";
+import { FEATURE_MATRIX, type TierId } from "@/content/tiers";
 import { computeAssessment, assessmentToPrompt, type AssessmentRow } from "./intelligence/assessment";
 import { computeFinancials, financialsToPrompt, type FinancialInputs } from "./intelligence/financial";
 import { computeRoster, rosterToPrompt, type RoleRow } from "./intelligence/roster";
@@ -53,6 +54,67 @@ export function configFor(ref: EngineRef): ModuleConfig {
 }
 
 export const REGISTERED_CODES = Object.keys(MODULE_REGISTRY);
+
+/**
+ * Per-engine tier gate, DERIVED from FEATURE_MATRIX's own `ref` and
+ * `values` fields rather than declared a second time — the matrix
+ * already says "Decision path simulator (q03) is Growth and up", but
+ * nothing enforced that at the API. A caller on Free or Starter could
+ * run q03 through /api/engines/q03 as long as they had the points,
+ * regardless of what the pricing page promised.
+ *
+ * Parses two ref shapes: a plain code ("q44"), and a range joined by
+ * an en dash ("p01–p02", expanded to both). Multiple refs in one row
+ * are comma/·-separated. A code with no matching row is left
+ * ungated — the matrix does not claim a restriction for it, so
+ * neither does this; inventing one would be a restriction nobody
+ * actually specified.
+ */
+const RANK_BY_TIER: Record<TierId, number> = { free: 0, starter: 1, growth: 2, enterprise: 3, concierge: 4 };
+const TIER_BY_RANK: TierId[] = ["free", "starter", "growth", "enterprise", "concierge"];
+
+function expandRefCodes(ref: string): string[] {
+  const codes: string[] = [];
+  for (const part of ref.split(/[·,]/).map((s) => s.trim())) {
+    const range = /^([A-Za-z])(\d{2})[–-]([A-Za-z])?(\d{2})$/.exec(part);
+    if (range && (!range[3] || range[3] === range[1])) {
+      const series = range[1].toUpperCase();
+      const from = Number(range[2]);
+      const to = Number(range[4]);
+      for (let n = from; n <= to; n++) codes.push(`${series}${String(n).padStart(2, "0")}`);
+      continue;
+    }
+    if (/^[A-Za-z]\d{2}$/.test(part)) codes.push(part.toUpperCase());
+  }
+  return codes;
+}
+
+const ENGINE_MIN_TIER: Record<string, TierId> = {};
+for (const group of FEATURE_MATRIX) {
+  for (const row of group.rows) {
+    if (!row.ref) continue;
+    const minRank = row.values.findIndex((v) => v !== false);
+    if (minRank === -1) continue; // not available on any tier — not a "minimum", so skip
+    for (const code of expandRefCodes(row.ref)) {
+      const existing = ENGINE_MIN_TIER[code];
+      // If a code appears in more than one row, the more permissive (lower) tier wins.
+      if (!existing || RANK_BY_TIER[TIER_BY_RANK[minRank]] < RANK_BY_TIER[existing]) {
+        ENGINE_MIN_TIER[code] = TIER_BY_RANK[minRank];
+      }
+    }
+  }
+}
+
+/** null = the matrix does not specify a restriction for this code. */
+export function minTierForEngine(code: string): TierId | null {
+  return ENGINE_MIN_TIER[code.toUpperCase()] ?? null;
+}
+
+export function meetsEngineTier(code: string, callerTier: TierId): boolean {
+  const required = minTierForEngine(code);
+  if (!required) return true;
+  return RANK_BY_TIER[callerTier] >= RANK_BY_TIER[required];
+}
 
 export type EngineResult = {
   code: string;

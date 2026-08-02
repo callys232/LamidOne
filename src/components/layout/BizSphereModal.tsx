@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 /**
  * BIZSPHERE — the scroll-to-bottom introduction modal.
  *
@@ -11,8 +13,12 @@
  * Re-themed onto this app's own system (brand red, theme-aware
  * surfaces) rather than ProdLamid's fixed black/blue/orange palette,
  * so it doesn't read as a foreign widget bolted onto the page.
+ *
+ * BizSphere itself is coming soon — no `href` yet — so instead of
+ * linking out, this collects an email for `/api/waitlist`. Once a
+ * live URL exists, pass `href` and it switches back to a direct link.
  */
-export function BizSphereModal({ open, onClose, href }: { open: boolean; onClose: () => void; href: string }) {
+export function BizSphereModal({ open, onClose, href }: { open: boolean; onClose: () => void; href?: string }) {
   if (!open) return null;
 
   return (
@@ -58,16 +64,74 @@ export function BizSphereModal({ open, onClose, href }: { open: boolean; onClose
           and exchange services and products.
         </p>
 
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onClose}
-          className="btn btn-primary mt-8 inline-flex w-full justify-center sm:w-auto"
-        >
-          Join our community
-        </a>
+        {href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="btn btn-primary mt-8 inline-flex w-full justify-center sm:w-auto"
+          >
+            Join our community
+          </a>
+        ) : (
+          <WaitlistForm />
+        )}
       </div>
     </div>
+  );
+}
+
+function WaitlistForm() {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setState("busy");
+    setError("");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "bizsphere-modal" }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? "Could not join the waitlist.");
+      setState("done");
+    } catch (e) {
+      setState("error");
+      setError((e as Error).message);
+    }
+  }
+
+  if (state === "done") {
+    return (
+      <p className="mt-8 text-sm font-medium text-brand">
+        You&apos;re on the list — we&apos;ll email you when BizSphere opens.
+      </p>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-8">
+      <p className="faint mb-3 text-[11px] font-semibold uppercase tracking-wide">Coming soon — join the waitlist</p>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@company.com"
+          className="w-full rounded-lg border px-3 py-2 text-sm outline-none sm:flex-1"
+          style={{ borderColor: "var(--line)", background: "var(--page)" }}
+        />
+        <button type="submit" disabled={state === "busy"} className="btn btn-primary whitespace-nowrap disabled:opacity-50">
+          {state === "busy" ? "Joining…" : "Join waitlist"}
+        </button>
+      </div>
+      {state === "error" && <p className="mt-2 text-xs" style={{ color: "var(--bad)" }}>{error}</p>}
+    </form>
   );
 }

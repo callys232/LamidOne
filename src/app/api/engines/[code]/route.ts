@@ -2,7 +2,7 @@ import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } fr
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { withMeter, available, getBalance } from "@/lib/points";
-import { parseEngineCode, configFor, runEngine, EngineInputError, REGISTERED_CODES } from "@/lib/engines";
+import { parseEngineCode, configFor, runEngine, EngineInputError, REGISTERED_CODES, minTierForEngine, meetsEngineTier } from "@/lib/engines";
 import { recordRun, nextSteps } from "@/lib/bundles";
 
 export const runtime = "nodejs";
@@ -27,6 +27,8 @@ export const GET = handler(async (req) => {
     inputs: config.inputs,
     dimensionLabels: config.dimensionLabels,
     registered: REGISTERED_CODES.includes(ref.code),
+    /** null = open to any signed-in tier — see minTierForEngine(). */
+    minTier: minTierForEngine(ref.code),
   });
 });
 
@@ -50,6 +52,16 @@ export const POST = handler(async (req) => {
 
   const rl = await limit("agent", identity.userId);
   if (!rl.ok) return rateLimited(rl.retryAfter);
+
+  /* Derived from FEATURE_MATRIX's own tier columns — previously
+     unenforced here, so a Free account could run a Growth-and-up
+     engine (e.g. q03) as long as it had the points. */
+  if (!meetsEngineTier(ref.code, identity.tier)) {
+    const required = minTierForEngine(ref.code);
+    return fail(403, "tier_required", `This engine requires the ${required} plan or above.`, {
+      kind: "upgrade", tier: required ?? undefined,
+    });
+  }
 
   const body = await req.json().catch(() => null) as
     | { input?: Record<string, unknown>; bundleId?: string }
