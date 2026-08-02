@@ -53,7 +53,7 @@ function agentFacts(): string {
 
 function freeToolFacts(): string {
   return FREE_TOOLS.map(
-    (t) => `- ${t.name} (/free-tools/${t.slug}) — ${t.what} ${t.gated ? "Free account required." : "No account needed."}`,
+    (t) => `- ${t.name} (/free-tools/${t.slug}) — ${t.what} Free to fill in; a free account is required to see the result.`,
   ).join("\n");
 }
 

@@ -15,7 +15,7 @@ import { CTA } from "@/content/brand";
 export const metadata: Metadata = {
   title: "All products and features",
   description:
-    "Nine suites, ten agents and every platform capability — the complete directory of what LAMID ONE does.",
+    "Nine suites, eleven agents and every platform capability — the complete directory of what LAMID ONE does.",
 };
 
 const GROUPS: { title: string; blurb: string; items: Capability[] }[] = [
@@ -37,7 +37,7 @@ const GROUPS: { title: string; blurb: string; items: Capability[] }[] = [
  * it, so nothing built is left unsold or undiscoverable.
  */
 export default function ProductsPage() {
-  const publicCount = GROUPS.reduce((n, g) => n + g.items.filter((i) => i.visibility === "public").length, 0);
+  const publicCount = GROUPS.reduce((n, g) => n + g.items.filter((i) => i.visibility === "public" && i.verified).length, 0);
 
   return (
     <>
@@ -47,10 +47,11 @@ export default function ProductsPage() {
           <div className="shell py-20">
             <div className="max-w-3xl">
               <Eyebrow>Everything in the platform</Eyebrow>
-              <h1 className="h-display mt-6">Nine suites. {publicCount} capabilities. One record.</h1>
+              <h1 className="h-display mt-6">Nine suites. {publicCount} capabilities live today.</h1>
               <p className="lead mt-6">
                 The navigation shows the shortlist. This page is the whole index — every capability,
-                grouped, with nothing hidden behind a sales call.
+                grouped, with nothing hidden behind a sales call. Anything marked &ldquo;Not yet&rdquo;
+                is not live — named because omitting it would be the misleading choice.
               </p>
             </div>
           </div>
@@ -82,15 +83,21 @@ export default function ProductsPage() {
                 <div className="mb-6 flex items-baseline gap-5">
                   <h3 className="font-display text-2xl">{g.title}</h3>
                   <span className="h-px flex-1" style={{ background: "var(--line)" }} aria-hidden="true" />
-                  <span className="faint text-sm tabular-nums">{g.items.length}</span>
+                  <span className="faint text-sm tabular-nums">{g.items.filter((i) => i.verified).length} / {g.items.length}</span>
                 </div>
                 <p className="lead mb-7 max-w-2xl text-sm">{g.blurb}</p>
                 <div className="grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
                   {g.items.map((c) => (
-                    <div key={c.name} className="feature-card" tabIndex={0}>
+                    <div key={c.name} className="feature-card" tabIndex={0} style={c.verified ? undefined : { opacity: 0.6 }}>
                       <h4 className="flex items-center gap-2 font-semibold">
                         {c.name}
-                        {c.visibility === "operator" && (
+                        {!c.verified && (
+                          <span className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                                style={{ border: "1px solid var(--warn)", color: "var(--warn)" }}>
+                            Not yet
+                          </span>
+                        )}
+                        {c.verified && c.visibility === "operator" && (
                           <span className="faint rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
                                 style={{ border: "1px solid var(--line)" }}>
                             Operator
@@ -109,7 +116,7 @@ export default function ProductsPage() {
         <Section id="next" className="border-t">
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { t: "LAMID Agents", d: "Ten agents and what each costs per outcome.", href: "/agents" },
+              { t: "LAMID Agents", d: "Eleven agents and what each costs per outcome.", href: "/agents" },
               { t: "Integrations", d: "Everything the platform connects to.", href: "/integrations" },
               { t: "Pricing", d: "Five tiers and the complete feature comparison.", href: "/pricing" },
             ].map((c) => (

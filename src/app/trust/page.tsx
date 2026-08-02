@@ -29,26 +29,30 @@ export const metadata: Metadata = {
 
 const IMPLEMENTED = [
   { control: "Encryption in transit", detail: "TLS 1.2 or higher on every connection." },
-  { control: "Encryption at rest", detail: "AES-256 on stored data and documents." },
-  { control: "Two-factor authentication", detail: "Available on every account, at every tier." },
-  { control: "Role-based access control", detail: "Permissions enforced at API level, not just in the interface." },
-  { control: "Field-level permissions", detail: "Enterprise and Concierge tiers." },
-  { control: "Single sign-on", detail: "SAML 2.0 and SCIM provisioning on Enterprise." },
-  { control: "Audit logging", detail: "Immutable record of consequential actions; retention by tier." },
-  { control: "Rate limiting and bot protection", detail: "Per-route limits and Cloudflare Turnstile on public forms." },
-  { control: "Input sanitisation and validation", detail: "Schema validation on every boundary crossing." },
-  { control: "Error monitoring", detail: "Structured logging with alerting on anomalies." },
+  { control: "Encryption at rest", detail: "AES-256 on stored data and documents, at the infrastructure level." },
+  { control: "Password hashing", detail: "scrypt with a per-account salt — passwords are never stored or logged in plain form." },
+  { control: "Role-based access control", detail: "Tier and role are re-derived server-side on every request, never trusted from a client-held token." },
+  { control: "Audit logging", detail: "Immutable record of consequential actions — awards, approvals, disputes." },
+  { control: "Rate limiting", detail: "Per-route limits, distributed via Upstash Redis in production." },
+  { control: "Bot resistance on public forms", detail: "Rate limiting plus a honeypot field — not yet a challenge-based system like Turnstile; see below." },
+  { control: "Input sanitisation and validation", detail: "Length caps and control-character stripping on every request boundary." },
+  { control: "Signed payment webhooks", detail: "Paystack events verified by HMAC-SHA512 signature before anything in the payload is trusted." },
   { control: "Data export", detail: "Full self-service export of everything held about you." },
   { control: "Data erasure", detail: "Deletion on request, with the operator audit trail retained." },
-  { control: "Escrow segregation", detail: "Client funds held separately and released only on approval." },
+  { control: "Escrow segregation", detail: "Client funds held separately and released only on approval or a certified auto-release." },
 ];
 
 const IN_PROGRESS = [
+  { item: "Two-factor authentication", status: "Not built yet. Sign-in today is email and password only." },
+  { item: "Single sign-on (SAML / SCIM)", status: "Not built yet. Every account signs in the same way, regardless of tier." },
+  { item: "Cloudflare Turnstile", status: "Not integrated. Public forms currently rely on rate limiting and a honeypot field instead." },
+  { item: "Field-level permissions", status: "Not built yet. Access control today is role-based, not field-level." },
+  { item: "Error monitoring with alerting", status: "Structured server-side logging exists; a monitoring service with alerting (e.g. Sentry) is not wired up yet." },
   { item: "SOC 2 Type II", status: "Audit not yet commenced. We will publish the report when it exists." },
   { item: "ISO 27001", status: "Not certified. Cloud infrastructure providers hold their own certification." },
   { item: "Penetration test summary", status: "Scheduled. Summary will be published here." },
-  { item: "Formal uptime SLA", status: "99.9% committed contractually on Enterprise and Concierge; no public status page yet." },
-  { item: "Data residency selection", status: "Available on Enterprise. Additional regions being added." },
+  { item: "Formal uptime SLA", status: "No public status page yet." },
+  { item: "Data residency selection", status: "Not built yet — all data is held in one region today." },
 ];
 
 export default function TrustPage() {

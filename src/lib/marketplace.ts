@@ -1,5 +1,6 @@
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
 import { ACTION_COSTS } from "@/content/agents";
+import { listMilestones } from "./milestones";
 
 /**
  * MARKETPLACE — projects, bids and experts.
@@ -376,6 +377,20 @@ export async function completeProject(
     throw new MarketplaceError("This project has no awarded bid yet — award one before closing it.");
   }
 
+  /* A project can only close once every milestone it defined is
+     actually approved — otherwise a project could close while a
+     milestone sits disputed or still-submitted, with escrow logic
+     that has no idea the project it was protecting is now "done". A
+     project with no milestones at all (never broken into escrow
+     stages) has nothing to check here and closes as before. */
+  const milestones = await listMilestones(projectId);
+  const unresolved = milestones.filter((m) => m.status !== "approved");
+  if (unresolved.length > 0) {
+    throw new MarketplaceError(
+      `${unresolved.length} milestone${unresolved.length === 1 ? "" : "s"} still need${unresolved.length === 1 ? "s" : ""} to be approved before this project can close.`,
+    );
+  }
+
   const record: CompletedProject = {
     ...project,
     status: "complete",
@@ -400,7 +415,19 @@ export async function completeProject(
     const prj = await collection<Project>("projects");
     const done = await collection<CompletedProject>("completedProjects");
     if (prj && done) {
-      await prj.updateOne({ id: projectId }, { $set: { status: "complete", updatedAt: Date.now() } });
+      /* The `status: "awarded"` guard in the filter closes the same
+         race awardBid() already closes for itself — without it, two
+         concurrent completeProject() calls both pass the read-check
+         above and both write, double-paying and double-counting the
+         expert's stats. Only the first of two concurrent calls finds
+         a match; the second gets null and must not proceed. */
+      const updatedProject = await prj.findOneAndUpdate(
+        { id: projectId, status: "awarded" },
+        { $set: { status: "complete", updatedAt: Date.now() } },
+        { returnDocument: "after" },
+      );
+      if (!updatedProject) throw new MarketplaceError("This project was just closed by another request.");
+
       await done.insertOne(record);
       await syncExpertStats(record.expertId);
       return record;
@@ -408,7 +435,8 @@ export async function completeProject(
   }
 
   const p = projects.get(projectId);
-  if (p) { p.status = "complete"; p.updatedAt = Date.now(); }
+  if (!p || p.status !== "awarded") throw new MarketplaceError("This project was just closed by another request.");
+  p.status = "complete"; p.updatedAt = Date.now();
   completed.set(projectId, record);
   await syncExpertStats(record.expertId);
   return record;

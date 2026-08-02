@@ -115,7 +115,8 @@ export async function submitMilestone(expertId: string, milestoneId: string, not
     aiCertified: certified,
     aiScore: score,
     ...(certified ? { autoReleaseAt: autoReleaseDeadline() } : {}),
-  });
+  }, m.status);
+  if (!updated) throw new MilestoneError("This milestone changed status while submitting — refresh and try again.");
 
   const project = await getProject(m.projectId);
   if (project) {
@@ -140,7 +141,8 @@ export async function approveMilestone(clientId: string, milestoneId: string): P
   if (!project || project.clientId !== clientId) throw new MilestoneError("Only the client can approve this milestone.");
   if (m.status !== "submitted") throw new MilestoneError("Only a submitted milestone can be approved.");
 
-  const updated = await update(milestoneId, { status: "approved", approvedAt: Date.now() });
+  const updated = await update(milestoneId, { status: "approved", approvedAt: Date.now() }, "submitted");
+  if (!updated) throw new MilestoneError("This milestone was just handled by another request — refresh to see its current status.");
 
   await record({ orgId: null, actorId: clientId, actorRole: "client", action: "milestone_approved", target: m.id, detail: `${m.currency} ${m.amount}` });
   await notify(clientId, "Milestone approved", `You approved "${m.title}" — ${m.currency} ${m.amount.toLocaleString()} has been released.`);
@@ -153,7 +155,8 @@ export async function disputeMilestone(milestoneId: string, raisedBy: string): P
   if (!m) throw new MilestoneError("No such milestone.");
   if (m.status !== "submitted") throw new MilestoneError("Only a submitted milestone can be disputed.");
 
-  const updated = await update(milestoneId, { status: "disputed" });
+  const updated = await update(milestoneId, { status: "disputed" }, "submitted");
+  if (!updated) throw new MilestoneError("This milestone was just handled by another request — refresh to see its current status.");
 
   const project = await getProject(m.projectId);
   if (project) {
@@ -173,15 +176,34 @@ async function findOne(milestoneId: string): Promise<Milestone | null> {
   return store.get(milestoneId) ?? null;
 }
 
-async function update(milestoneId: string, patch: Partial<Milestone>): Promise<Milestone> {
+/**
+ * `expectedStatus`, when given, makes this an optimistic-concurrency
+ * write: it only applies if the milestone's status is still what the
+ * caller last read it as. Without this, `disputeMilestone` and
+ * `processAutoReleases` (or two overlapping auto-release sweeps) could
+ * both read the same `submitted` milestone and both write — whichever
+ * write landed second would silently overwrite the first (e.g. an
+ * auto-release firing right after a client disputed the same
+ * milestone, releasing funds the client had just frozen). Returns
+ * `null` when the guard fails, meaning another request already moved
+ * this milestone — callers must treat that as "did not happen", not
+ * as success.
+ */
+async function update(
+  milestoneId: string,
+  patch: Partial<Milestone>,
+  expectedStatus?: MilestoneStatus,
+): Promise<Milestone | null> {
   if (persistenceEnabled()) {
     const col = await collection<Milestone>("milestones");
     if (col) {
-      const after = await col.findOneAndUpdate({ id: milestoneId }, { $set: patch }, { returnDocument: "after" });
-      if (after) return after;
+      const filter = expectedStatus ? { id: milestoneId, status: expectedStatus } : { id: milestoneId };
+      return col.findOneAndUpdate(filter, { $set: patch }, { returnDocument: "after" });
     }
   }
-  const m = store.get(milestoneId)!;
+  const m = store.get(milestoneId);
+  if (!m) return null;
+  if (expectedStatus && m.status !== expectedStatus) return null;
   Object.assign(m, patch);
   return m;
 }
@@ -210,7 +232,12 @@ export async function processAutoReleases(): Promise<{ released: string[] }> {
     if ((BLOCKS_AUTO_RELEASE as readonly string[]).includes(m.status)) continue;
     if (!m.aiCertified || !m.autoReleaseAt || m.autoReleaseAt > now) continue;
 
-    await update(m.id, { status: "approved", approvedAt: now, autoReleased: true });
+    /* Guarded on "submitted" — if a client disputed or approved this
+       milestone in the window between the query above and this write,
+       the guard fails and this iteration is correctly a no-op instead
+       of overwriting their decision. */
+    const updated = await update(m.id, { status: "approved", approvedAt: now, autoReleased: true }, "submitted");
+    if (!updated) continue;
     released.push(m.id);
 
     const project = await getProject(m.projectId);

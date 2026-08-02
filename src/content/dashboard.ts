@@ -100,7 +100,7 @@ export const SECTIONS: Section[] = [
     roles: ["client", "enterprise", "concierge"] },
 
   { id: "agents", label: "Agents", Icon: Bot, group: "Intelligence",
-    blurb: "The ten agents, what each costs, and your usage.",
+    blurb: "The eleven agents, what each costs, and your usage.",
     roles: ["client", "expert", "enterprise", "concierge", "operator"] },
 
   { id: "analytics", label: "Analytics", Icon: BarChart3, group: "Intelligence",

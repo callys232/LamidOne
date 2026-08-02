@@ -1,7 +1,7 @@
-import { handler, ok, fail, badRequest, rateLimited } from "@/lib/http";
+import { handler, ok, fail, rateLimited } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
-import { available, getBalanceAsync, creditAsync, historyAsync } from "@/lib/points";
+import { available, getBalanceAsync, historyAsync } from "@/lib/points";
 import { POINT_PACKAGES, USD_PER_POINT } from "@/content/agents";
 
 export const runtime = "nodejs";
@@ -30,32 +30,14 @@ export const GET = handler(async (req) => {
 });
 
 /**
- * Credit points after a confirmed purchase.
- *
- * ⚠️  This must only ever be called from a verified payment webhook —
- * Stripe or Paystack — never from the browser. ProdLamid already has
- * `api/escrows/paystack/webhook` doing signature verification; wire
- * this behind the same check. An unauthenticated credit endpoint is
- * free money.
+ * Points used to be creditable via `POST` on this route, gated only
+ * by a plain string compared against `LAMID_WEBHOOK_SECRET` — not a
+ * real Paystack signature, and not called from anywhere in this app.
+ * An unauthenticated (or weak-secret) credit endpoint for an arbitrary
+ * `userId` is a free-money oracle if that secret ever leaks or is
+ * guessed. Real crediting now happens through
+ * /api/webhooks/paystack (HMAC-SHA512-verified against
+ * PAYSTACK_SECRET_KEY) and the browser callback at
+ * /api/checkout/callback, both funnelling through the same
+ * idempotent `fulfillOrder` — see lib/fulfillment.ts.
  */
-export const POST = handler(async (req) => {
-  const secret = req.headers.get("x-lamid-webhook-secret");
-  if (!secret || secret !== process.env.LAMID_WEBHOOK_SECRET) {
-    return fail(401, "unauthorised", "Webhook signature required.");
-  }
-
-  const body = await req.json().catch(() => null) as
-    | { userId?: string; points?: number; kind?: "allowance" | "purchased"; reference?: string }
-    | null;
-
-  if (!body?.userId || typeof body.points !== "number" || body.points <= 0) {
-    return badRequest("`userId` and a positive `points` value are required.");
-  }
-
-  const kind = body.kind === "allowance" ? "allowance" : "purchased";
-  const balance = await creditAsync(
-    body.userId, Math.floor(body.points), kind, body.reference ?? "purchase",
-  );
-
-  return ok({ balance: { ...balance, available: available(balance) } });
-});

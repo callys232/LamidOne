@@ -32,8 +32,8 @@ export const PRICING_FAQ: FaqItem[] = [
     a: "Access is included in your plan and both open as their own applications in a new tab. DocuShare storage is the one metered extra: each tier includes local storage from 5 GB on Free up to unlimited on Enterprise, and cloud capacity is an optional add-on from $5 per month.",
   },
   {
-    q: "Do you charge in local currency?",
-    a: "Yes. Checkout supports nine currencies including Nigerian naira, Ghanaian cedi, Kenyan shilling, South African rand and UAE dirham, with live exchange rates. Point packages are priced in naira natively.",
+    q: "What currency am I charged in?",
+    a: "USD. Every plan and point package is priced and charged in US dollars, wherever you sign up from — there is no region-locked pricing.",
   },
   {
     q: "What does Enterprise include that Growth does not?",

@@ -44,9 +44,9 @@ export default function AboutPage() {
           </em>
         </p>
         <p>
-          The firm&apos;s stated Vision 2025 is to produce &ldquo;8,000 more of Africa&apos;s best
-          talents to deliver exceptional value&rdquo; — the same capability-building goal LAMID
-          LEARN exists to serve on this platform.
+          The firm&apos;s stated goal is to produce thousands more world-class talents who can
+          deliver exceptional value — the same capability-building goal LAMID LEARN exists to
+          serve, for any team on this platform, anywhere.
         </p>
 
         <h2>What we believe</h2>
@@ -84,15 +84,6 @@ export default function AboutPage() {
           Enterprise Africa, and Regional Director of the Leadership for Environment and
           Development (LEAD) Programme, a Rockefeller Foundation initiative now active in over 20
           countries.
-        </p>
-
-        <h2>Selected engagements</h2>
-        <p>
-          Over 35 years, LAMID Consulting has been retained by the Federal Government of Nigeria,
-          Lagos State Government, Shell Petroleum Development Company Nigeria, the United Nations
-          Development Programme, Unilever Nigeria, Access Bank, Lafarge, the British Council and
-          USAID, among others — advisory and human-capital-development work, not LAMID ONE
-          engagements specifically; the platform this site describes is new.
         </p>
 
         <h2>Where we are</h2>

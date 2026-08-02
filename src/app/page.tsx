@@ -12,7 +12,7 @@ import { Faq } from "@/components/sections/Faq";
 import { CTA, REACH } from "@/content/brand";
 import { SUITES } from "@/content/suites";
 import { PLATFORM_AGENTS, POINTS_EXPLAINER } from "@/content/agents";
-import { INTEGRATIONS } from "@/content/platform";
+import { VERIFIED_INTEGRATIONS } from "@/content/platform";
 import { HOME_FAQ, HOME_COMPARISON } from "@/content/home";
 import { ScreenshotFrame } from "@/components/mock/ProductMock";
 
@@ -46,7 +46,7 @@ export default function HomePage() {
               </h1>
               <p className="lead mt-7 max-w-2xl">
                 Strategy, growth, people, finance and clients on one operating layer — with the
-                arithmetic shown, not generated. Nine suites, ten agents, one record.
+                arithmetic shown, not generated. Nine suites, eleven agents, one record.
               </p>
               <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-10" />
               <p className="faint mt-4 text-sm">
@@ -132,7 +132,7 @@ export default function HomePage() {
         <Section id="agents" tone="tint">
           <SectionHeading
             eyebrow="LAMID Agents"
-            title="Ten agents. You pay when the work is done."
+            title="Eleven agents. You pay when the work is done."
             blurb={POINTS_EXPLAINER.body}
             action={<Link href="/agents" className="link-underline text-sm">All agents</Link>}
           />
@@ -157,16 +157,17 @@ export default function HomePage() {
           <div className="card p-8 sm:p-10">
             <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-5">
-                <h2 className="h-section text-2xl sm:text-3xl">Works with what you already run.</h2>
+                <h2 className="h-section text-2xl sm:text-3xl">What actually powers this.</h2>
                 <p className="lead mt-4 text-base">
-                  {INTEGRATIONS.length} integrations across payments, identity, storage, documents and AI.
+                  Real payments, a real model layer, and real connections to LAMID&apos;s own
+                  ecosystem apps — {VERIFIED_INTEGRATIONS.length} in production today.
                 </p>
                 <Link href="/integrations" className="link-underline mt-6 inline-flex text-sm">
-                  See all integrations
+                  See what&apos;s live and what&apos;s next
                 </Link>
               </div>
               <ul className="flex flex-wrap gap-2 lg:col-span-7">
-                {INTEGRATIONS.map((i) => (
+                {VERIFIED_INTEGRATIONS.map((i) => (
                   <li key={i.name} className="rounded-lg px-3 py-2 text-sm" style={{ border: "1px solid var(--line)" }}>
                     {i.name}
                   </li>

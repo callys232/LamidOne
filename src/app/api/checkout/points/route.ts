@@ -1,15 +1,20 @@
+import { randomUUID } from "node:crypto";
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { initializeTransaction, PaystackError, paystackConfigured } from "@/lib/paystack";
 import { createOrder } from "@/lib/checkout";
+import { requirePersistenceInProd } from "@/lib/store";
 import { env } from "@/lib/env";
 import { POINT_PACKAGES } from "@/content/agents";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ref = () => `pts_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+/* Not derivable/guessable, unlike the previous Date.now()+Math.random()
+   scheme — these are checkout references, not just internal object
+   ids, so they get the same treatment as any other unguessable token. */
+const ref = () => `pts_${randomUUID()}`;
 
 /**
  * Starts a real Paystack Checkout for a points package. The price
@@ -18,6 +23,7 @@ const ref = () => `pts_${Date.now().toString(36)}_${Math.random().toString(36).s
  * than the published rate.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 1024)) return tooLarge();
 
   const identity = await resolveIdentity(req);

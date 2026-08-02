@@ -3,6 +3,7 @@ import "./globals.css";
 import { BRAND } from "@/content/brand";
 import { AssistantWidget } from "@/components/layout/AssistantWidget";
 import { BizSphereModalWrapper } from "@/components/layout/BizSphereModalWrapper";
+import { BackToTop } from "@/components/layout/BackToTop";
 
 export const metadata: Metadata = {
   title: {
@@ -18,10 +19,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Set the theme before paint so dark mode never flashes white. */}
+        {/* Set the theme before paint so a stored dark preference never
+            flashes light. Light is the default a new visitor meets —
+            deliberately not following system prefers-color-scheme —
+            so only an explicit saved choice turns dark mode on. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem('lamid-theme');var d=s?s==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`,
+            __html: `(function(){try{if(localStorage.getItem('lamid-theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`,
           }}
         />
       </head>
@@ -32,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <AssistantWidget />
         <BizSphereModalWrapper />
+        <BackToTop />
       </body>
     </html>
   );

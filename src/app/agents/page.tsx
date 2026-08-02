@@ -14,7 +14,7 @@ import { AgentMock } from "@/components/mock/ProductMock";
 export const metadata: Metadata = {
   title: "LAMID Agents",
   description:
-    "Ten AI agents across the platform, charged per completed outcome. A run that fails costs nothing.",
+    "Eleven AI agents across the platform, charged per completed outcome. A run that fails costs nothing.",
 };
 
 /**
@@ -38,7 +38,7 @@ export default function AgentsPage() {
             <div className="max-w-3xl">
               <Eyebrow>LAMID Agents</Eyebrow>
               <h1 className="h-display mt-6">
-                Ten agents that work on your own records<span className="text-brand">.</span>
+                Eleven agents that work on your own records<span className="text-brand">.</span>
               </h1>
               <p className="lead mt-6">
                 Every agent is grounded in the data already in your engines — not in a general
@@ -202,7 +202,7 @@ export default function AgentsPage() {
             items={[
               { q: "What is an AI agent?", a: "An agent completes a defined task end to end and returns a result you can act on — a shortlist, a drafted proposal, a scored diagnostic — rather than answering a question in a chat box. Each LAMID agent is scoped to one job and priced by the outcome it produces." },
               { q: "How are LAMID Agents priced?", a: "In LAMID Points, per completed outcome. A resolved dispute costs 80 points, a drafted proposal 60, a delivered shortlist 30, an answered question 15. If a run fails you are not charged. Every paid plan includes a monthly points allowance." },
-              { q: "Can I build my own agent?", a: "Not yet. Custom engine configuration is available on Enterprise, and a custom agent builder is on the roadmap. Today the ten agents listed above are the full set." },
+              { q: "Can I build my own agent?", a: "Not yet. Custom engine configuration is available on Enterprise, and a custom agent builder is on the roadmap. Today the eleven agents listed above are the full set." },
               { q: "Who can use the agents?", a: "The Assistant, Diagnostic and Matching agents are available on the free plan. Proposal, Milestone, Deliverable and Project Match unlock at Starter. Dispute, Intelligence and Operating Model unlock at Growth. The full breakdown is in the pricing comparison." },
               { q: "How is this different from using ChatGPT directly?", a: "A general assistant cannot see your engagement records, your budget model or your workforce data, so it can only give you a plausible-sounding general answer. LAMID Agents read the data already in your engines, respect the permissions of the person invoking them, and write their output back to the record it belongs to." },
             ]}

@@ -57,7 +57,10 @@ export default function SigninPage() {
               />
             </label>
             <label className="block text-sm">
-              <span className="muted mb-1.5 block text-xs font-medium">Password</span>
+              <span className="mb-1.5 flex items-center justify-between text-xs font-medium">
+                <span className="muted">Password</span>
+                <a href="/forgot-password" className="link-underline text-brand">Forgot password?</a>
+              </span>
               <input
                 type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-lg border px-3 py-2 text-sm"

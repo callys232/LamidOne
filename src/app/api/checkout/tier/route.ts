@@ -1,15 +1,18 @@
+import { randomUUID } from "node:crypto";
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { initializeTransaction, PaystackError, paystackConfigured } from "@/lib/paystack";
 import { createOrder } from "@/lib/checkout";
+import { getOrCreatePlanCode } from "@/lib/subscriptionPlans";
+import { requirePersistenceInProd } from "@/lib/store";
 import { env } from "@/lib/env";
 import { TIERS, type TierId } from "@/content/tiers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ref = () => `tier_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const ref = () => `tier_${randomUUID()}`;
 
 /**
  * Starts a real Paystack Checkout for a self-serve tier upgrade.
@@ -19,12 +22,15 @@ const ref = () => `tier_${Date.now().toString(36)}_${Math.random().toString(36).
  * self-serve card form. Price is always this account's own TIERS
  * entry, never client-supplied.
  *
- * This charges the FIRST payment and activates the tier on success —
- * it is not a recurring subscription. Renewal, cancellation and
- * dunning would need Paystack's Plan/Subscription objects and a
- * webhook handler, which is a real follow-up, not implemented here.
+ * This IS a recurring subscription: the transaction is initialized
+ * against a Paystack Plan (lib/subscriptionPlans.ts), so a successful
+ * first payment saves the card and Paystack auto-charges it every
+ * billing interval on its own, firing `charge.success` again for each
+ * renewal — handled by /api/webhooks/paystack, not by this route.
+ * Cancellation is /api/billing/cancel.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 1024)) return tooLarge();
 
   const identity = await resolveIdentity(req);
@@ -41,17 +47,22 @@ export const POST = handler(async (req) => {
 
   if (!paystackConfigured()) return fail(503, "not_configured", "Payments are not configured yet.");
 
-  const usd = body?.annual ? tier.price.annual! : tier.price.monthly;
+  const interval: "monthly" | "annually" = body?.annual ? "annually" : "monthly";
+  const usd = interval === "annually" ? tier.price.annual! : tier.price.monthly;
   const reference = ref();
-  await createOrder({ reference, userId: identity.userId, kind: "tier", tier: tier.id as TierId, usd });
+  await createOrder({
+    reference, userId: identity.userId, kind: "tier", tier: tier.id as TierId, usd, billingInterval: interval,
+  });
 
   try {
+    const planCode = await getOrCreatePlanCode(tier, interval);
     const tx = await initializeTransaction({
       email: identity.email,
       amountMajorUnit: usd,
       reference,
       callbackUrl: `${env.siteUrl}/api/checkout/callback`,
       metadata: { userId: identity.userId, kind: "tier", tier: tier.id },
+      plan: planCode,
     });
     return ok({ authorizationUrl: tx.authorization_url });
   } catch (e) {

@@ -38,6 +38,7 @@ export default function BillingPage() {
           </div>
           <Link href="/pricing" className="btn btn-secondary shrink-0 !px-4 !py-2 text-xs">Compare plans</Link>
         </div>
+        {tier.id !== "free" && <CancelSubscription />}
 
         <dl className="mt-6 grid gap-4 border-t pt-5 sm:grid-cols-3" style={{ borderColor: "var(--line-soft)" }}>
           <div>
@@ -76,8 +77,8 @@ export default function BillingPage() {
         <div className="card p-6">
           <h2 className="font-display text-lg">Upgrade</h2>
           <p className="muted mt-2 text-sm leading-relaxed">
-            One payment activates the plan immediately — this charges you now for the first period,
-            not a recurring subscription yet.
+            Activates immediately and renews automatically each billing period on the card you pay
+            with — cancel any time from this page, no minimum term.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {upgradable.map((t) => <UpgradeCard key={t.id} tierId={t.id} name={t.name} price={t.price.monthly!} />)}
@@ -92,6 +93,50 @@ export default function BillingPage() {
           subscription payment is taken.
         </p>
       </div>
+    </div>
+  );
+}
+
+function CancelSubscription() {
+  const [state, setState] = useState<"idle" | "confirming" | "busy" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function cancel() {
+    setState("busy");
+    setError("");
+    try {
+      const res = await fetch("/api/billing/cancel", { method: "POST", headers: authHeaders() });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? "Could not cancel.");
+      setState("done");
+    } catch (e) {
+      setState("error");
+      setError((e as Error).message);
+    }
+  }
+
+  if (state === "done") {
+    return <p className="muted mt-3 text-xs">Subscription cancelled — this account is back on Free.</p>;
+  }
+
+  if (state === "confirming") {
+    return (
+      <div className="mt-3 flex items-center gap-2">
+        <span className="text-xs">Cancel your subscription? You&apos;ll drop to Free immediately.</span>
+        <button type="button" onClick={cancel} disabled={state !== "confirming"} className="btn btn-secondary !px-2.5 !py-1 text-xs">
+          Yes, cancel
+        </button>
+        <button type="button" onClick={() => setState("idle")} className="faint text-xs hover:text-brand">Never mind</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3">
+      <button type="button" onClick={() => setState("confirming")} disabled={state === "busy"} className="faint text-xs underline hover:text-brand disabled:opacity-50">
+        {state === "busy" ? "Cancelling…" : "Cancel subscription"}
+      </button>
+      {state === "error" && <p className="mt-1 text-xs" style={{ color: "var(--bad)" }}>{error}</p>}
     </div>
   );
 }

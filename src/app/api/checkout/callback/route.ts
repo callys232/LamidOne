@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { verifyTransaction, PaystackError } from "@/lib/paystack";
-import { getOrder, markPaid } from "@/lib/checkout";
-import { creditAsync } from "@/lib/points";
-import { activateTier } from "@/lib/users";
+import { getOrder } from "@/lib/checkout";
+import { fulfillOrder } from "@/lib/fulfillment";
+import { requirePersistenceInProd } from "@/lib/store";
 import { env } from "@/lib/env";
-import type { TierId } from "@/content/tiers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,6 +22,12 @@ export async function GET(req: Request) {
   const reference = url.searchParams.get("reference") ?? url.searchParams.get("trxref") ?? "";
   const base = env.siteUrl;
 
+  try {
+    requirePersistenceInProd();
+  } catch {
+    return NextResponse.redirect(`${base}/dashboard/wallet?purchase=not_configured`);
+  }
+
   if (!reference) return NextResponse.redirect(`${base}/dashboard/wallet?purchase=missing_reference`);
 
   const order = await getOrder(reference);
@@ -40,24 +45,20 @@ export async function GET(req: Request) {
     return NextResponse.redirect(`${base}${failTarget}?purchase=failed`);
   }
 
-  const paid = await markPaid(reference);
-  if (!paid) {
-    /* Already processed (a refreshed callback page) or the order was
-       never pending — either way, crediting again would be a bug, so
-       this still reads as success to the customer without repeating
-       the credit. */
-    return NextResponse.redirect(`${base}${failTarget}?purchase=already_processed`);
+  /* The webhook (api/webhooks/paystack) may have already fulfilled
+     this exact order in the time it took the browser to redirect back
+     here — `fulfillOrder`'s underlying `markPaid` is the single
+     atomic gate that makes that race harmless either way. */
+  const result = await fulfillOrder(reference);
+  if (!result.done) {
+    return NextResponse.redirect(`${base}${failTarget}?purchase=${result.reason}`);
   }
 
-  if (paid.kind === "points" && paid.points) {
-    await creditAsync(paid.userId, paid.points, "purchased", `points purchase ${reference}`);
-    return NextResponse.redirect(`${base}/dashboard/wallet?purchase=success&points=${paid.points}`);
+  if (result.order.kind === "points" && result.order.points) {
+    return NextResponse.redirect(`${base}/dashboard/wallet?purchase=success&points=${result.order.points}`);
   }
-
-  if (paid.kind === "tier" && paid.tier) {
-    await activateTier(paid.userId, paid.tier as TierId);
-    return NextResponse.redirect(`${base}/dashboard/billing?purchase=success&tier=${paid.tier}`);
+  if (result.order.kind === "tier" && result.order.tier) {
+    return NextResponse.redirect(`${base}/dashboard/billing?purchase=success&tier=${result.order.tier}`);
   }
-
   return NextResponse.redirect(`${base}/dashboard/wallet?purchase=success`);
 }

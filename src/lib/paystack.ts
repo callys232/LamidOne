@@ -107,6 +107,12 @@ export type InitializedTransaction = { authorization_url: string; access_code: s
 export async function initializeTransaction(input: {
   email: string; amountMajorUnit: number; currency?: string; reference: string;
   callbackUrl: string; metadata?: Record<string, unknown>;
+  /** Attaches this transaction to a Paystack Plan — the customer's
+   *  card is saved on successful payment and Paystack auto-charges it
+   *  again each billing interval, firing `charge.success` webhooks for
+   *  every renewal with no further action from this app. Omit for a
+   *  genuine one-time charge (points packages). */
+  plan?: string;
 }): Promise<InitializedTransaction> {
   return call<InitializedTransaction>("/transaction/initialize", {
     method: "POST",
@@ -117,7 +123,49 @@ export async function initializeTransaction(input: {
       reference: input.reference,
       callback_url: input.callbackUrl,
       metadata: input.metadata ?? {},
+      ...(input.plan ? { plan: input.plan } : {}),
     }),
+  });
+}
+
+export type PaystackPlan = { plan_code: string; name: string; amount: number; interval: string };
+
+/** Creates a Paystack Plan — the object a recurring subscription is
+ *  billed against. Idempotent from the caller's side via
+ *  lib/subscriptionPlans.ts, which creates each tier/interval
+ *  combination at most once and caches the returned `plan_code`. */
+export async function createPlan(input: {
+  name: string; amountMajorUnit: number; interval: "monthly" | "annually"; currency?: string;
+}): Promise<PaystackPlan> {
+  return call<PaystackPlan>("/plan", {
+    method: "POST",
+    body: JSON.stringify({
+      name: input.name,
+      amount: Math.round(input.amountMajorUnit * 100),
+      interval: input.interval,
+      currency: input.currency ?? "USD",
+    }),
+  });
+}
+
+export type PaystackSubscription = {
+  subscription_code: string;
+  email_token: string;
+  status: string;
+  next_payment_date: string | null;
+};
+
+/** Needed before `disableSubscription` — Paystack requires the
+ *  subscription's one-time `email_token` alongside its code to cancel
+ *  it, as a second factor beyond just knowing the code. */
+export async function fetchSubscription(subscriptionCode: string): Promise<PaystackSubscription> {
+  return call<PaystackSubscription>(`/subscription/${encodeURIComponent(subscriptionCode)}`);
+}
+
+export async function disableSubscription(subscriptionCode: string, emailToken: string): Promise<void> {
+  await call("/subscription/disable", {
+    method: "POST",
+    body: JSON.stringify({ code: subscriptionCode, token: emailToken }),
   });
 }
 

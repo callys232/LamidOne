@@ -1,7 +1,7 @@
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge, clean } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
-import { withMeter, getBalance, available } from "@/lib/points";
+import { withMeter, getBalanceAsync, available } from "@/lib/points";
 import { chatCompletion, systemPrompt, isPersona, type PersonaId } from "@/lib/ai";
 
 export const runtime = "nodejs";
@@ -90,7 +90,7 @@ export const POST = handler(async (req) => {
   }
 
   /* ── Signed in: metered on a delivered reply ── */
-  const balance = getBalance(identity.userId);
+  const balance = await getBalanceAsync(identity.userId);
   if (available(balance) < 10) {
     return fail(402, "insufficient_points", "Not enough LAMID Points for this conversation.", {
       kind: "topup",

@@ -91,7 +91,7 @@ export const PRODUCTS_MENU = {
   /** Demoted below a rule — present, but ranked under the suites. */
   secondary: [
     suiteLink("docushare"),
-    { label: "LAMID Agents", href: "/agents", description: "The ten AI agents and what each costs" },
+    { label: "LAMID Agents", href: "/agents", description: "The eleven AI agents and what each costs" },
     { label: "LAMID Points", href: "/points", description: "Pay per completed outcome" },
     { label: "Integrations", href: "/integrations", description: "Everything it connects to" },
   ] as NavLink[],

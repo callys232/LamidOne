@@ -1,5 +1,5 @@
 import { MongoClient, type Db, type Collection, type Document as MongoDocument } from "mongodb";
-import { env } from "./env";
+import { env, ConfigError } from "./env";
 
 /**
  * PERSISTENCE.
@@ -86,6 +86,7 @@ export async function ensureIndexes(): Promise<void> {
        second insert fail atomically instead. */
     db.collection("users").createIndex({ id: 1 }, { unique: true }),
     db.collection("users").createIndex({ email: 1 }, { unique: true }),
+    db.collection("users").createIndex({ subscriptionCode: 1 }, { sparse: true }),
 
     db.collection("projects").createIndex({ id: 1 }, { unique: true }),
     db.collection("projects").createIndex({ clientId: 1, createdAt: -1 }),
@@ -97,6 +98,11 @@ export async function ensureIndexes(): Promise<void> {
 
     db.collection("completedProjects").createIndex({ clientId: 1, completedAt: -1 }),
     db.collection("completedProjects").createIndex({ expertId: 1, completedAt: -1 }),
+    /* `id` here is the project's own id, reused unchanged on the
+       completed record — this is the DB-level backstop against
+       completeProject() ever inserting the same project twice, in
+       case the application-level "awarded" guard is ever bypassed. */
+    db.collection("completedProjects").createIndex({ id: 1 }, { unique: true }),
 
     db.collection("experts").createIndex({ id: 1 }, { unique: true }),
     db.collection("experts").createIndex({ disciplines: 1, engagementsCompleted: -1 }),
@@ -131,12 +137,34 @@ export async function ensureIndexes(): Promise<void> {
     db.collection("integrations").createIndex({ userId: 1 }, { unique: true }),
     db.collection("checkoutOrders").createIndex({ reference: 1 }, { unique: true }),
     db.collection("checkoutOrders").createIndex({ userId: 1, createdAt: -1 }),
+    db.collection("paystackPlans").createIndex({ key: 1 }, { unique: true }),
 
     db.collection("auditLog").createIndex({ orgId: 1, at: -1 }),
     db.collection("auditLog").createIndex({ actorId: 1, at: -1 }),
 
     db.collection("waitlist").createIndex({ email: 1 }, { unique: true }),
+    db.collection("contactInquiries").createIndex({ status: 1, createdAt: -1 }),
+    db.collection("passwordResets").createIndex({ tokenHash: 1 }, { unique: true }),
+    db.collection("passwordResets").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
   ]).catch((e) => console.error("[store] index creation failed:", (e as Error).message));
 }
 
 export const persistenceEnabled = () => Boolean(env.mongoUri);
+
+/**
+ * Money and escrow routes must not silently run on the in-memory
+ * fallback in production — a serverless deploy has many instances,
+ * each with its OWN Map, so the atomicity every reservation/payout
+ * guard here is built around (`findOneAndUpdate`) simply does not
+ * exist without Mongo: two instances can both approve a reservation
+ * or both mark the same order paid. In development this is a
+ * deliberate convenience (`persistenceEnabled()` false, everything
+ * still works); in production it must instead fail the one request
+ * with a clear 503, not corrupt a balance silently. Call at the top
+ * of any route handler that touches balances, holds, orders,
+ * milestones or marketplace payouts — `handler()` in lib/http.ts turns
+ * the thrown ConfigError into that 503 automatically.
+ */
+export function requirePersistenceInProd(): void {
+  if (env.isProd && !persistenceEnabled()) throw new ConfigError("MONGODB_URI");
+}

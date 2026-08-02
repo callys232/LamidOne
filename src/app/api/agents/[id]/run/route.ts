@@ -1,11 +1,12 @@
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge, forbidden } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity, canRunAgent } from "@/lib/entitlements";
-import { withMeter, available, getBalance } from "@/lib/points";
+import { withMeter, available, getBalanceAsync } from "@/lib/points";
 import { AGENTS } from "@/content/agents";
 import { runEngine, parseEngineCode, EngineInputError } from "@/lib/engines";
 import { chatCompletion, systemPrompt } from "@/lib/ai";
 import { resolveTicket } from "@/lib/supportAgent";
+import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,6 +25,7 @@ export const dynamic = "force-dynamic";
  * engines did not produce.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   const url = new URL(req.url);
   const agentId = url.pathname.split("/").at(-2) ?? "";
 
@@ -56,7 +58,12 @@ export const POST = handler(async (req) => {
     return badRequest("Body must be JSON with an `input` object.");
   }
 
-  const balance = getBalance(identity.userId);
+  /* Must be the persistence-aware read — the sync `getBalance` only
+     ever sees the in-memory fallback, which is empty for every real
+     user once Mongo is configured, and would reject every run here
+     regardless of actual balance (withMeter's own reserveAsync would
+     still be correct, but callers never reach it). */
+  const balance = await getBalanceAsync(identity.userId);
   if (available(balance) < agent.points) {
     return fail(402, "insufficient_points", `${agent.name} costs ${agent.points} points.`, {
       kind: "topup",

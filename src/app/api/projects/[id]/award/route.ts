@@ -3,6 +3,7 @@ import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { awardBid, MarketplaceError } from "@/lib/marketplace";
 import { record as auditRecord } from "@/lib/audit";
+import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export const dynamic = "force-dynamic";
  * billable action.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 4 * 1024)) return tooLarge();
 
   const projectId = new URL(req.url).pathname.split("/").at(-2) ?? "";

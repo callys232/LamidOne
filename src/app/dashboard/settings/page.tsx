@@ -36,23 +36,92 @@ export default function SettingsPage() {
         </dl>
       </div>
 
-      <div className="card p-6">
-        <h2 className="font-semibold">Your data</h2>
-        <p className="muted mt-2 text-sm leading-relaxed">
-          Export everything held about you at any time, or request deletion. An operator audit
-          record of the deletion itself is retained as a legal record.
-        </p>
-        <div className="mt-4 flex gap-3">
-          <button className="btn btn-secondary !px-4 !py-2 text-xs">Export data</button>
-          <button className="btn btn-ghost !px-4 !py-2 text-xs" style={{ color: "var(--bad)" }}>Request deletion</button>
-        </div>
-      </div>
+      <DataSection />
 
       <div className="card p-6">
         <h2 className="font-semibold">Security</h2>
-        <p className="muted mt-2 text-sm">Two-factor authentication and password management live in the sign-in flow.</p>
-        <Link href="/signin" className="link-underline mt-3 inline-flex text-sm">Manage security</Link>
+        <p className="muted mt-2 text-sm">
+          Email and password sign-in only, today — two-factor authentication and SSO are not built
+          yet (see the trust centre for the full list of what is and isn&apos;t implemented).
+        </p>
+        <Link href="/trust" className="link-underline mt-3 inline-flex text-sm">View trust centre</Link>
       </div>
+    </div>
+  );
+}
+
+function DataSection() {
+  const [exporting, setExporting] = useState(false);
+  const [deleteState, setDeleteState] = useState<"idle" | "confirming" | "busy" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function exportData() {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/profile/export", { headers: authHeaders() });
+      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? "Export failed.");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lamid-one-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function requestDeletion() {
+    setDeleteState("busy");
+    setError("");
+    try {
+      const res = await fetch("/api/profile/delete-request", { method: "POST", headers: authHeaders() });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? "Could not submit the request.");
+      setDeleteState("done");
+    } catch (e) {
+      setDeleteState("error");
+      setError((e as Error).message);
+    }
+  }
+
+  return (
+    <div className="card p-6">
+      <h2 className="font-semibold">Your data</h2>
+      <p className="muted mt-2 text-sm leading-relaxed">
+        Export everything held about you at any time, or request deletion. An operator audit
+        record of the deletion itself is retained as a legal record.
+      </p>
+
+      {deleteState === "done" ? (
+        <p className="mt-4 text-sm" style={{ color: "var(--good)" }}>
+          Deletion requested — an operator will verify and action it. This is not instant, so no
+          existing escrow or organisation obligations are affected without review.
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={exportData} disabled={exporting} className="btn btn-secondary !px-4 !py-2 text-xs disabled:opacity-50">
+            {exporting ? "Preparing…" : "Export data"}
+          </button>
+          {deleteState === "confirming" ? (
+            <>
+              <span className="text-xs">Request account deletion? An operator will review it.</span>
+              <button type="button" onClick={requestDeletion} disabled={deleteState !== "confirming"} className="btn btn-ghost !px-3 !py-1.5 text-xs" style={{ color: "var(--bad)" }}>
+                Yes, request it
+              </button>
+              <button type="button" onClick={() => setDeleteState("idle")} className="faint text-xs hover:text-brand">Never mind</button>
+            </>
+          ) : (
+            <button type="button" onClick={() => setDeleteState("confirming")} disabled={(deleteState as string) === "busy"} className="btn btn-ghost !px-4 !py-2 text-xs disabled:opacity-50" style={{ color: "var(--bad)" }}>
+              {(deleteState as string) === "busy" ? "Submitting…" : "Request deletion"}
+            </button>
+          )}
+        </div>
+      )}
+      {error && <p className="mt-2 text-xs" style={{ color: "var(--bad)" }}>{error}</p>}
     </div>
   );
 }

@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Clock, Lock, Unlock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
-import { FREE_TOOLS, UNGATED, GATED, type FreeTool } from "@/content/freeTools";
+import { FREE_TOOLS, type FreeTool } from "@/content/freeTools";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
 
 export const metadata: Metadata = {
   title: "Free tools",
-  description:
-    "Score a decision, map your operating rhythm, check your AI visibility or cost a project — free, most without an account.",
+  description: "Score a decision, map your operating rhythm, or cost a project — free to fill in, sign up to see the result.",
 };
 
 function ToolCard({ tool }: { tool: FreeTool }) {
@@ -20,13 +19,14 @@ function ToolCard({ tool }: { tool: FreeTool }) {
     <article className="card card-interactive flex flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-display text-xl">{tool.name}</h3>
-        <span
-          className="faint flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
-          style={{ border: "1px solid var(--line)" }}
-        >
-          {tool.gated ? <Lock className="h-3 w-3" aria-hidden="true" /> : <Unlock className="h-3 w-3" aria-hidden="true" />}
-          {tool.gated ? "Sign-up" : "No account"}
-        </span>
+        {!tool.engineCode && !tool.externalHref && (
+          <span
+            className="faint shrink-0 rounded px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
+            style={{ border: "1px solid var(--line)" }}
+          >
+            Coming soon
+          </span>
+        )}
       </div>
       <p className="muted mt-3 flex-1 text-sm leading-relaxed">{tool.what}</p>
       <div className="faint mt-5 flex items-center gap-4 text-xs">
@@ -41,7 +41,7 @@ function ToolCard({ tool }: { tool: FreeTool }) {
         )}
       </div>
       <Button href={`/free-tools/${tool.slug}`} variant="ghost" className="mt-6 w-full">
-        {tool.gated ? "Start — free account" : "Start now"}
+        {tool.externalHref ? "Open" : tool.engineCode ? "Try it — free" : "Learn more"}
       </Button>
     </article>
   );
@@ -50,9 +50,11 @@ function ToolCard({ tool }: { tool: FreeTool }) {
 /**
  * Free tools index.
  *
- * Gating is calibrated to output, and the page says so openly. Telling
- * people which tools need an account before they click is a small
- * honesty that costs nothing and removes the bait-and-switch feeling.
+ * Every tool is free to fill in, with no account — signing up (or
+ * upgrading, for a paid-tier engine) is only needed to see the
+ * computed result. Same rule for all of them now, so this page states
+ * it once up top instead of splitting tools into two sections by
+ * gating rule.
  */
 export default function FreeToolsPage() {
   return (
@@ -63,34 +65,19 @@ export default function FreeToolsPage() {
           <div className="shell py-20">
             <div className="max-w-3xl">
               <Eyebrow>Free tools</Eyebrow>
-              <h1 className="h-display mt-6">{FREE_TOOLS.length} tools. No card, ever.</h1>
+              <h1 className="h-display mt-6">{FREE_TOOLS.length} tools. Fill in free, no account.</h1>
               <p className="lead mt-6">
                 Each one is a thin free tier over an engine that runs the paid platform — the same
-                arithmetic, a smaller input surface. {UNGATED.length} need no account at all.
+                arithmetic, a smaller input surface. Filling one in never asks who you are; seeing
+                the computed result does.
               </p>
             </div>
           </div>
         </section>
 
-        <Section id="ungated">
-          <SectionHeading
-            eyebrow="No account needed"
-            title="Get a verdict and leave."
-            blurb="These return a score or a reading. You do not have to tell us who you are to see it."
-          />
+        <Section id="tools">
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {UNGATED.map((t) => <ToolCard key={t.slug} tool={t} />)}
-          </div>
-        </Section>
-
-        <Section id="gated" className="border-t">
-          <SectionHeading
-            eyebrow="Free account"
-            title="Take something away with you."
-            blurb="These produce a document you will want to keep and re-open — a budget, a gap list, a brief. A free account holds them for you."
-          />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {GATED.map((t) => <ToolCard key={t.slug} tool={t} />)}
+            {FREE_TOOLS.map((t) => <ToolCard key={t.slug} tool={t} />)}
           </div>
         </Section>
 

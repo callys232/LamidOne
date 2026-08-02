@@ -1,9 +1,10 @@
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
-import { withMeter, available, getBalance } from "@/lib/points";
+import { withMeter, available, getBalanceAsync } from "@/lib/points";
 import { parseEngineCode, configFor, runEngine, EngineInputError, REGISTERED_CODES, minTierForEngine, meetsEngineTier } from "@/lib/engines";
 import { recordRun, nextSteps } from "@/lib/bundles";
+import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ export const GET = handler(async (req) => {
  * so a malformed input costs the customer nothing.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   const code = new URL(req.url).pathname.split("/").at(-1) ?? "";
   const ref = parseEngineCode(code);
   if (!ref) return badRequest(`"${code}" is not a module code.`);
@@ -68,7 +70,10 @@ export const POST = handler(async (req) => {
     | null;
   if (!body?.input) return badRequest("Body must be JSON with an `input` object.");
 
-  const balance = getBalance(identity.userId);
+  /* Persistence-aware read — see agents/[id]/run/route.ts for why the
+     sync `getBalance` here would incorrectly reject every real user in
+     production. */
+  const balance = await getBalanceAsync(identity.userId);
   /* Engine runs bill at the Catalyst rate — a module run IS a diagnostic. */
   const AGENT = "diagnostic";
   if (available(balance) < 40) {

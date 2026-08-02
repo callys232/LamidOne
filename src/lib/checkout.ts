@@ -17,6 +17,10 @@ export type CheckoutOrder = {
   kind: "points" | "tier";
   points?: number;
   tier?: TierId;
+  /** Set only for `kind: "tier"` orders started against a Paystack
+   *  Plan (see lib/subscriptionPlans.ts) — tells the fulfiller which
+   *  cadence to record once Paystack confirms the subscription. */
+  billingInterval?: "monthly" | "annually";
   usd: number;
   status: "pending" | "paid" | "failed";
   createdAt: number;

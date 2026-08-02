@@ -233,6 +233,51 @@ export async function withMeterCost<T>(
   }
 }
 
+/**
+ * Reconciles holds the Mongo TTL index (store.ts, `holds` collection,
+ * 900s) has quietly deleted — that index only removes the hold
+ * DOCUMENT, it cannot also decrement `balances.held` in the same
+ * operation, so left alone a crashed/timed-out run stranded `held`
+ * points forever with no code path to reclaim them. This is what
+ * actually reconciles the two: it re-derives "expired" independently
+ * of the TTL index (so it also catches holds the index hasn't gotten
+ * to yet) and is called opportunistically before every reserve and
+ * balance read, so a leaked hold self-heals the next time the
+ * affected user's balance is touched at all — no cron required for
+ * the common case. `sweepExpiredHoldsAsync()` with no userId (used by
+ * the cron backstop route) sweeps every user, for the edge case of an
+ * account that never comes back.
+ */
+export async function sweepExpiredHoldsAsync(userId?: string): Promise<number> {
+  const { collection, persistenceEnabled } = await import("./store");
+  if (!persistenceEnabled()) return 0;
+
+  const balances = await collection<BalanceDoc>("balances");
+  const holdsCol = await collection<HoldDoc>("holds");
+  const ledgerCol = await collection<LedgerEntry>("ledger");
+  if (!balances || !holdsCol) return 0;
+
+  const cutoff = new Date(Date.now() - HOLD_TTL_MS);
+  const query = userId ? { userId, createdAt: { $lt: cutoff } } : { createdAt: { $lt: cutoff } };
+  const expired = await holdsCol.find(query as never).limit(500).toArray();
+
+  let swept = 0;
+  for (const h of expired) {
+    /* findOneAndDelete, not deleteOne — claims the hold so a
+       concurrent settle/release racing this sweep cannot also act on
+       it (whichever operation deletes it first wins; the other finds
+       nothing and is a safe no-op). */
+    const claimed = await holdsCol.findOneAndDelete({ id: h.id });
+    if (!claimed) continue;
+    await balances.updateOne({ userId: claimed.userId }, { $inc: { held: -claimed.points } });
+    await ledgerCol?.insertOne({
+      userId: claimed.userId, delta: 0, reason: "hold_expired", agentId: claimed.agentId, at: Date.now(),
+    });
+    swept += 1;
+  }
+  return swept;
+}
+
 export async function reserveAsync(
   userId: string,
   agentId: string,
@@ -245,6 +290,8 @@ export async function reserveAsync(
   const balances = await collection<BalanceDoc>("balances");
   const holdsCol = await collection<HoldDoc>("holds");
   if (!balances || !holdsCol) return reserve(userId, agentId, costOverride);
+
+  await sweepExpiredHoldsAsync(userId);
 
   const cost = costOverride ?? AGENTS.find((a) => a.id === agentId)?.points ?? 0;
 
@@ -353,6 +400,7 @@ export async function getBalanceAsync(userId: string): Promise<Balance> {
   const { collection, persistenceEnabled } = await import("./store");
   if (!persistenceEnabled()) return getBalance(userId);
 
+  await sweepExpiredHoldsAsync(userId);
   const balances = await collection<BalanceDoc>("balances");
   const doc = await balances?.findOne({ userId });
   return doc

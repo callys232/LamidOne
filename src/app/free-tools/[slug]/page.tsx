@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Clock, Lock, Unlock } from "lucide-react";
+import { Clock, ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
@@ -24,18 +24,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 /**
  * Free-tool detail page.
  *
- * States up front whether an account is needed and why, rather than
- * discovering it at the submit button. Gating tracks the value of what
- * you walk away with, and saying so removes the bait-and-switch feeling
- * (teardown §7.3).
+ * Every tool routes to the SAME public, no-login diagnostic runner
+ * the marketing suite pages already use (/diagnostics/{code}) —
+ * fillable by anyone, result gated behind sign-up (or an upgrade, for
+ * a paid-tier engine). `budget-estimator` is the one exception: it
+ * routes to /diagnostics/budget, the dedicated calculator, because F02
+ * isn't a rating-dimension assessment like the others.
+ *
+ * A tool with no `engineCode` yet is listed honestly as not wired to
+ * a live computation rather than sending someone to a sign-up page
+ * with nothing behind it once they arrive.
  */
 export default async function FreeToolPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tool = FREE_TOOLS.find((t) => t.slug === slug);
   if (!tool) notFound();
+  if (tool.externalHref) redirect(tool.externalHref);
 
   const suite = SUITES_BY_ID[tool.suite as SuiteId];
   const others = FREE_TOOLS.filter((t) => t.slug !== tool.slug).slice(0, 4);
+  const runHref = tool.engineCode === "budget" ? "/diagnostics/budget" : tool.engineCode ? `/diagnostics/${tool.engineCode}` : null;
 
   return (
     <>
@@ -63,8 +71,7 @@ export default async function FreeToolPage({ params }: { params: Promise<{ slug:
                   About {tool.minutes} minutes
                 </span>
                 <span className="muted flex items-center gap-1.5">
-                  {tool.gated ? <Lock className="h-4 w-4" aria-hidden="true" /> : <Unlock className="h-4 w-4" aria-hidden="true" />}
-                  {tool.gated ? "Free account required" : "No account required"}
+                  {runHref ? "Free to fill in — sign up to see the result" : "Not wired to a live engine yet"}
                 </span>
                 {suite && (
                   <Link href={`/suites/${suite.id}`} className="font-semibold hover:underline" style={{ color: suite.tint }}>
@@ -74,9 +81,11 @@ export default async function FreeToolPage({ params }: { params: Promise<{ slug:
               </div>
 
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <Button href={tool.gated ? "/signup" : "#start"} variant="primary">
-                  {tool.gated ? "Create a free account" : "Start now"}
-                </Button>
+                {runHref ? (
+                  <Button href={runHref} variant="primary">Try it now</Button>
+                ) : (
+                  <Button href="/suites" variant="secondary">Browse live suites instead</Button>
+                )}
                 {suite && <Button href={`/suites/${suite.id}`} variant="secondary">See the full suite</Button>}
               </div>
             </div>
@@ -85,31 +94,43 @@ export default async function FreeToolPage({ params }: { params: Promise<{ slug:
 
         <Section id="start">
           <div className="card max-w-2xl p-8">
-            <h2 className="font-display text-xl">The tool itself runs in the application.</h2>
-            <p className="muted mt-3 leading-relaxed">
-              {tool.name} is a reduced free tier over{" "}
-              <span className="font-medium">{tool.poweredBy}</span> — the same computation the paid
-              platform runs, with a smaller input surface. It is wired to the live engine rather
-              than reimplemented on this page.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button href={tool.gated ? "/signup" : "/demo"} variant="primary">
-                {tool.gated ? "Create a free account" : "Open the tool"}
-              </Button>
-              <Button href="/free-tools" variant="ghost">All free tools</Button>
-            </div>
+            {runHref ? (
+              <>
+                <h2 className="font-display text-xl">The tool itself runs in the application.</h2>
+                <p className="muted mt-3 leading-relaxed">
+                  {tool.name} is a reduced free tier over{" "}
+                  <span className="font-medium">{tool.poweredBy}</span> — the same computation the
+                  paid platform runs, with a smaller input surface. It is wired to the live engine
+                  rather than reimplemented on this page.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button href={runHref} variant="primary">
+                    Try it now <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                  <Button href="/free-tools" variant="ghost">All free tools</Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="font-display text-xl">Not live yet.</h2>
+                <p className="muted mt-3 leading-relaxed">
+                  {tool.name} is not wired to a live engine yet, so there is nothing to run here
+                  honestly — listed anyway rather than hidden, same reasoning as the trust
+                  centre&apos;s &ldquo;not yet&rdquo; list.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button href="/free-tools" variant="ghost">All free tools</Button>
+                </div>
+              </>
+            )}
           </div>
         </Section>
 
         <Section className="border-t">
           <SectionHeading
-            eyebrow="Why this is free"
-            title={tool.gated ? "Free, but we ask for an email." : "Free, and we do not ask for anything."}
-            blurb={
-              tool.gated
-                ? "This one produces a document you will want to keep and re-open — so a free account holds it for you. Nothing is charged, now or later, unless you choose a paid plan."
-                : "This one gives you a reading you look at once. There is nothing to store, so there is no reason to ask who you are."
-            }
+            eyebrow="Why sign up"
+            title="Free to fill in. An account only to see the result."
+            blurb="Your answers are never asked to reveal who you are — only the computed score, and only because it is worth saving and re-opening rather than losing the moment you close the tab."
           />
         </Section>
 
@@ -129,8 +150,8 @@ export default async function FreeToolPage({ params }: { params: Promise<{ slug:
         <Section className="border-t">
           <Faq
             items={[
-              { q: `Is ${tool.name} really free?`, a: `Yes, with no time limit and no card. ${tool.gated ? "It needs a free account so your output is saved and you can re-open it." : "It needs no account at all."} The paid plans exist for the full engine behind it, not for this.` },
-              { q: "What happens to the data I enter?", a: "It is encrypted in transit and at rest, and it is never used to train third-party AI models. If you used the tool without an account, nothing is retained against an identity." },
+              { q: `Is ${tool.name} really free?`, a: "Yes, with no time limit and no card. Filling it in never asks who you are — only seeing the computed result needs a free account, so your output is saved and you can re-open it. The paid plans exist for the full engine behind it, not for this." },
+              { q: "What happens to the data I enter?", a: "It is encrypted in transit and at rest, and it is never used to train third-party AI models. If you fill in the form and never sign up, nothing is retained against an identity." },
               { q: "What is the paid version?", a: `${suite ? suite.name : "The full suite"} runs the complete engine with more inputs, history, comparison over time and export. This free tier is the same computation on a smaller surface.` },
             ]}
           />

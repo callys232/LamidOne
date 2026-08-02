@@ -24,15 +24,23 @@ export async function GET() {
     model: Boolean(env.openrouterKey || env.openaiKey),
     rateLimitStore: Boolean(env.redisUrl && env.redisToken),
     database: Boolean(env.mongoUri),
-    webhookSecret: Boolean(process.env.LAMID_WEBHOOK_SECRET),
+    paystackWebhook: Boolean(process.env.PAYSTACK_SECRET_KEY),
+    cronSecret: Boolean(process.env.LAMID_CRON_SECRET),
     mockAuth: mockEnabled(),
   };
 
   const warnings: string[] = [];
   if (!configured.model) warnings.push("No model key — the assistant and language agents will return 503. Engines are unaffected.");
   if (!configured.rateLimitStore && env.isProd) warnings.push("Rate limiting is in-memory in production; limits are per-instance. Set UPSTASH_REDIS_REST_URL.");
-  if (!configured.database) warnings.push("No database — points and bundles are in-memory and reset on restart.");
-  if (!configured.webhookSecret) warnings.push("LAMID_WEBHOOK_SECRET unset — the points credit endpoint is closed.");
+  if (!configured.database) {
+    warnings.push(
+      env.isProd
+        ? "No database in PRODUCTION — checkout, points, escrow and marketplace routes are refusing requests (503) rather than running on in-memory storage that would reset and diverge across instances."
+        : "No database — points and bundles are in-memory and reset on restart.",
+    );
+  }
+  if (!configured.paystackWebhook) warnings.push("PAYSTACK_SECRET_KEY unset — /api/webhooks/paystack cannot verify signatures and rejects everything with 503.");
+  if (!configured.cronSecret) warnings.push("LAMID_CRON_SECRET unset — /api/cron/auto-release and /api/cron/sweep-holds are unreachable; both still self-correct opportunistically on normal reads, just not on a schedule.");
   if (configured.mockAuth && env.isProd) warnings.push("MOCK AUTH IS ENABLED IN PRODUCTION. Unset LAMID_ALLOW_MOCK_AUTH.");
 
   return ok({

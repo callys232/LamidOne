@@ -1,7 +1,7 @@
 import { handler, ok, rateLimited } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity, entitlementSummary } from "@/lib/entitlements";
-import { getBalance, available } from "@/lib/points";
+import { getBalanceAsync, available } from "@/lib/points";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,7 +20,10 @@ export const GET = handler(async (req) => {
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
   const summary = entitlementSummary(identity);
-  const balance = identity.userId ? getBalance(identity.userId) : null;
+  /* Persistence-aware — the sync `getBalance` only sees the in-memory
+     fallback, which would show every real user 0 points once Mongo is
+     configured (see agents/[id]/run/route.ts for the same bug). */
+  const balance = identity.userId ? await getBalanceAsync(identity.userId) : null;
 
   return ok({
     ...summary,

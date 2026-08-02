@@ -1,5 +1,6 @@
 import { handler, ok, badRequest, tooLarge, rateLimited, bodyTooLarge, clean } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
+import { recordInquiry } from "@/lib/contactInquiries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,10 +37,12 @@ export const POST = handler(async (req) => {
     return badRequest("That email address does not look right.");
   }
 
-  /* ⚠️  SEAM — wire to ProdLamid's `lib/mailer.ts` and
-     `lib/services/transactionalEmailService.ts`, and persist against
-     SupportTicket so nothing depends on an inbox being watched. */
-  console.info("[contact]", { topic, name, email, length: message.length });
+  /* Persisted so a reply depends on an operator checking a real,
+     durable record — not on a log line surviving until someone reads
+     it. No transactional-email send yet (no mailer is configured in
+     this deploy), so the reply itself is still a human checking this
+     queue and emailing back manually, not an automated notification. */
+  await recordInquiry({ name, email, topic, message });
 
   return ok({
     received: true,

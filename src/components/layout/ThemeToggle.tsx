@@ -15,9 +15,9 @@ export function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("lamid-theme");
-    const prefers = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = stored ? stored === "dark" : prefers;
+    /* Matches the inline head script: light unless the visitor has
+       explicitly chosen dark before — no system-preference fallback. */
+    const isDark = localStorage.getItem("lamid-theme") === "dark";
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
   }, []);

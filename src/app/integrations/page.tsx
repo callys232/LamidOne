@@ -3,22 +3,29 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
-import { INTEGRATIONS, INTEGRATION_CATEGORIES } from "@/content/platform";
+import { INTEGRATIONS, VERIFIED_INTEGRATIONS, VERIFIED_INTEGRATION_CATEGORIES } from "@/content/platform";
 import { CTA } from "@/content/brand";
 
 export const metadata: Metadata = {
   title: "Integrations",
-  description: "Payments, identity, storage, documents, AI and the wider LAMID ecosystem.",
+  description: "What's live today, and what's next.",
 };
 
 /**
- * Integrations — a risk-reducer, not a feature.
+ * Integrations — live vs. roadmap, not one undifferentiated list.
  *
- * The buyer's objection is "I would have to rip out my stack". This
- * page says no. It gets a compact treatment because it only needs to
- * defuse an objection, not sell (teardown §6).
+ * This page used to render ALL of ProdLamid's integrations (Stripe,
+ * SAML/SCIM, Cloudflare Turnstile, Sentry — 20 in total) as though
+ * every one of them was wired into this site, because the underlying
+ * data (content/platform.ts) was ProdLamid's own capability audit,
+ * not this repo's. Same honest split the trust centre already uses
+ * for certifications: what is real today, and what genuinely is not
+ * yet, named plainly rather than folded into one confident-sounding
+ * number.
  */
 export default function IntegrationsPage() {
+  const roadmap = INTEGRATIONS.filter((i) => !i.verified);
+
   return (
     <>
       <Header ctaSet="neutral" />
@@ -27,10 +34,10 @@ export default function IntegrationsPage() {
           <div className="shell py-20">
             <div className="max-w-3xl">
               <Eyebrow>Integrations</Eyebrow>
-              <h1 className="h-display mt-6">Works with what you already run.</h1>
+              <h1 className="h-display mt-6">What&apos;s live, and what&apos;s next.</h1>
               <p className="lead mt-6">
-                {INTEGRATIONS.length} integrations across {INTEGRATION_CATEGORIES.length} categories.
-                You do not have to migrate anything to start.
+                {VERIFIED_INTEGRATIONS.length} integrations across {VERIFIED_INTEGRATION_CATEGORIES.length} categories
+                are live in production today. The rest are named below, not hidden.
               </p>
             </div>
           </div>
@@ -38,8 +45,8 @@ export default function IntegrationsPage() {
 
         <Section id="directory">
           <div className="space-y-12">
-            {INTEGRATION_CATEGORIES.map((cat) => {
-              const items = INTEGRATIONS.filter((i) => i.category === cat);
+            {VERIFIED_INTEGRATION_CATEGORIES.map((cat) => {
+              const items = VERIFIED_INTEGRATIONS.filter((i) => i.category === cat);
               return (
                 <section key={cat}>
                   <div className="mb-6 flex items-baseline gap-5">
@@ -61,13 +68,20 @@ export default function IntegrationsPage() {
           </div>
         </Section>
 
-        <Section id="api" tone="tint" className="border-t">
+        <Section id="roadmap" tone="tint" className="border-t">
           <SectionHeading
-            eyebrow="Build on it"
-            title="A REST API, webhooks and SDKs."
-            blurb="Read access from Growth, read and write on Enterprise. DocuShare exposes its own file API and webhooks."
+            eyebrow="Not yet"
+            title="On the roadmap."
+            blurb="Named because omitting them would be the misleading choice, same as the trust centre."
           />
-          <Button href="/developers" variant="ghost">Developer documentation</Button>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {roadmap.map((i) => (
+              <div key={i.name} className="card p-6 opacity-70">
+                <h3 className="font-semibold">{i.name}</h3>
+                <p className="muted mt-2 text-sm leading-relaxed">{i.what}</p>
+              </div>
+            ))}
+          </div>
         </Section>
 
         <section style={{ background: "var(--ink)" }}>

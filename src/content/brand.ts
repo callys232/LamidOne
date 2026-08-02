@@ -43,7 +43,7 @@ export type Countable = {
 export const REACH: Countable[] = [
   { value: "30+", label: "industries covered by the expert network", verified: false },
   { value: "5",   label: "plans, from free to concierge",             verified: true  },
-  { value: "10",  label: "AI agents running across the platform",     verified: true  },
+  { value: "11",  label: "AI agents running across the platform",     verified: true  },
   { value: "9",   label: "suites on one operating layer",             verified: true  },
 ];
 

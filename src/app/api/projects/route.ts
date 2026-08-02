@@ -2,6 +2,7 @@ import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } fr
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { withMeterCost, available, getBalanceAsync } from "@/lib/points";
+import { requirePersistenceInProd } from "@/lib/store";
 import {
   createProject, listProjects, MarketplaceError, POST_PROJECT_COST,
   type ProjectStatus,
@@ -39,6 +40,7 @@ export const GET = handler(async (req) => {
  * and the client is not charged for a brief that never posted.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 64 * 1024)) return tooLarge();
 
   const identity = await resolveIdentity(req);

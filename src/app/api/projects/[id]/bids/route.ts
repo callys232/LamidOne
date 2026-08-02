@@ -2,6 +2,7 @@ import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } fr
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { withMeterCost, available, getBalanceAsync } from "@/lib/points";
+import { requirePersistenceInProd } from "@/lib/store";
 import {
   placeBid, listBids, getProject, MarketplaceError, PLACE_BID_COST, BOOST_BID_COST,
 } from "@/lib/marketplace";
@@ -31,6 +32,7 @@ export const GET = handler(async (req) => {
 
 /** Place a bid. 20 points, or 80 with a boost. */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 32 * 1024)) return tooLarge();
 
   const identity = await resolveIdentity(req);

@@ -3,6 +3,7 @@ import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { listMilestones, createMilestone, submitMilestone, approveMilestone, disputeMilestone, MilestoneError } from "@/lib/milestones";
 import { record } from "@/lib/audit";
+import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export const GET = handler(async (req) => {
 
 /** Client defines a milestone. Free — structuring delivery is not metered. */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   const identity = await resolveIdentity(req);
   if (!identity.userId) return fail(401, "unauthorised", "Sign in to create a milestone.");
 
@@ -46,6 +48,7 @@ export const POST = handler(async (req) => {
 
 /** State transitions. `{ id, action: "submit" | "approve" | "dispute" }`. */
 export const PATCH = handler(async (req) => {
+  requirePersistenceInProd();
   const identity = await resolveIdentity(req);
   if (!identity.userId) return fail(401, "unauthorised", "Sign in.");
 

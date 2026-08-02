@@ -2,6 +2,7 @@ import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } fr
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { completeProject, MarketplaceError } from "@/lib/marketplace";
+import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export const dynamic = "force-dynamic";
  * people distrust every other meter you have.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 32 * 1024)) return tooLarge();
 
   const projectId = new URL(req.url).pathname.split("/").at(-2) ?? "";

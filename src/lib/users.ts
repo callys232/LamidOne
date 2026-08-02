@@ -30,6 +30,13 @@ export type User = {
   role: DashboardRole;
   tier: TierId;
   subscriptionStatus: "active" | "none";
+  /** Set only when the tier came from a real recurring Paystack
+   *  subscription (see lib/subscriptionPlans.ts) rather than the
+   *  dev-only tier-testing shortcut or a one-time charge. Needed to
+   *  cancel the subscription later — Paystack requires the code, not
+   *  just the customer's identity. */
+  subscriptionCode?: string;
+  billingInterval?: "monthly" | "annually";
   orgId: string | null;
   organisation?: string;
   createdAt: number;
@@ -166,6 +173,54 @@ export async function activateTier(id: string, tier: TierId): Promise<User | nul
 }
 
 /**
+ * Attaches the Paystack subscription code once it exists — it isn't
+ * known yet at the moment `activateTier` runs (the browser callback
+ * or the `charge.success` webhook only has the one-time transaction
+ * reference), only once Paystack's own `subscription.create` webhook
+ * arrives a beat later. Looked up by email, the one identifier every
+ * Paystack webhook payload reliably carries.
+ */
+export async function attachSubscriptionCode(
+  email: string, code: string, interval: "monthly" | "annually",
+): Promise<User | null> {
+  const patch = { subscriptionCode: code, billingInterval: interval };
+  const clean = email.trim().toLowerCase();
+  if (persistenceEnabled()) {
+    const col = await collection<User>("users");
+    if (col) {
+      const after = await col.findOneAndUpdate({ email: clean }, { $set: patch }, { returnDocument: "after" });
+      return after ?? null;
+    }
+  }
+  const uid = byEmail.get(clean);
+  const user = uid ? users.get(uid) : undefined;
+  if (!user) return null;
+  Object.assign(user, patch);
+  return user;
+}
+
+/** Fires when Paystack reports a subscription is no longer active —
+ *  either the customer cancelled (via /api/billing/cancel) or a
+ *  renewal charge failed enough times that Paystack gave up. Downgrade
+ *  is immediate and unconditional: there is no partial-period grace
+ *  tracked here, which is the same "simple over silently-wrong"
+ *  tradeoff the rest of the checkout flow makes. */
+export async function deactivateSubscription(subscriptionCode: string): Promise<User | null> {
+  const patch = { tier: "free" as TierId, subscriptionStatus: "none" as const };
+  if (persistenceEnabled()) {
+    const col = await collection<User>("users");
+    if (col) {
+      const after = await col.findOneAndUpdate({ subscriptionCode }, { $set: patch }, { returnDocument: "after" });
+      return after ?? null;
+    }
+  }
+  const user = [...users.values()].find((u) => u.subscriptionCode === subscriptionCode);
+  if (!user) return null;
+  Object.assign(user, patch);
+  return user;
+}
+
+/**
  * Sets tier/subscriptionStatus directly, bypassing any real payment.
  * Deliberately NOT exposed through updateUser() (the self-service
  * profile-edit path) — this exists only for the dev-only tier-testing
@@ -176,6 +231,25 @@ export async function activateTier(id: string, tier: TierId): Promise<User | nul
  */
 export async function setTierForTesting(id: string, tier: TierId): Promise<User | null> {
   const patch = { tier, subscriptionStatus: tier === "free" ? "none" as const : "active" as const };
+  if (persistenceEnabled()) {
+    const col = await collection<User>("users");
+    if (col) {
+      const after = await col.findOneAndUpdate({ id }, { $set: patch }, { returnDocument: "after" });
+      return after ?? null;
+    }
+  }
+  const user = users.get(id);
+  if (!user) return null;
+  Object.assign(user, patch);
+  return user;
+}
+
+/** Sets a new password directly — used by the password-reset flow
+ *  once a reset token has already been verified. Never called with an
+ *  unvalidated password; `validatePassword` is the caller's job, same
+ *  as at signup. */
+export async function setPassword(id: string, newPassword: string): Promise<User | null> {
+  const patch = { passwordHash: hashPassword(newPassword) };
   if (persistenceEnabled()) {
     const col = await collection<User>("users");
     if (col) {

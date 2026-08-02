@@ -127,13 +127,7 @@ export function AssistantWidget() {
 
   if (!open) {
     return (
-      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
-        <span
-          className="rounded-full px-3.5 py-2 text-sm font-medium shadow-lg animate-fadeUp"
-          style={{ background: "var(--raised)", border: "1px solid var(--line)" }}
-        >
-          Ask Aide
-        </span>
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1.5">
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -143,6 +137,12 @@ export function AssistantWidget() {
         >
           <Bot className="h-6 w-6" style={{ color: "var(--brand-ink)" }} aria-hidden="true" />
         </button>
+        <span
+          className="rounded-full px-3.5 py-1.5 text-sm font-medium shadow-lg animate-fadeUp"
+          style={{ background: "var(--raised)", border: "1px solid var(--line)" }}
+        >
+          Ask Aide
+        </span>
       </div>
     );
   }
