@@ -220,6 +220,7 @@ export const MAIN_NAV: NavItem[] = [
   { label: "Solutions", kind: "mega", menu: "solutions" },
   { label: "Pricing", kind: "link", href: "/pricing" },
   { label: "Resources", kind: "mega", menu: "resources" },
+  { label: "Demo", kind: "link", href: "/demo-dev" },
 ];
 
 /* ── Footer ───────────────────────────────────────────────── */

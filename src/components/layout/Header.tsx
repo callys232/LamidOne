@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronDown, Search, ArrowUpRight, Menu, X } from "lucide-react";
+import { AuthStatus } from "./AuthStatus";
 import { BRAND, CTA } from "@/content/brand";
 import {
   MAIN_NAV, PRODUCTS_MENU, SOLUTIONS_MENU, RESOURCES_MENU, UTILITY_NAV,
@@ -196,12 +197,16 @@ export function Header({ ctaSet = "marketing" }: { ctaSet?: "marketing" | "prici
           <ul className="flex items-center gap-6">
             <li><ThemeToggle /></li>
             {UTILITY_NAV.right.map((l) => (
-              <li key={l.label}>
-                <Link href={l.href} className="muted hover:text-brand transition-colors flex items-center gap-1.5">
-                  {l.label === "Search" && <Search className="h-3.5 w-3.5" aria-hidden="true" />}
-                  {l.label}
-                </Link>
-              </li>
+              l.label === "Log in" ? (
+                <AuthStatus key={l.label} />
+              ) : (
+                <li key={l.label}>
+                  <Link href={l.href} className="muted hover:text-brand transition-colors flex items-center gap-1.5">
+                    {l.label === "Search" && <Search className="h-3.5 w-3.5" aria-hidden="true" />}
+                    {l.label}
+                  </Link>
+                </li>
+              )
             ))}
           </ul>
         </div>

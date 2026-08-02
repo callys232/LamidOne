@@ -1,6 +1,6 @@
 import { handler, ok, fail } from "@/lib/http";
-import { seedDemoUser, publicUser, DEMO_PASSWORD } from "@/lib/users";
-import { DEMO_ACCOUNTS } from "@/content/demoAccounts";
+import { seedDemoUser, publicUser } from "@/lib/users";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/content/demoAccounts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

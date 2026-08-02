@@ -17,7 +17,20 @@ export const POST = handler(async (req) => {
 
   try {
     const user = await authenticate(body.email, body.password);
-    const token = signAccessToken({ sub: user.id, email: user.email, role: "user", ...(user.orgId ? { orgId: user.orgId } : {}) });
+    /* `role: "admin"` in the JWT is what `resolveIdentity` reads as
+       `isAdmin`, which `roleFor()` (content/dashboard.ts) turns into
+       the operator dashboard. Before this, NO account — no matter
+       what was stored on it — could ever reach the operator view
+       through real login; every token was unconditionally signed
+       role: "user". Public signup still can't create an operator
+       account (SIGNUP_ROLES excludes it); this only lets an account
+       that already has role "operator" stored on it (seeded, or a
+       future internal admin-invite flow) actually reach that view. */
+    const token = signAccessToken({
+      sub: user.id, email: user.email,
+      role: user.role === "operator" ? "admin" : "user",
+      ...(user.orgId ? { orgId: user.orgId } : {}),
+    });
 
     const res = ok({ user: publicUser(user) });
     res.cookies.set("accessToken", token, {

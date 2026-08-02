@@ -2,6 +2,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
 import type { TierId } from "@/content/tiers";
 import type { DashboardRole } from "@/content/dashboard";
+import { DEMO_PASSWORD } from "@/content/demoAccounts";
 
 /**
  * USER ACCOUNTS.
@@ -279,10 +280,6 @@ export function publicUser(user: User) {
   const { passwordHash: _omit, ...safe } = user;
   return safe;
 }
-
-/** Shared password for every seeded demo account — see
- *  content/demoAccounts.ts for why these exist and how they're seeded. */
-export const DEMO_PASSWORD = "LamidDemo123";
 
 /**
  * Upserts a fixed demo account rather than `createUser`, which throws
