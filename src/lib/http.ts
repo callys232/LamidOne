@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ConfigError } from "./env";
+import { DatabaseError } from "./store";
 
 /**
  * One response shape for every route, so clients never have to guess
@@ -42,6 +43,10 @@ export function handler(fn: (req: Request) => Promise<Response>) {
       if (e instanceof ConfigError) {
         console.error("[config]", e.message);
         return fail(503, "not_configured", "This feature is not configured on the server.");
+      }
+      if (e instanceof DatabaseError) {
+        console.error("[database]", e.message);
+        return fail(503, "database_unreachable", e.message);
       }
       console.error("[unhandled]", e);
       return fail(500, "internal", "Something went wrong. The error has been logged.");

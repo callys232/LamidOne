@@ -1,6 +1,6 @@
 import { handler, ok, fail, badRequest, rateLimited } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
-import { authenticate, publicUser, seedDemoUser } from "@/lib/users";
+import { authenticate, publicUser, seedDemoUser, SignupError } from "@/lib/users";
 import { signAccessToken } from "@/lib/auth";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/content/demoAccounts";
 import { requirePersistenceInProd } from "@/lib/store";
@@ -28,7 +28,17 @@ export const POST = handler(async (req) => {
   if (!account) return badRequest("Unknown demo account.");
 
   await seedDemoUser(account);
-  const user = await authenticate(account.email, DEMO_PASSWORD);
+  let user;
+  try {
+    user = await authenticate(account.email, DEMO_PASSWORD);
+  } catch (e) {
+    /* Should be unreachable — seedDemoUser just upserted this exact
+       account — but surfaced as a clean error rather than a generic
+       500 if it ever isn't (e.g. a stale read against a just-written
+       record on a lagging replica). */
+    if (e instanceof SignupError) return fail(500, "demo_login_failed", "Could not sign in to the demo account. Try again.");
+    throw e;
+  }
 
   /* Same operator bridge as the real login route — a seeded account
      with role "operator" reaches the operator dashboard for real. */

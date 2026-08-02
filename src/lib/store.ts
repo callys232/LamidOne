@@ -15,6 +15,10 @@ import { env, ConfigError } from "./env";
  * failing to boot, which is what a hard requirement here would cause.
  */
 
+export class DatabaseError extends Error {
+  constructor(msg: string) { super(msg); this.name = "DatabaseError"; }
+}
+
 type Cache = { client: MongoClient | null; promise: Promise<MongoClient> | null };
 
 const globalCache = globalThis as unknown as { __lamidMongo?: Cache };
@@ -43,6 +47,19 @@ export async function getDb(): Promise<Db | null> {
     const client = await cache.promise;
     return client.db();
   } catch (e) {
+    if (env.isProd) {
+      /* In production, MONGODB_URI being SET is a promise that Mongo
+         is genuinely reachable — silently returning null here (as
+         development does, for convenience with no database) would
+         send every caller down its in-memory fallback path, exactly
+         recreating the bug requirePersistenceInProd() exists to
+         prevent, just one layer deeper: a truthy URI whose connection
+         is actually broken (bad credentials, IP not whitelisted,
+         wrong host). Throwing turns that into a clear 503 with the
+         real cause, instead of confusing, per-function-inconsistent
+         fallback behaviour that looks like a logic bug. */
+      throw new DatabaseError(`MongoDB connection failed: ${(e as Error).message}`);
+    }
     console.error("[store] mongo unavailable, using in-memory:", (e as Error).message);
     return null;
   }
