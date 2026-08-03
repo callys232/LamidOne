@@ -2,7 +2,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
 import type { TierId } from "@/content/tiers";
 import type { DashboardRole } from "@/content/dashboard";
-import { DEMO_PASSWORD } from "@/content/demoAccounts";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/content/demoAccounts";
 
 /**
  * USER ACCOUNTS.
@@ -79,7 +79,45 @@ export function validatePassword(password: string): void {
   }
 }
 
+/**
+ * The 6 demo accounts (content/demoAccounts.ts) resolve HERE, before
+ * any database is touched — their `id`/`email` are fixed constants,
+ * not Mongo-generated, specifically so signing in as one and browsing
+ * the dashboard shell works with no MONGODB_URI configured at all, or
+ * a broken one. Built once per process (the salt in `hashPassword` is
+ * random per call, so this must not be recomputed per lookup or two
+ * demo requests in the same process would hash to different values
+ * and neither would verify against the other).
+ *
+ * Data that genuinely lives in Mongo — points balance, projects,
+ * milestones — is untouched by this: those still read (and honestly
+ * show empty) from whatever persistence is actually configured. Only
+ * the account's own identity is hardcoded.
+ */
+const DEMO_ORG_ID = "org_demo_meridian_trust";
+let demoUsersCache: Map<string, User> | null = null;
+function hardcodedDemoUsers(): Map<string, User> {
+  if (demoUsersCache) return demoUsersCache;
+  const passwordHash = hashPassword(DEMO_PASSWORD);
+  const map = new Map<string, User>();
+  for (const a of DEMO_ACCOUNTS) {
+    const isOrgRole = a.role === "enterprise" || a.role === "concierge" || a.role === "operator";
+    map.set(a.id, {
+      id: a.id, email: a.email, name: a.name, passwordHash,
+      role: a.role, tier: a.tier, subscriptionStatus: a.tier === "free" ? "none" : "active",
+      orgId: isOrgRole ? DEMO_ORG_ID : null,
+      ...(a.organisation ? { organisation: a.organisation } : {}),
+      createdAt: 0,
+    });
+  }
+  demoUsersCache = map;
+  return map;
+}
+
 export async function findUserById(id: string): Promise<User | null> {
+  const demo = hardcodedDemoUsers().get(id);
+  if (demo) return demo;
+
   if (persistenceEnabled()) {
     const col = await collection<User>("users");
     return (await col?.findOne({ id })) ?? null;
@@ -89,6 +127,10 @@ export async function findUserById(id: string): Promise<User | null> {
 
 export async function findUserByEmail(email: string): Promise<User | null> {
   const clean = email.trim().toLowerCase();
+  for (const demo of hardcodedDemoUsers().values()) {
+    if (demo.email === clean) return demo;
+  }
+
   if (persistenceEnabled()) {
     const col = await collection<User>("users");
     return (await col?.findOne({ email: clean })) ?? null;

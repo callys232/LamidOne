@@ -23,15 +23,24 @@ import type { DashboardRole } from "./dashboard";
 export const DEMO_PASSWORD = "TierDemo2026";
 
 export type DemoAccount = {
+  /** Fixed, deterministic — NOT a Mongo-generated id. This is what
+   *  lets the demo accounts resolve identity (lib/users.ts's
+   *  HARDCODED_DEMO_USERS) with no database round trip at all, so
+   *  signing in and browsing the dashboard shell works even with no
+   *  MONGODB_URI configured, or a broken one. Data that genuinely
+   *  lives in Mongo (points balance, projects, milestones) still
+   *  shows as honestly empty in that case — nothing about that is
+   *  faked, only the account's own identity is hardcoded. */
+  id: string;
   email: string; name: string; role: DashboardRole; tier: TierId; organisation?: string;
 };
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
-  { email: "free-tier@lamidone.com", name: "Demo — Free", role: "client", tier: "free" },
-  { email: "starter-tier@lamidone.com", name: "Demo — Starter", role: "client", tier: "starter" },
-  { email: "growth-tier@lamidone.com", name: "Demo — Growth", role: "client", tier: "growth" },
-  { email: "enterprise-tier@lamidone.com", name: "Demo — Enterprise", role: "enterprise", tier: "enterprise", organisation: "Meridian Trust" },
-  { email: "concierge-tier@lamidone.com", name: "Demo — Concierge", role: "enterprise", tier: "concierge", organisation: "Meridian Trust" },
-  { email: "demo-expert@lamidone.app", name: "Demo — Expert", role: "expert", tier: "free" },
-  { email: "admin@lamidone.com", name: "Demo — Operator", role: "operator", tier: "enterprise", organisation: "Meridian Trust" },
+  { id: "demo_free", email: "free-tier@lamidone.com", name: "Demo — Free", role: "client", tier: "free" },
+  { id: "demo_starter", email: "starter-tier@lamidone.com", name: "Demo — Starter", role: "client", tier: "starter" },
+  { id: "demo_growth", email: "growth-tier@lamidone.com", name: "Demo — Growth", role: "client", tier: "growth" },
+  { id: "demo_enterprise", email: "enterprise-tier@lamidone.com", name: "Demo — Enterprise", role: "enterprise", tier: "enterprise", organisation: "Meridian Trust" },
+  { id: "demo_concierge", email: "concierge-tier@lamidone.com", name: "Demo — Concierge", role: "enterprise", tier: "concierge", organisation: "Meridian Trust" },
+  { id: "demo_expert", email: "demo-expert@lamidone.app", name: "Demo — Expert", role: "expert", tier: "free" },
+  { id: "demo_operator", email: "admin@lamidone.com", name: "Demo — Operator", role: "operator", tier: "enterprise", organisation: "Meridian Trust" },
 ];
