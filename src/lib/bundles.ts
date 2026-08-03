@@ -1,3 +1,4 @@
+import { collection, persistenceEnabled, ensureIndexes } from "./store";
 import { handoffsFor, type Handoff } from "./intelligence/handoffs";
 import { MODULE_REGISTRY } from "./intelligence/moduleRegistry";
 import { parseEngineCode, configFor, type EngineResult } from "./engines";
@@ -53,12 +54,17 @@ export type Bundle = {
   runs: BundleRun[];
 };
 
+/* In-memory fallback for local development with no database. NOT the
+   production path: this module used to be memory-only, which meant a
+   bundle vanished on cold start and diverged across serverless
+   instances - the feature built so the engines are not collectively
+   amnesiac was itself amnesiac in production. */
 const store = new Map<string, Bundle>();
 const byUser = new Map<string, Set<string>>();
 
 const id = () => `b_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
-export function createBundle(userId: string, name: string): Bundle {
+export async function createBundle(userId: string, name: string): Promise<Bundle> {
   const bundle: Bundle = {
     id: id(),
     userId,
@@ -68,20 +74,35 @@ export function createBundle(userId: string, name: string): Bundle {
     facts: {},
     runs: [],
   };
+
+  if (persistenceEnabled()) {
+    await ensureIndexes();
+    const col = await collection<Bundle>("bundles");
+    if (col) { await col.insertOne(bundle); return bundle; }
+  }
   store.set(bundle.id, bundle);
   if (!byUser.has(userId)) byUser.set(userId, new Set());
   byUser.get(userId)!.add(bundle.id);
   return bundle;
 }
 
-export function getBundle(userId: string, bundleId: string): Bundle | null {
+export async function getBundle(userId: string, bundleId: string): Promise<Bundle | null> {
+  /* Ownership is part of the QUERY, not a check after the fact, so no
+     caller can forget it and no id-guesser can read another account's
+     working context. */
+  if (persistenceEnabled()) {
+    const col = await collection<Bundle>("bundles");
+    if (col) return col.findOne({ id: bundleId, userId });
+  }
   const b = store.get(bundleId);
-  /* Ownership is checked here rather than at the route, so no caller
-     can forget to do it. */
   return b && b.userId === userId ? b : null;
 }
 
-export function listBundles(userId: string): Bundle[] {
+export async function listBundles(userId: string): Promise<Bundle[]> {
+  if (persistenceEnabled()) {
+    const col = await collection<Bundle>("bundles");
+    if (col) return col.find({ userId }).sort({ updatedAt: -1 }).limit(100).toArray();
+  }
   return [...(byUser.get(userId) ?? [])]
     .map((bid) => store.get(bid))
     .filter((b): b is Bundle => Boolean(b))
@@ -103,13 +124,13 @@ function headlineOf(result: EngineResult): string {
  * Record a run and absorb its inputs as reusable facts.
  * Returns the updated bundle so the caller can hand `next` to the UI.
  */
-export function recordRun(
+export async function recordRun(
   userId: string,
   bundleId: string,
   result: EngineResult,
   input: Record<string, unknown>,
-): Bundle | null {
-  const bundle = getBundle(userId, bundleId);
+): Promise<Bundle | null> {
+  const bundle = await getBundle(userId, bundleId);
   if (!bundle) return null;
 
   bundle.runs.push({
@@ -137,6 +158,16 @@ export function recordRun(
   }
 
   bundle.updatedAt = Date.now();
+
+  if (persistenceEnabled()) {
+    const col = await collection<Bundle>("bundles");
+    if (col) {
+      await col.updateOne(
+        { id: bundleId, userId },
+        { $set: { runs: bundle.runs, facts: bundle.facts, updatedAt: bundle.updatedAt } },
+      );
+    }
+  }
   return bundle;
 }
 
@@ -211,8 +242,8 @@ function registryNext(code: string): (Handoff & { name?: string })[] {
 }
 
 /** Everything the UI needs for one bundle, in one read. */
-export function bundleView(userId: string, bundleId: string) {
-  const bundle = getBundle(userId, bundleId);
+export async function bundleView(userId: string, bundleId: string) {
+  const bundle = await getBundle(userId, bundleId);
   if (!bundle) return null;
   return {
     ...bundle,

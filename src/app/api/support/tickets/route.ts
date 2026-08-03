@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, badRequest, rateLimited } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -21,6 +22,7 @@ export const GET = handler(async (req) => {
 
 /** Free — raising a ticket should never cost points. */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   const identity = await resolveIdentity(req);
   if (!identity.userId) return fail(401, "unauthorised", "Sign in to raise a ticket.");
 

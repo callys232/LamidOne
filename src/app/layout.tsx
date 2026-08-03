@@ -4,6 +4,7 @@ import { BRAND } from "@/content/brand";
 import { AssistantWidget } from "@/components/layout/AssistantWidget";
 import { BizSphereModalWrapper } from "@/components/layout/BizSphereModalWrapper";
 import { BackToTop } from "@/components/layout/BackToTop";
+import { CookieConsent } from "@/components/layout/CookieConsent";
 
 export const metadata: Metadata = {
   title: {
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AssistantWidget />
         <BizSphereModalWrapper />
         <BackToTop />
+        <CookieConsent />
       </body>
     </html>
   );

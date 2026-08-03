@@ -24,13 +24,13 @@ export const GET = handler(async (req) => {
   const rl = await limit("read", identity.userId);
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
-  const view = bundleView(identity.userId, bundleId);
+  const view = await bundleView(identity.userId, bundleId);
   if (!view) return fail(404, "not_found", "No such bundle.");
 
   const prefillCode = url.searchParams.get("prefill");
   if (!prefillCode) return ok({ bundle: view });
 
-  const bundle = getBundle(identity.userId, bundleId);
+  const bundle = await getBundle(identity.userId, bundleId);
   if (!bundle) return fail(404, "not_found", "No such bundle.");
 
   const prefill = prefillFor(bundle, prefillCode);

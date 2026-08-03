@@ -19,6 +19,23 @@ export const env = {
   /** Canonical origin, used by robots.ts and sitemap.ts. Falls back to
    *  localhost so `next dev` and `next build` never fail for lacking it —
    *  only the deployed site needs the real value set. */
+  /**
+   * Whether the one-click demo sign-in is available.
+   *
+   * Always on outside production. In production it is OFF unless
+   * explicitly enabled, because /demo-dev signs a visitor straight in
+   * as one of the fixed demo accounts - including an OPERATOR account
+   * with broader section access than any customer tier. Ungated, that
+   * is a public operator login for anyone who finds the URL.
+   *
+   * Kept as a switch rather than removed so the dashboards can still
+   * be walked through on a real deployment: set it while verifying,
+   * unset it before launch.
+   */
+  get demoLoginEnabled() {
+    return process.env.NODE_ENV !== "production"
+      || process.env.LAMID_ALLOW_DEMO_LOGIN === "true";
+  },
   get siteUrl() { return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""); },
 } as const;
 

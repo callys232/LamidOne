@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, tooLarge, rateLimited, bodyTooLarge, badRequest } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -7,6 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 256)) return tooLarge();
 
   const eventId = new URL(req.url).pathname.split("/").at(-2) ?? "";

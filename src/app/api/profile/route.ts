@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, badRequest, rateLimited, clean } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -28,6 +29,7 @@ export const GET = handler(async (req) => {
  *  changing the sign-in email is a separate, verification-gated flow
  *  this build does not implement yet, and role is fixed at signup. */
 export const PATCH = handler(async (req) => {
+  requirePersistenceInProd();
   const identity = await resolveIdentity(req);
   if (!identity.userId) return fail(401, "unauthorised", "Sign in to update your profile.");
 

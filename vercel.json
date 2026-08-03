@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/auto-release",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/sweep-holds",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/refresh-awards",
+      "schedule": "0 4 * * *"
+    }
+  ],
+  "functions": {
+    "src/app/api/cron/refresh-awards/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}

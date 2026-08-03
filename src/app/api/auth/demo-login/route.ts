@@ -3,6 +3,7 @@ import { limit, clientId } from "@/lib/ratelimit";
 import { authenticate, publicUser, SignupError } from "@/lib/users";
 import { signAccessToken } from "@/lib/auth";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/content/demoAccounts";
+import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,6 +22,10 @@ export const dynamic = "force-dynamic";
  * hardcoded, nothing about its data is faked.
  */
 export const POST = handler(async (req) => {
+  /* 404 rather than 403: a disabled surface should be
+     indistinguishable from one that never existed. */
+  if (!env.demoLoginEnabled) return fail(404, "not_found", "Not found.");
+
   const rl = await limit("form", clientId(req));
   if (!rl.ok) return rateLimited(rl.retryAfter);
 

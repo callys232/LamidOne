@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -27,6 +28,7 @@ export const GET = handler(async (req) => {
 
 /** Host an event. Free — this is content, not a metered agent action. */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 8 * 1024)) return tooLarge();
 
   const identity = await resolveIdentity(req);

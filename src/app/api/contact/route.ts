@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, badRequest, tooLarge, rateLimited, bodyTooLarge, clean } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { recordInquiry } from "@/lib/contactInquiries";
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
  * honeypot field catches the naive bots that ignore rate limits.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 16 * 1024)) return tooLarge();
 
   const rl = await limit("form", clientId(req));

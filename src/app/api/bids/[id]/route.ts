@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
  * that. Free — withdrawing costs nothing, same as awarding.
  */
 export const PATCH = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 1024)) return tooLarge();
 
   const bidId = new URL(req.url).pathname.split("/").at(-1) ?? "";

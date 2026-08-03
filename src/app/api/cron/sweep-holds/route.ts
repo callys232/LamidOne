@@ -1,4 +1,5 @@
 import { handler, ok, fail } from "@/lib/http";
+import { cronAuthorised } from "@/lib/cronAuth";
 import { sweepExpiredHoldsAsync } from "@/lib/points";
 
 export const runtime = "nodejs";
@@ -16,12 +17,14 @@ export const dynamic = "force-dynamic";
  * Guarded by the same shared-secret pattern — infrastructure calling
  * in, not a person.
  */
-export const POST = handler(async (req) => {
-  const secret = req.headers.get("x-lamid-cron-secret");
-  if (!secret || secret !== process.env.LAMID_CRON_SECRET) {
-    return fail(401, "unauthorised", "Cron secret required.");
-  }
+const run = handler(async (req: Request) => {
+  if (!cronAuthorised(req)) return fail(401, "unauthorised", "Cron secret required.");
 
   const swept = await sweepExpiredHoldsAsync();
   return ok({ swept, at: new Date().toISOString() });
 });
+
+/* Vercel Cron invokes scheduled paths with a GET; everything else
+   (manual curl, external scheduler) posts. Same work either way. */
+export const GET = run;
+export const POST = run;

@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, badRequest, rateLimited, bodyTooLarge, clean } from "@/lib/http";
 import { limit, clientId } from "@/lib/ratelimit";
 import { joinWaitlist, WaitlistError } from "@/lib/waitlist";
@@ -6,6 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 4 * 1024)) return badRequest("Request too large.");
 
   const rl = await limit("form", clientId(req));

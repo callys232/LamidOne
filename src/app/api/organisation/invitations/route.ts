@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, rateLimited, badRequest } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -19,6 +20,7 @@ export const GET = handler(async (req) => {
 
 /** Revoke. `{ id }` in the body. */
 export const DELETE = handler(async (req) => {
+  requirePersistenceInProd();
   const identity = await resolveIdentity(req);
   if (!identity.userId) return fail(401, "unauthorised", "Sign in to manage invitations.");
   if (!identity.orgId) return fail(400, "no_org", "This account is not part of an organisation.");

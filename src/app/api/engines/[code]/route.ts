@@ -111,7 +111,7 @@ export const POST = handler(async (req) => {
        knows where they are. Recorded after settlement — an unbilled run
        should not appear in the working record. */
     const bundle = body.bundleId
-      ? recordRun(identity.userId!, body.bundleId, result, body.input!)
+      ? await recordRun(identity.userId!, body.bundleId, result, body.input!)
       : null;
 
     return ok({

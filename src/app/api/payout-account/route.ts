@@ -1,3 +1,4 @@
+import { requirePersistenceInProd } from "@/lib/store";
 import { handler, ok, fail, badRequest, rateLimited, bodyTooLarge, tooLarge } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
@@ -35,6 +36,7 @@ export const GET = handler(async (req) => {
  * because an unverifiable payout destination is worse than none.
  */
 export const POST = handler(async (req) => {
+  requirePersistenceInProd();
   if (bodyTooLarge(req, 4 * 1024)) return tooLarge();
 
   const identity = await resolveIdentity(req);
