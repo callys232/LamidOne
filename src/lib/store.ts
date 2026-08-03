@@ -160,6 +160,14 @@ export async function ensureIndexes(): Promise<void> {
     db.collection("auditLog").createIndex({ actorId: 1, at: -1 }),
 
     db.collection("waitlist").createIndex({ email: 1 }, { unique: true }),
+
+    /* Cached Contracts Finder corpus. `terms` is the lookup path — a
+       multikey index over the tokenised title, so a comparables search
+       is an index hit rather than a scan of every award. */
+    db.collection("publicAwards").createIndex({ key: 1 }, { unique: true }),
+    db.collection("publicAwards").createIndex({ terms: 1 }),
+
+    db.collection("accountingConnections").createIndex({ userId: 1, provider: 1 }, { unique: true }),
     db.collection("contactInquiries").createIndex({ status: 1, createdAt: -1 }),
 
     db.collection("invoices").createIndex({ id: 1 }, { unique: true }),

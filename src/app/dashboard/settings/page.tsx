@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
 import { useApi, authHeaders } from "@/lib/useApi";
@@ -252,6 +253,24 @@ function IntegrationsForm() {
         Send real platform events — a new bid, an awarded project, a ticket reply — to a channel you already
         use. Paste a webhook URL from Slack, Discord, or any endpoint that accepts a POST (Zapier, Make, n8n).
       </p>
+
+      {/* Accounting sync is written and fails closed, but has never
+          completed a live authentication — so it is disclosed here
+          rather than offered as though it were finished. Same position
+          as the trust centre takes. */}
+      <div className="mt-4 rounded-lg border p-4" style={{ borderColor: "var(--warn)" }}>
+        <p className="flex items-center gap-2 text-sm font-semibold">
+          <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+          Xero and QuickBooks sync — unverified
+        </p>
+        <p className="muted mt-1.5 text-sm leading-relaxed">
+          The connection flow is built and can push an invoice, but it has never completed a live
+          authentication against either provider, so we do not yet count it as working. It needs
+          credentials configured on the server and one real end-to-end test. Until then the connect
+          button returns a clear error rather than half-working.{" "}
+          <Link href="/trust" className="link-underline">See the trust centre</Link>.
+        </p>
+      </div>
 
       <div className="mt-4 space-y-4">
         {INTEGRATION_FIELDS.map((f) => {

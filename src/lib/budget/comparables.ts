@@ -56,7 +56,7 @@ const STOP = new Set([
 ]);
 
 /** Lowercased, de-punctuated, stop-worded tokens of length ≥ 3. */
-function tokenise(s: string): string[] {
+export function tokenise(s: string): string[] {
   return String(s ?? "")
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, " ")
@@ -91,7 +91,7 @@ function noteFor(count: number, what: string): string {
   return `${count} comparable ${what}. The spread matters more than the median — price toward the upper quartile if your scope is less defined than average.`;
 }
 
-function summarise(values: number[], currency: string, what: string): ComparableStats {
+export function summarise(values: number[], currency: string, what: string): ComparableStats {
   const clean = values.filter((v) => Number.isFinite(v) && v > 0).sort((a, b) => a - b);
   const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 

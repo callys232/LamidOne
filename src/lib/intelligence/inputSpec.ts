@@ -74,8 +74,61 @@ export interface DecisionQualityInputSpec {
   kind: "decision-quality";
 }
 
+/**
+ * Candidate growth pathways compared against each other under a
+ * capacity constraint. Distinct from `assessment` because the output
+ * is a SEQUENCED PORTFOLIO, not a score — see
+ * lib/intelligence/growthPathways.ts.
+ */
+export interface GrowthPathwaysInputSpec {
+  kind: "growth-pathways";
+}
+
+/**
+ * Options evaluated across possible futures. Serves the simulator,
+ * foresight and scenario-planner modules — see
+ * lib/intelligence/scenarioDecision.ts.
+ */
+export interface ScenarioDecisionInputSpec {
+  kind: "scenario-decision";
+}
+
+/**
+ * Initiatives sequenced into a phased plan under dependencies and a
+ * per-period capacity — see lib/intelligence/roadmap.ts.
+ */
+export interface RoadmapInputSpec {
+  kind: "roadmap";
+}
+
+/**
+ * Process steps analysed for the constraint that sets throughput —
+ * see lib/intelligence/optimisation.ts.
+ */
+export interface OptimisationInputSpec {
+  kind: "optimisation";
+}
+
+/** Options compared against weighted criteria, with sensitivity
+ *  analysis — see lib/intelligence/selector.ts. */
+export interface SelectionInputSpec {
+  kind: "selection";
+}
+
+/** Objectives checked pairwise for contradiction — see
+ *  lib/intelligence/conflict.ts. */
+export interface ConflictInputSpec {
+  kind: "conflict";
+}
+
 export type ModuleInputSpec =
   | DecisionQualityInputSpec
+  | GrowthPathwaysInputSpec
+  | ScenarioDecisionInputSpec
+  | RoadmapInputSpec
+  | OptimisationInputSpec
+  | SelectionInputSpec
+  | ConflictInputSpec
   | TimeSeriesInputSpec
   | FinancialInputSpec
   | RosterInputSpec

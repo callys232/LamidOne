@@ -6,6 +6,20 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { authHeaders } from "@/lib/useApi";
+import { DecisionQualityRunner } from "@/components/diagnostics/DecisionQualityRunner";
+import { GrowthPathwaysRunner } from "@/components/diagnostics/GrowthPathwaysRunner";
+import { ScenarioDecisionRunner } from "@/components/diagnostics/ScenarioDecisionRunner";
+import type { ScenarioDecisionResult } from "@/lib/intelligence/scenarioDecision";
+import { RoadmapRunner } from "@/components/diagnostics/RoadmapRunner";
+import { OptimisationRunner } from "@/components/diagnostics/OptimisationRunner";
+import { SelectionRunner } from "@/components/diagnostics/SelectionRunner";
+import { ConflictRunner } from "@/components/diagnostics/ConflictRunner";
+import type { RoadmapResult } from "@/lib/intelligence/roadmap";
+import type { OptimisationResult } from "@/lib/intelligence/optimisation";
+import type { SelectionResult } from "@/lib/intelligence/selector";
+import type { ConflictResult } from "@/lib/intelligence/conflict";
+import type { GrowthPathwaysResult, PathwayInput } from "@/lib/intelligence/growthPathways";
+import type { DQQuestion, RequirementMeta, DecisionQualityResult, Consequence, Reversibility } from "@/lib/intelligence/decisionQuality";
 
 /**
  * THE PUBLIC DIAGNOSTIC RUNNER.
@@ -28,6 +42,15 @@ type EngineSpec = {
   code: string; suite: string; engineName: string; seriesName: string;
   purpose: string; inputs: { kind?: string } | null; dimensionLabels: string[]; registered: boolean;
   minTier: string | null;
+  /* Present only for modules that ship a fixed anchored question bank
+     instead of free-form dimension sliders — see Q44. */
+  decisionQuality?: { requirements: RequirementMeta[]; questions: DQQuestion[] };
+  growthPathways?: { quadrants: { id: string; label: string; what: string }[] };
+  scenarioDecision?: boolean;
+  roadmap?: boolean;
+  optimisation?: boolean;
+  selection?: boolean;
+  conflict?: boolean;
 };
 
 type Row = { label: string; rating: number; weight: number; evidence: 0 | 1 | 2; note: string };
@@ -61,6 +84,61 @@ export default function PublicDiagnosticPage() {
   const [needsUpgrade, setNeedsUpgrade] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [dqResult, setDqResult] = useState<DecisionQualityResult | null>(null);
+  const [gpResult, setGpResult] = useState<GrowthPathwaysResult | null>(null);
+  const [sdResult, setSdResult] = useState<ScenarioDecisionResult | null>(null);
+  const [rmResult, setRmResult] = useState<RoadmapResult | null>(null);
+  const [opResult, setOpResult] = useState<OptimisationResult | null>(null);
+  const [selResult, setSelResult] = useState<SelectionResult | null>(null);
+  const [cfResult, setCfResult] = useState<ConflictResult | null>(null);
+
+  /* Which structured runner this module uses, if any. Keeps the render
+     branch to one condition instead of four near-identical blocks. */
+  const structuredKind = spec?.roadmap ? "roadmap"
+    : spec?.optimisation ? "optimisation"
+    : spec?.selection ? "selection"
+    : spec?.conflict ? "conflict"
+    : null;
+
+  /* Structured-input modules post their own payload shape and render
+     their own result, so they share this submit path rather than
+     bending the generic rows/ratings one. */
+  async function runStructured(payload: Record<string, unknown>, onOk: (summary: unknown) => void) {
+    setBusy(true); setRunError(null); setNeedsAuth(false); setNeedsUpgrade(null);
+    try {
+      const res = await fetch(`/api/engines/${code}`, {
+        method: "POST", headers: authHeaders(), body: JSON.stringify({ input: payload }),
+      });
+      const body = await res.json();
+      if (res.status === 401) { setNeedsAuth(true); return; }
+      if (res.status === 403 && body?.code === "tier_required") { setNeedsUpgrade(body.remedy?.tier ?? spec?.minTier ?? null); return; }
+      if (!res.ok) throw new Error(body?.error ?? "The engine could not complete.");
+      onOk(body.summary);
+    } catch (e) {
+      setRunError((e as Error).message);
+    } finally { setBusy(false); }
+  }
+
+  /* Anchored-question modules post a different payload shape and render
+     their own result, so they get their own submit path rather than
+     bending the generic rows/ratings one. */
+  async function runDecisionQuality(payload: {
+    answers: Record<string, number>; consequence: Consequence; reversibility: Reversibility;
+  }) {
+    setBusy(true); setRunError(null); setNeedsAuth(false); setNeedsUpgrade(null);
+    try {
+      const res = await fetch(`/api/engines/${code}`, {
+        method: "POST", headers: authHeaders(), body: JSON.stringify({ input: payload }),
+      });
+      const body = await res.json();
+      if (res.status === 401) { setNeedsAuth(true); return; }
+      if (res.status === 403 && body?.code === "tier_required") { setNeedsUpgrade(body.remedy?.tier ?? spec?.minTier ?? null); return; }
+      if (!res.ok) throw new Error(body?.error ?? "The engine could not complete.");
+      setDqResult(body.summary as DecisionQualityResult);
+    } catch (e) {
+      setRunError((e as Error).message);
+    } finally { setBusy(false); }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -120,7 +198,161 @@ export default function PublicDiagnosticPage() {
             <div className="card mx-auto h-64 max-w-2xl animate-pulse" style={{ background: "var(--line-soft)" }} />
           )}
 
-          {spec && !result && (
+          {spec?.decisionQuality && (
+            <div className="mx-auto max-w-3xl space-y-8">
+              <div>
+                <p className="faint text-xs font-semibold uppercase tracking-wide">{spec.seriesName}</p>
+                <h1 className="h-section mt-2">{spec.engineName}</h1>
+                <p className="lead mt-3">{spec.purpose}</p>
+              </div>
+
+              {needsAuth && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">Create a free account to see the score.</p>
+                  <p className="muted mt-2 text-sm">Your answers stay as they are — sign up in another tab and score it again.</p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href="/signup" target="_blank" className="btn btn-primary">Create a free account</Link>
+                    <Link href="/signin" target="_blank" className="btn btn-ghost">Sign in</Link>
+                  </div>
+                </div>
+              )}
+              {needsUpgrade && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">This one needs the {needsUpgrade} plan.</p>
+                  <Link href="/pricing" target="_blank" className="btn btn-primary mt-4">See plans</Link>
+                </div>
+              )}
+              {runError && <p className="text-sm" style={{ color: "var(--bad)" }}>{runError}</p>}
+
+              <DecisionQualityRunner
+                requirements={spec.decisionQuality.requirements}
+                questions={spec.decisionQuality.questions}
+                busy={busy} result={dqResult}
+                onRun={runDecisionQuality}
+                onReset={() => setDqResult(null)}
+              />
+            </div>
+          )}
+
+          {spec?.growthPathways && (
+            <div className="mx-auto max-w-3xl space-y-8">
+              <div>
+                <p className="faint text-xs font-semibold uppercase tracking-wide">{spec.seriesName}</p>
+                <h1 className="h-section mt-2">{spec.engineName}</h1>
+                <p className="lead mt-3">{spec.purpose}</p>
+              </div>
+
+              {needsAuth && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">Create a free account to see the sequence.</p>
+                  <p className="muted mt-2 text-sm">Your pathways stay as they are — sign up in another tab and run it again.</p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href="/signup" target="_blank" className="btn btn-primary">Create a free account</Link>
+                    <Link href="/signin" target="_blank" className="btn btn-ghost">Sign in</Link>
+                  </div>
+                </div>
+              )}
+              {needsUpgrade && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">This one needs the {needsUpgrade} plan.</p>
+                  <Link href="/pricing" target="_blank" className="btn btn-primary mt-4">See plans</Link>
+                </div>
+              )}
+              {runError && <p className="text-sm" style={{ color: "var(--bad)" }}>{runError}</p>}
+
+              <GrowthPathwaysRunner
+                busy={busy} result={gpResult}
+                onRun={(payload) => runStructured(payload as never, (s) => setGpResult(s as GrowthPathwaysResult))}
+                onReset={() => setGpResult(null)}
+              />
+            </div>
+          )}
+
+
+          {structuredKind && (
+            <div className="mx-auto max-w-4xl space-y-8">
+              <div>
+                <p className="faint text-xs font-semibold uppercase tracking-wide">{spec!.seriesName}</p>
+                <h1 className="h-section mt-2">{spec!.engineName}</h1>
+                <p className="lead mt-3">{spec!.purpose}</p>
+              </div>
+
+              {needsAuth && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">Create a free account to see the result.</p>
+                  <p className="muted mt-2 text-sm">Everything you entered stays as it is — sign up in another tab and run it again.</p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href="/signup" target="_blank" className="btn btn-primary">Create a free account</Link>
+                    <Link href="/signin" target="_blank" className="btn btn-ghost">Sign in</Link>
+                  </div>
+                </div>
+              )}
+              {needsUpgrade && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">This one needs the {needsUpgrade} plan.</p>
+                  <Link href="/pricing" target="_blank" className="btn btn-primary mt-4">See plans</Link>
+                </div>
+              )}
+              {runError && <p className="text-sm" style={{ color: "var(--bad)" }}>{runError}</p>}
+
+              {structuredKind === "roadmap" && (
+                <RoadmapRunner busy={busy} result={rmResult}
+                  onRun={(p) => runStructured(p as never, (s) => setRmResult(s as RoadmapResult))}
+                  onReset={() => setRmResult(null)} />
+              )}
+              {structuredKind === "optimisation" && (
+                <OptimisationRunner busy={busy} result={opResult}
+                  onRun={(p) => runStructured(p as never, (s) => setOpResult(s as OptimisationResult))}
+                  onReset={() => setOpResult(null)} />
+              )}
+              {structuredKind === "selection" && (
+                <SelectionRunner busy={busy} result={selResult}
+                  onRun={(p) => runStructured(p as never, (s) => setSelResult(s as SelectionResult))}
+                  onReset={() => setSelResult(null)} />
+              )}
+              {structuredKind === "conflict" && (
+                <ConflictRunner busy={busy} result={cfResult}
+                  onRun={(p) => runStructured(p as never, (s) => setCfResult(s as ConflictResult))}
+                  onReset={() => setCfResult(null)} />
+              )}
+            </div>
+          )}
+
+          {spec?.scenarioDecision && (
+            <div className="mx-auto max-w-4xl space-y-8">
+              <div>
+                <p className="faint text-xs font-semibold uppercase tracking-wide">{spec.seriesName}</p>
+                <h1 className="h-section mt-2">{spec.engineName}</h1>
+                <p className="lead mt-3">{spec.purpose}</p>
+              </div>
+
+              {needsAuth && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">Create a free account to see the analysis.</p>
+                  <p className="muted mt-2 text-sm">Your matrix stays as it is — sign up in another tab and run it again.</p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href="/signup" target="_blank" className="btn btn-primary">Create a free account</Link>
+                    <Link href="/signin" target="_blank" className="btn btn-ghost">Sign in</Link>
+                  </div>
+                </div>
+              )}
+              {needsUpgrade && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">This one needs the {needsUpgrade} plan.</p>
+                  <Link href="/pricing" target="_blank" className="btn btn-primary mt-4">See plans</Link>
+                </div>
+              )}
+              {runError && <p className="text-sm" style={{ color: "var(--bad)" }}>{runError}</p>}
+
+              <ScenarioDecisionRunner
+                busy={busy} result={sdResult}
+                onRun={(p) => runStructured(p as never, (s) => setSdResult(s as ScenarioDecisionResult))}
+                onReset={() => setSdResult(null)}
+              />
+            </div>
+          )}
+
+          {spec && !spec.decisionQuality && !spec.growthPathways && !spec.scenarioDecision && !structuredKind && !result && (
             <div className="mx-auto max-w-2xl space-y-8">
               <div>
                 <div className="flex items-center gap-2">

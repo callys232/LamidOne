@@ -5,6 +5,12 @@ import {
 import { FEATURE_MATRIX, type TierId } from "@/content/tiers";
 import { computeAssessment, assessmentToPrompt, type AssessmentRow } from "./intelligence/assessment";
 import { computeDecisionQuality, decisionQualityToPrompt } from "./intelligence/decisionQuality";
+import { computeGrowthPathways, growthPathwaysToPrompt } from "./intelligence/growthPathways";
+import { computeScenarioDecision, scenarioDecisionToPrompt } from "./intelligence/scenarioDecision";
+import { computeRoadmap, roadmapToPrompt } from "./intelligence/roadmap";
+import { computeOptimisation, optimisationToPrompt } from "./intelligence/optimisation";
+import { computeSelection, selectionToPrompt } from "./intelligence/selector";
+import { computeConflicts, conflictsToPrompt } from "./intelligence/conflict";
 import { computeFinancials, financialsToPrompt, type FinancialInputs } from "./intelligence/financial";
 import { computeRoster, rosterToPrompt, type RoleRow } from "./intelligence/roster";
 import { computeScenarios, scenariosToPrompt } from "./intelligence/scenario";
@@ -250,6 +256,100 @@ export function runEngine(ref: EngineRef, input: Record<string, unknown>): Engin
       summary: dq,
       working: decisionQualityToPrompt(dq),
       warnings: [...dq.confidenceFlags, ...(dq.fatalIssues.length ? [`Fatal gaps: ${dq.fatalIssues.join("; ")}`] : [])],
+    } as EngineResult;
+  }
+
+  /* G03 compares candidate pathways against each other and returns a
+     sequenced portfolio under a capacity constraint — a recommendation,
+     not a score. See lib/intelligence/growthPathways.ts. */
+  if (ref.code === "G03") {
+    const gp = computeGrowthPathways(
+      (input.pathways ?? []) as never,
+      Number(input.capacity) || 3,
+    );
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "growth-pathways",
+      summary: gp,
+      working: growthPathwaysToPrompt(gp),
+      warnings: [...gp.warnings, ...gp.portfolioWarnings],
+    } as EngineResult;
+  }
+
+  /* One archetype, four modules (Q03, Q46, Q47, Q68): options
+     evaluated across futures under three decision rules, with EVPI.
+     See lib/intelligence/scenarioDecision.ts. */
+  if (kind === "scenario-decision") {
+    const sd = computeScenarioDecision(
+      (input.scenarios ?? []) as never,
+      (input.options ?? []) as never,
+    );
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "scenario-decision",
+      summary: sd,
+      working: scenarioDecisionToPrompt(sd),
+      warnings: sd.warnings,
+    } as EngineResult;
+  }
+
+  /* One archetype, seven planner modules: initiatives sequenced into a
+     phased plan under dependencies and per-period capacity, with the
+     critical path reported. See lib/intelligence/roadmap.ts. */
+  if (kind === "roadmap") {
+    const rm = computeRoadmap(
+      (input.initiatives ?? []) as never,
+      Number(input.periods) || 4,
+      Number(input.capacityPerPeriod) || 10,
+      String(input.periodLabel ?? "Quarter"),
+    );
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "roadmap",
+      summary: rm,
+      working: roadmapToPrompt(rm),
+      warnings: [...rm.warnings, ...rm.guidance],
+    } as EngineResult;
+  }
+
+  /* One archetype, three optimisation modules: throughput is set by the
+     constraint, so improving anything else is waste. See
+     lib/intelligence/optimisation.ts. */
+  if (kind === "optimisation") {
+    const op = computeOptimisation((input.steps ?? []) as never);
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "optimisation",
+      summary: op,
+      working: optimisationToPrompt(op),
+      warnings: [...op.warnings, ...op.guidance],
+    } as EngineResult;
+  }
+
+  /* Weighted choice with sensitivity — a score plus how fragile it is. */
+  if (kind === "selection") {
+    const sel = computeSelection((input.options ?? []) as never, (input.criteria ?? []) as never);
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "selection", summary: sel, working: selectionToPrompt(sel),
+      warnings: [...sel.warnings, ...sel.guidance],
+    } as EngineResult;
+  }
+
+  /* Objectives checked pairwise — conflict is a property of pairs, so
+     no per-objective score can surface it. */
+  if (kind === "conflict") {
+    const cf = computeConflicts((input.objectives ?? []) as never);
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "conflict", summary: cf, working: conflictsToPrompt(cf),
+      warnings: [...cf.warnings, ...cf.guidance],
     } as EngineResult;
   }
 

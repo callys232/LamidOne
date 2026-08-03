@@ -5,6 +5,7 @@ import { withMeter, available, getBalanceAsync } from "@/lib/points";
 import { parseEngineCode, configFor, runEngine, EngineInputError, REGISTERED_CODES, minTierForEngine, meetsEngineTier } from "@/lib/engines";
 import { recordRun, nextSteps } from "@/lib/bundles";
 import { DQ_QUESTIONS, REQUIREMENTS } from "@/lib/intelligence/decisionQuality";
+import { QUADRANTS } from "@/lib/intelligence/growthPathways";
 import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -37,6 +38,16 @@ export const GET = handler(async (req) => {
     ...(config.inputs?.kind === "decision-quality"
       ? { decisionQuality: { requirements: REQUIREMENTS, questions: DQ_QUESTIONS } }
       : {}),
+    /* Pathway modules take a SET OF OPTIONS, not ratings — the runner
+       renders an option editor rather than sliders. */
+    ...(config.inputs?.kind === "growth-pathways"
+      ? { growthPathways: { quadrants: QUADRANTS } }
+      : {}),
+    ...(config.inputs?.kind === "scenario-decision" ? { scenarioDecision: true } : {}),
+    ...(config.inputs?.kind === "roadmap"     ? { roadmap: true } : {}),
+    ...(config.inputs?.kind === "optimisation"? { optimisation: true } : {}),
+    ...(config.inputs?.kind === "selection"   ? { selection: true } : {}),
+    ...(config.inputs?.kind === "conflict"    ? { conflict: true } : {}),
   });
 });
 

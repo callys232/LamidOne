@@ -47,6 +47,12 @@ const IN_PROGRESS = [
   { item: "Single sign-on (SAML / SCIM)", status: "Not built yet. Every account signs in the same way, regardless of tier." },
   { item: "Cloudflare Turnstile", status: "Not integrated. Public forms currently rely on rate limiting and a honeypot field instead." },
   { item: "Field-level permissions", status: "Not built yet. Access control today is role-based, not field-level." },
+  /* Written, compiles, fails closed without credentials — but has never
+     successfully authenticated, because registering a developer app needs
+     an account and a reviewed redirect URI on a live domain. Listed here
+     rather than under Implemented for exactly that reason. */
+  { item: "Xero / QuickBooks accounting sync", status: "Built but UNVERIFIED. The OAuth flow follows each provider's documented grant and fails closed with no credentials set, but it has never completed a live authentication, so we do not count it as working. One real end-to-end test is outstanding." },
+  { item: "LAMID LEARN completions sync", status: "Blocked upstream. The learning platform exposes no read endpoint for learner completions, so the bridge reports itself unavailable rather than guessing at course data." },
   { item: "Error monitoring with alerting", status: "Structured server-side logging exists; a monitoring service with alerting (e.g. Sentry) is not wired up yet." },
   { item: "SOC 2 Type II", status: "Audit not yet commenced. We will publish the report when it exists." },
   { item: "ISO 27001", status: "Not certified. Cloud infrastructure providers hold their own certification." },

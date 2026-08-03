@@ -2,6 +2,7 @@ import { handler, ok, badRequest, rateLimited, tooLarge, bodyTooLarge, clean } f
 import { limit, clientId } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { suggestDayRate, suggestProjectTotal } from "@/lib/budget/comparables";
+import { publicAwardComparables } from "@/lib/budget/contractsFinder";
 import { lookupWebRates, webRatesConfigured } from "@/lib/budget/webRates";
 
 export const runtime = "nodejs";
@@ -56,6 +57,14 @@ export const POST = handler(async (req) => {
      per request rather than fired on every keystroke. */
   const web = body?.includeWeb ? await lookupWebRates(query) : null;
 
+  /* Public awards are a LOCAL index lookup — the corpus is refreshed on
+     a schedule precisely so this costs nothing here — so unlike the web
+     tier it can run on every request. Kept as its own field rather than
+     blended into `platform`: internal history and UK public procurement
+     are different populations, and averaging them would produce a
+     number describing neither. */
+  const publicAwards = await publicAwardComparables(query);
+
   return ok({
     query,
     currency,
@@ -63,5 +72,6 @@ export const POST = handler(async (req) => {
     platform,
     web,
     webAvailable: webRatesConfigured(),
+    publicAwards,
   });
 });
