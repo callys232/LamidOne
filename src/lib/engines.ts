@@ -4,6 +4,7 @@ import {
 } from "./intelligence/moduleRegistry";
 import { FEATURE_MATRIX, type TierId } from "@/content/tiers";
 import { computeAssessment, assessmentToPrompt, type AssessmentRow } from "./intelligence/assessment";
+import { computeDecisionQuality, decisionQualityToPrompt } from "./intelligence/decisionQuality";
 import { computeFinancials, financialsToPrompt, type FinancialInputs } from "./intelligence/financial";
 import { computeRoster, rosterToPrompt, type RoleRow } from "./intelligence/roster";
 import { computeScenarios, scenariosToPrompt } from "./intelligence/scenario";
@@ -231,6 +232,27 @@ export function runEngine(ref: EngineRef, input: Record<string, unknown>): Engin
   let summary: unknown;
   let working: string;
 
+  /* Q44 runs its own engine rather than the shared four-dimension
+     archetype. Decision quality is a CHAIN limited by its weakest
+     requirement, not a weighted mean — averaging lets a strong frame
+     hide a missing owner, which is the exact failure the module
+     exists to catch. See lib/intelligence/decisionQuality.ts. */
+  if (ref.code === "Q44") {
+    const dq = computeDecisionQuality(
+      (input.answers ?? {}) as Record<string, number>,
+      input.consequence as never,
+      input.reversibility as never,
+    );
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "decision-quality",
+      summary: dq,
+      working: decisionQualityToPrompt(dq),
+      warnings: [...dq.confidenceFlags, ...(dq.fatalIssues.length ? [`Fatal gaps: ${dq.fatalIssues.join("; ")}`] : [])],
+    } as EngineResult;
+  }
+
   switch (kind) {
     case "assessment": {
       /* THE ENGINE ASSESSES ITS OWN DECLARED DIMENSIONS.
@@ -335,7 +357,7 @@ export function runEngine(ref: EngineRef, input: Record<string, unknown>): Engin
 export function runBudget(lineItems: LineItem[], settings: BudgetSettings) {
   if (!Array.isArray(lineItems)) throw new EngineInputError("`lineItems` must be an array.");
   const computed = computeBudget(lineItems, settings);
-  return { computed, csv: budgetToCSV(computed as never) };
+  return { computed, csv: budgetToCSV(computed) };
 }
 
 /** Engine count per suite, derived from the registry rather than typed by hand. */

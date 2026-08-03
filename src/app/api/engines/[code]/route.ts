@@ -4,6 +4,7 @@ import { resolveIdentity } from "@/lib/entitlements";
 import { withMeter, available, getBalanceAsync } from "@/lib/points";
 import { parseEngineCode, configFor, runEngine, EngineInputError, REGISTERED_CODES, minTierForEngine, meetsEngineTier } from "@/lib/engines";
 import { recordRun, nextSteps } from "@/lib/bundles";
+import { DQ_QUESTIONS, REQUIREMENTS } from "@/lib/intelligence/decisionQuality";
 import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -30,6 +31,12 @@ export const GET = handler(async (req) => {
     registered: REGISTERED_CODES.includes(ref.code),
     /** null = open to any signed-in tier — see minTierForEngine(). */
     minTier: minTierForEngine(ref.code),
+    /* Decision-quality modules ship a FIXED, anchored question bank
+       rather than free-form dimension sliders, so the runner needs the
+       questions themselves to render anything meaningful. */
+    ...(config.inputs?.kind === "decision-quality"
+      ? { decisionQuality: { requirements: REQUIREMENTS, questions: DQ_QUESTIONS } }
+      : {}),
   });
 });
 

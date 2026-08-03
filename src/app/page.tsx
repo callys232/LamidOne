@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RotatingWord } from "@/components/sections/RotatingWord";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -41,8 +42,13 @@ export default function HomePage() {
           <div className="shell py-20 sm:py-28">
             <div className="max-w-4xl">
               <Eyebrow>LAMID ONE — Human-AI Consulting Operating System</Eyebrow>
+              {/* The final word rotates so the line reads as a claim about
+                  the whole decision lifecycle rather than one verb. Slow
+                  and short-travel on purpose — see RotatingWord. */}
               <h1 className="h-hero mt-6">
-                Where organisations go to decide<span className="text-brand">.</span>
+                Where organisations go to{" "}
+                <RotatingWord words={["decide", "plan", "deliver", "grow"]} />
+                <span className="text-brand">.</span>
               </h1>
               <p className="lead mt-7 max-w-2xl">
                 Strategy, growth, people, finance and clients on one operating layer — with the

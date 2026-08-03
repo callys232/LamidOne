@@ -161,6 +161,14 @@ export async function ensureIndexes(): Promise<void> {
 
     db.collection("waitlist").createIndex({ email: 1 }, { unique: true }),
     db.collection("contactInquiries").createIndex({ status: 1, createdAt: -1 }),
+
+    db.collection("invoices").createIndex({ id: 1 }, { unique: true }),
+    db.collection("invoices").createIndex({ issuerId: 1, createdAt: -1 }),
+    db.collection("invoices").createIndex({ orgId: 1, status: 1, createdAt: -1 }),
+    /* An invoice number must be unique per issuer — an auditor treats a
+       duplicate as a control failure, not a cosmetic bug. */
+    db.collection("invoices").createIndex({ issuerId: 1, number: 1 }, { unique: true }),
+    db.collection("invoiceCounters").createIndex({ key: 1 }, { unique: true }),
     db.collection("passwordResets").createIndex({ tokenHash: 1 }, { unique: true }),
     db.collection("passwordResets").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
   ]).catch((e) => console.error("[store] index creation failed:", (e as Error).message));

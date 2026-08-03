@@ -781,8 +781,9 @@ export const MODULE_REGISTRY: Record<string, ModuleConfig> = {
   },
   Q44: {
     id: "Q44", seriesName: "Q-Series — Decision Intelligence", engineName: "Decision Clarity Score",
-    purpose: "Scores how clear a decision really is — defined options, known criteria, a named owner — before it's allowed to consume a meeting.",
-    dimensionLabels: ["Pre-Decision Clarity", "Decision Clarity at Point of Commitment", "Communication Clarity", "Long-Term Clarity Index"],
+    purpose: "Scores one decision against the six requirements of decision quality — frame, alternatives, information, criteria, reasoning and commitment — and holds it to a bar set by how consequential and how reversible it is. Quality is the weakest link, not the average.",
+    dimensionLabels: ["Appropriate frame", "Real alternatives", "Reliable information", "Clear criteria and tradeoffs", "Sound reasoning", "Commitment to action"],
+    inputs: { kind: "decision-quality" },
     driverContext: "Identity Drivers create fundamental clarity character. Cultural Drivers determine whether clarity is valued and expected. Timing Drivers reveal how clarity changes under time pressure. Direction Drivers emit the clearest possible signal for each major decision.",
     correctionProtocols: ["Clarity Stabilisation","Clarity Synchronisation","Clarity Amplification","Clarity Alignment","Clarity Improvement","Clarity Lock-In"],
     backHref: "/q43-risk-visibility-monitor", backLabel: "Risk Visibility Monitor", nextHref: "/q45-strategic-insight-generator", nextLabel: "Strategic Insight Generator",

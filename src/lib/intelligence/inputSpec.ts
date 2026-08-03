@@ -63,7 +63,19 @@ export interface AssessmentInputSpec {
   dimensions?: string[];
 }
 
+/**
+ * A specific decision assessed against the six requirements of decision
+ * quality. Distinct from `assessment` because the questions are FIXED
+ * and anchored (see lib/intelligence/decisionQuality.ts) rather than
+ * derived from the registry's dimension labels, and because the result
+ * is chain-limited rather than averaged.
+ */
+export interface DecisionQualityInputSpec {
+  kind: "decision-quality";
+}
+
 export type ModuleInputSpec =
+  | DecisionQualityInputSpec
   | TimeSeriesInputSpec
   | FinancialInputSpec
   | RosterInputSpec

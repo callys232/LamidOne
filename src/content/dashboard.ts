@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Receipt,
   LayoutDashboard, FolderKanban, ShieldCheck, Wallet, Users2, Building2,
   Bot, Boxes, FileText, Bell, Settings, Gauge, Timer, LifeBuoy,
   BarChart3, ScrollText, UserCheck, Send, Calendar,
@@ -29,7 +30,8 @@ export type SectionId =
   | "engines" | "agents" | "bundles" | "documents" | "experts"
   | "members" | "teams" | "billing" | "analytics" | "sla"
   | "approvals" | "audit" | "invitations" | "notifications"
-  | "verification" | "earnings" | "bids" | "support" | "settings" | "events";
+  | "verification" | "earnings" | "bids" | "support" | "settings" | "events"
+  | "invoices";
 
 export type Section = {
   id: SectionId;
@@ -76,6 +78,10 @@ export const SECTIONS: Section[] = [
   /* ── Money ────────────────────────────────────────────── */
   { id: "escrow", label: "Escrow", Icon: ShieldCheck, group: "Money",
     blurb: "Funds held against milestones, and what releases when.",
+    roles: ["client", "expert", "enterprise", "concierge", "operator"] },
+
+  { id: "invoices", label: "Invoices", Icon: Receipt, group: "Money",
+    blurb: "Raise, send and track invoices — including straight from approved milestones.",
     roles: ["client", "expert", "enterprise", "concierge", "operator"] },
 
   { id: "wallet", label: "Wallet and points", Icon: Wallet, group: "Money",

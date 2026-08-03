@@ -60,9 +60,30 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  *  is a calculator, not an assessment, so it never says "diagnostic". */
 const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, { label: string; href: string; external?: boolean }>> = {
   core: { label: "Book a diagnostic", href: "/diagnostics/q44" },
-  grow: { label: "Assess your digital maturity", href: "/diagnostics/g06" },
-  talent: { label: "Book a diagnostic", href: "/diagnostics/a07" },
+  /* Neither of these is a diagnostic. TALENT recommends a route from
+     where someone is to a target role; GROW names the growth paths open
+     to the business. Both suites previously fell back to diagnostic
+     framing, which described the wrong verb entirely. */
+  grow: { label: "See your growth pathways", href: "/diagnostics/g03" },
+  talent: { label: "Map a talent pathway", href: "/diagnostics/pathway" },
   finance: { label: "Build a budget", href: "/diagnostics/budget" },
+  desk: { label: "Raise an invoice", href: "/dashboard/invoices" },
+};
+
+/**
+ * Suites whose hero carries a capability strip instead of leaving the
+ * reader to infer what the suite actually does. DESK's promise is that
+ * one record spans proposal → delivery → invoice, so the hero names
+ * each stage and links to the thing that performs it. Every entry here
+ * must point at something that EXISTS — this strip is exactly where a
+ * roadmap item would read as a shipped feature.
+ */
+const HERO_CAPABILITIES: Partial<Record<SuiteId, { label: string; detail: string; href: string }[]>> = {
+  desk: [
+    { label: "Draft the proposal", detail: "Scribe scopes and costs it from diagnostic output, not a blank page.", href: "/agents" },
+    { label: "Run milestones through escrow", detail: "Cadence breaks scope into releases; funds move only on approval.", href: "/dashboard/engagements" },
+    { label: "Invoice from approved work", detail: "Raise an invoice straight from approved milestones, references carried through.", href: "/dashboard/invoices" },
+  ],
 };
 
 export default async function SuitePage({ params }: { params: Promise<{ id: string }> }) {
@@ -94,6 +115,7 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
       ? SUITE_DIAGNOSTIC[suite.id]!
       : CTA.primary;
   const secondaryCta = suite.external ? CTA.secondary : CTA.secondary;
+  const heroCapabilities = HERO_CAPABILITIES[suite.id];
 
   return (
     <>
@@ -142,6 +164,20 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
               <div className={studio ? "mt-10 flex justify-center" : "mt-10"}>
                 <CtaPair primary={primaryCta} secondary={secondaryCta} />
               </div>
+
+              {heroCapabilities && (
+                <ol className="mt-12 grid gap-4 sm:grid-cols-3">
+                  {heroCapabilities.map((c, i) => (
+                    <li key={c.label}>
+                      <Link href={c.href} className="card card-interactive block h-full p-5">
+                        <span className="faint text-xs font-semibold tabular-nums">0{i + 1}</span>
+                        <p className="mt-2 font-semibold">{c.label}</p>
+                        <p className="muted mt-1.5 text-sm leading-relaxed">{c.detail}</p>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              )}
 
               <p className="faint mt-5 text-sm">
                 {suite.engineCount} engines · included from{" "}

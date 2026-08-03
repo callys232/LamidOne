@@ -74,6 +74,16 @@ body {
 @layer components {
   .shell { @apply mx-auto w-full max-w-shell px-5 sm:px-8; }
 
+  /* Form input. Was referenced in several components but never defined,
+     so those controls rendered unstyled. Border/background default to the
+     theme vars and can be overridden inline at the call site. */
+  .input {
+    @apply w-full rounded-lg border px-3 py-2 text-sm outline-none;
+    border-color: var(--line);
+    background: var(--page);
+  }
+  .input:focus { border-color: var(--brand); }
+
   /* ── Type ──────────────────────────────────────────────── */
   .h-hero    { font-family: var(--font-display); @apply text-hero font-normal; }
   .h-display { font-family: var(--font-display); @apply text-display font-normal; }

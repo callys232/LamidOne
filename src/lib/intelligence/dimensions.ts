@@ -231,7 +231,7 @@ export function budgetDimensions(b: ComputedBudget): ComputedDimension[] {
           label:   "Budget Adherence",
           // On plan reads as 100; every point of overrun costs two.
           value:   clamp(100 - Math.max(0, variance.variancePct) * 2),
-          insight: `${variance.linesTracked} lines tracked — ${money(variance.actualToDate)} spent against ${money(variance.budgetedToDate)} planned (${variance.variancePct >= 0 ? "+" : ""}${variance.variancePct}%).`,
+          insight: `${variance.linesTracked} lines tracked — ${money(variance.actualOnTracked)} spent against ${money(variance.budgetedOnTracked)} planned (${variance.variancePct >= 0 ? "+" : ""}${variance.variancePct}%).`,
         }
       : {
           label:   "Budget Adherence",
