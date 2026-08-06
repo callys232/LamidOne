@@ -113,7 +113,7 @@ export const CORE: Suite = {
   audience: "both",
   tint: "#1E4FD8",
   Icon: Network,
-  headline: "Strategy and Execution Software That Keeps One Direction",
+  headline: "Human-AI Fusion: The Operating System for Modern Consulting",
   subhead:
     "Decision intelligence, operating rhythm, and governance on one layer — so the plan you agreed and the work you're doing stay the same thing.",
   rollsUp: ["q", "p", "r", "s", "x", "z", "core"],
@@ -129,6 +129,7 @@ export const CORE: Suite = {
         "See where a decision is stalling and who it is waiting on",
         "Keep the rationale attached to the decision permanently",
         "Detect decisions you keep remaking under a different name",
+        "Ground every recommendation in quantitative rigor — the math, statistics, probability and financial logic a board would check",
       ],
       stats: [
         { value: "100", label: "decision engines in the suite", verified: true },
@@ -145,6 +146,8 @@ export const CORE: Suite = {
         "See your real delivery pace, not the one in the plan",
         "Get alerted when a team's cadence drifts from the others",
         "Track workload balance across every unit",
+        "Run real-time coherence checks between strategy, execution and leadership decisions",
+        "Send drift straight to FINANCE, so a schedule problem shows up as a forecast problem before it's a crisis",
       ],
       stats: [
         { value: "30", label: "cadence engines from mapping to governance", verified: true },
@@ -160,8 +163,24 @@ export const CORE: Suite = {
         "Hold your decision authority matrix as live data",
         "Track policy and compliance rules against real activity",
         "Evidence continuity and resilience posture on demand",
+        "Get structured frameworks at software speed, not a 12-week wait for a slide deck",
+        "Turn chaotic, stress-laden tasks into organised, trackable, efficient systems",
       ],
       stats: [{ value: "7", label: "governance and assurance engines", verified: true }],
+    },
+    {
+      eyebrow: "Engagement workflow",
+      title: "One flow from first conversation to final invoice.",
+      body:
+        "Onboarding, discovery, strategy, delivery and closure run as one connected sequence rather than five disconnected tools — the diagnostic that opened the conversation is still attached when the milestone is approved and the invoice goes out. The result is the same standard of service every time, less redundant admin, scheduling and progress updates handled automatically, and human judgement kept exactly where it belongs — on the decision, not the paperwork.",
+      bullets: [
+        "Onboarding — post and bid the initial brief, sign the contract and collect the retainer in LAMID DESK, workspace set up automatically",
+        "Discovery — interview stakeholders, map current operations and identify the bottlenecks with CORE's diagnostics",
+        "Strategy — process what you've found and commit to a recommendation, with the rationale attached",
+        "Implementation — track milestones and deliverables as the client executes, through LAMID DESK",
+        "Closure — final report, review meeting and invoice, requested from the same record",
+      ],
+      stats: [{ value: "5", label: "connected stages, one record throughout", verified: true }],
     },
   ],
   features: [
@@ -199,11 +218,11 @@ export const GROW: Suite = {
   id: "grow",
   dashboardScreenshot: "/screenshots/grow-dashboard.svg",
   name: "LAMID GROW",
-  kind: "Customer and digital growth software",
+  kind: "Digital Growth & Advisory",
   audience: "both",
   tint: "#0E7A5F",
   Icon: TrendingUp,
-  headline: "Customer and Digital Growth Software for Scaling Organisations",
+  headline: "Where People and AI Build the Future — Helping Organisations Grow Smarter and Faster",
   subhead:
     "Watch how customers find you, engage you and stay — and see where growth is compounding versus where it is leaking.",
   rollsUp: ["grow", "z"],
@@ -213,11 +232,13 @@ export const GROW: Suite = {
       eyebrow: "Market intelligence",
       title: "Know where the opportunity is before the quarter tells you.",
       body:
-        "Opportunity signals, market intelligence and digital maturity assessed continuously, so you are reacting to the market rather than to your own reporting lag.",
+        "Opportunity signals, market and customer-timing intelligence, and digital maturity assessed continuously across acquisition, retention and brand resonance — so you know when demand is building, not just that it did, and you are reacting to the market rather than to your own reporting lag. Built on advisory experience across African and emerging markets, not a template written for somewhere else.",
       bullets: [
         "Track opportunity signals across your markets",
         "Assess digital maturity against where you need to be",
         "See which growth pathways are actually open to you",
+        "Read competitive positioning as it updates, not once a quarter",
+        "Read against the same decision record CORE already holds — no separate market deck to reconcile",
       ],
       stats: [{ value: "—", label: "faster to identify a market shift", verified: false }],
     },
@@ -225,13 +246,28 @@ export const GROW: Suite = {
       eyebrow: "Growth planning",
       title: "Plan growth you can actually resource.",
       body:
-        "The growth planner ties ambition to capacity — so the plan you sign off is one your people, your cash and your operating rhythm can carry.",
+        "The growth planner ties ambition to capacity — so the plan you sign off is one your people, your cash and your operating rhythm can carry, not a manual process dressed up as a strategy.",
       bullets: [
         "Build a growth plan against real capacity",
         "Model modernisation paths and what each requires",
         "Report progress to the board without rebuilding the deck",
+        "Replace manual processes with modern, automated structures",
+        "Carry the KPIs FINANCE tracks to revenue, so the plan and the forecast never disagree",
       ],
       stats: [{ value: "—", label: "of growth plans delivered on schedule", verified: false }],
+    },
+    {
+      eyebrow: "Advisory and scaling",
+      title: "Structures that hold as you get bigger, not after.",
+      body:
+        "Modernisation frameworks and expert advisory turn ambition into a structure that can actually carry growth — restructuring, business modelling and market-expansion guidance aimed at a business that grows predictably and stays lean, not one that scales into its own weight.",
+      bullets: [
+        "Modernisation frameworks tied to your actual operating model",
+        "Advisory for restructuring, business modelling and market expansion",
+        "Innovation enablement using hybrid intelligence, not headcount alone",
+        "Build a business that grows predictably and stays lean",
+      ],
+      stats: [{ value: "8", label: "features from market intelligence to transformation tracking", verified: true }],
     },
   ],
   features: [
@@ -263,7 +299,7 @@ export const TALENT: Suite = {
   id: "talent",
   dashboardScreenshot: "/screenshots/talent-dashboard.svg",
   name: "LAMID TALENT",
-  kind: "People intelligence software",
+  kind: "Human-AI Talent Intelligence & Workforce Acceleration",
   audience: "both",
   tint: "#6D28D9",
   Icon: GraduationCap,
@@ -283,6 +319,7 @@ export const TALENT: Suite = {
         "See which teams are carrying unsustainable load",
         "Identify flight risk before the resignation",
         "Map bench strength for every critical role",
+        "Feed capability and risk straight into FINANCE's cost and productivity lines",
       ],
       stats: [
         { value: "40+", label: "signals used in capability matching", verified: false },
@@ -309,6 +346,7 @@ export const TALENT: Suite = {
     { name: "Succession pipeline", description: "Live succession cover for every critical role.", routePrefix: "a21" },
     { name: "Bench strength", description: "Know your depth before someone resigns.", routePrefix: "a22" },
     { name: "Career pathing", description: "Visible paths, tracked movement.", routePrefix: "a25" },
+    { name: "Mentorship", description: "Match and track mentoring relationships.", routePrefix: "api/talent/mentorship" },
     { name: "Workforce forecasting", description: "Forecast headcount and capability against the plan.", routePrefix: "a26" },
     { name: "Engagement signals", description: "Read engagement from behaviour, not just surveys.", routePrefix: "a27" },
     { name: "Behavioural competency", description: "Assess competency on evidence rather than impression.", routePrefix: "a23" },
@@ -340,9 +378,9 @@ export const FINANCE: Suite = {
   audience: "both",
   tint: "#B45309",
   Icon: Landmark,
-  headline: "Financial Clarity Software for Businesses That Plan in Public",
+  headline: "Finance That Drives Decisions, Not Just Reports Them",
   subhead:
-    "Budgets, forecasts, cost structure and enterprise value computed from your figures — with the arithmetic shown, not generated.",
+    "Weak visibility, fragmented budgeting, inconsistent forecasting and poor cost discipline break the link between KPIs and financial reality. LAMID FINANCE closes it — budgets, forecasts, cost structure and enterprise value computed from your figures, with the arithmetic shown, not generated.",
   rollsUp: ["f", "finance"],
   engineCount: 9,
   useCases: [
@@ -384,6 +422,7 @@ export const FINANCE: Suite = {
         "Track enterprise value as the numbers move",
         "Hold financial KPIs against target continuously",
         "Evidence financial governance on demand",
+        "Link CORE's decisions, GROW's growth signals and TALENT's workforce metrics to one financial outcome — not four decks that disagree",
       ],
       stats: [{ value: "9", label: "finance engines from visibility to CFO transformation", verified: true }],
     },
@@ -391,7 +430,7 @@ export const FINANCE: Suite = {
   features: [
     { name: "Financial visibility", description: "One live read on the financial position.", routePrefix: "f01" },
     { name: "Budgeting and forecasting", description: "Costed budgets and forecasts with the arithmetic shown.", routePrefix: "f02" },
-    { name: "Financial KPIs", description: "Hold the metrics that matter against target.", routePrefix: "f03" },
+    { name: "Financial KPIs", description: "Hold operational, growth and workforce metrics against financial target, in one place.", routePrefix: "f03" },
     { name: "Cost optimisation", description: "Find waste and leakage without cutting capability.", routePrefix: "f04" },
     { name: "Enterprise value", description: "Track what the business is worth as it changes.", routePrefix: "f05" },
     { name: "Financial governance", description: "Controls and evidence held live.", routePrefix: "f06" },

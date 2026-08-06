@@ -27,6 +27,16 @@ export default function SettingsPage() {
       {error && <p className="text-sm" style={{ color: "var(--bad)" }}>{error}</p>}
       {data && <ProfileForm profile={data.user} onSaved={reload} />}
 
+      {v.role === "expert" && (
+        <div className="card flex items-center justify-between gap-4 p-6">
+          <div>
+            <h2 className="font-semibold">Expert profile</h2>
+            <p className="muted mt-1 text-sm">Headline and disciplines — what Compass and Scout match briefs against.</p>
+          </div>
+          <Link href="/dashboard/profile/expert" className="btn btn-ghost shrink-0">Edit</Link>
+        </div>
+      )}
+
       <IntegrationsForm />
 
       <div className="card p-6">

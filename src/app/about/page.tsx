@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SimplePage, Prose } from "@/components/layout/SimplePage";
+import { yearsOfOperation } from "@/content/brand";
 
 export const metadata: Metadata = { title: "About us" };
 
@@ -14,10 +15,11 @@ export const metadata: Metadata = { title: "About us" };
  * already applies to stat tiles and outcome claims.
  */
 export default function AboutPage() {
+  const years = yearsOfOperation();
   return (
     <SimplePage
       eyebrow="About"
-      title="Thirty-five years of advisory work, rebuilt as software."
+      title={`${years}+ years of advisory work, rebuilt as software.`}
       lead="LAMID Consulting has run advisory engagements since 1988. LAMID ONE is that practice's own model — the way it frames a decision, weighs a factor, does the arithmetic — put into a platform clients keep, instead of a deck that leaves when the consultants do."
     >
       <Prose>
@@ -92,7 +94,7 @@ export default function AboutPage() {
           data to make the sort of percentage claims most software companies put on a homepage — so
           we have not made them. The stat tiles on this site refuse to render a figure we have not
           verified. That is a deliberate constraint in the code, not an oversight — the same
-          discipline the firm behind it has applied to client work since 1988.
+          discipline the firm behind it has applied to client work for {years}+ years.
         </p>
       </Prose>
     </SimplePage>

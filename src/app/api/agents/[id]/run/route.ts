@@ -7,6 +7,8 @@ import { runEngine, parseEngineCode, EngineInputError } from "@/lib/engines";
 import { chatCompletion, systemPrompt } from "@/lib/ai";
 import { resolveTicket } from "@/lib/supportAgent";
 import { requirePersistenceInProd } from "@/lib/store";
+import { matchExperts, matchProjects } from "@/lib/matching";
+import { listExperts, listProjects, getProject, getExpertProfile } from "@/lib/marketplace";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -88,6 +90,37 @@ export const POST = handler(async (req) => {
         const body = String(input.body ?? "").slice(0, 4000);
         if (!subject && !body) throw new EngineInputError("Steward needs `subject` and/or `body` — the ticket text to resolve.");
         return resolveTicket(subject, body);
+      }
+
+      /* Compass: deterministic weighted scoring against real expert
+         records — no model in the loop. Takes either a `projectId`
+         (score against that project's disciplines) or a bare `skills`
+         array (score a brief before it is even posted). */
+      if (agentId === "matching") {
+        let skills: string[];
+        if (typeof input.projectId === "string") {
+          const project = await getProject(input.projectId);
+          if (!project) throw new EngineInputError(`No project "${input.projectId}".`);
+          skills = project.skills;
+        } else {
+          skills = Array.isArray(input.skills) ? input.skills.map(String) : [];
+        }
+        if (skills.length === 0) throw new EngineInputError("Compass needs `skills` (or a `projectId` to read them from) to match against.");
+
+        const experts = await listExperts({ take: 200 });
+        const take = Math.min(Number(input.take) || 5, 20);
+        return { matches: matchExperts({ skills }, experts, take) };
+      }
+
+      /* Scout: the reverse direction — which open briefs fit MY
+         disciplines. Same deterministic scoring, no model. */
+      if (agentId === "project-match") {
+        const expert = await getExpertProfile(identity.userId!);
+        if (!expert) throw new EngineInputError("No expert profile on this account yet — set one up under your profile first.");
+
+        const open = await listProjects({ status: "open", take: 200 });
+        const take = Math.min(Number(input.take) || 5, 20);
+        return { matches: matchProjects(expert, open, take) };
       }
 
       /* Language-backed: the model writes prose around supplied facts. */

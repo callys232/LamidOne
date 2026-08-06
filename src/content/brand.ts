@@ -19,13 +19,23 @@
 export const BRAND = {
   name: "LAMID ONE",
   wordmark: "LAMID ONE",
-  tagline: "Where organisations go to decide.",
+  tagline: "The evolution of consulting.",
   domain: "lamidone.com",
   accent: "#C12129",
   /** LAMID Consulting mark, carried over from ProdLamid's public folder. */
   logo: "/lamid-logo.png",
   logoAlt: "LAMID Consulting",
 } as const;
+
+/**
+ * LAMID Consulting was founded in 1988 — sourced from the corporate
+ * brochure (see about/page.tsx). Computed rather than hardcoded so
+ * "X years" cannot go stale the way a typed-in figure does; this is the
+ * one place that fact lives, so /about and the homepage cannot drift
+ * against each other the way this file's own header warns against.
+ */
+export const FOUNDED_YEAR = 1988;
+export const yearsOfOperation = () => new Date().getFullYear() - FOUNDED_YEAR;
 
 export type Countable = {
   /** The numeral. Keep notation mixed across a row — `30+`, `~14`, `9`
@@ -41,6 +51,7 @@ export type Countable = {
 
 /** Facts we can count today without waiting for outcome data. */
 export const REACH: Countable[] = [
+  { value: `${yearsOfOperation()}+`, label: "years of advisory work behind the platform", verified: true },
   { value: "30+", label: "industries covered by the expert network", verified: false },
   { value: "5",   label: "plans, from free to concierge",             verified: true  },
   { value: "11",  label: "AI agents running across the platform",     verified: true  },

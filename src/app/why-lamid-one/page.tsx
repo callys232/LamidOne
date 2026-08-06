@@ -32,9 +32,10 @@ export default function WhyPage() {
         <section className="border-b" style={{ borderColor: "var(--line-soft)" }}>
           <div className="shell py-20">
             <div className="max-w-4xl">
-              <Eyebrow>Why LAMID ONE</Eyebrow>
+              <Eyebrow>Why <span className="text-brand">LAMID ONE</span></Eyebrow>
               <h1 className="h-display mt-6">
-                Most advisory leaves when the invoice clears<span className="text-brand">.</span>
+                Consultants leave. Spreadsheets forget.{" "}
+                <span className="text-brand">LAMID ONE</span> stays.
               </h1>
               <p className="lead mt-6 max-w-2xl">
                 We keep the model, the reasoning and the working — so the next decision starts from

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { highlightBrand } from "@/lib/highlightBrand";
 
 /**
  * FAQ — an SEO and objection-handling surface, not a support surface.
@@ -39,7 +40,7 @@ function FaqRow({ item }: { item: FaqItem }) {
           aria-expanded={open}
           className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left"
         >
-          <span className="text-[15px] font-semibold leading-snug">{item.q}</span>
+          <span className="text-[15px] font-semibold leading-snug">{highlightBrand(item.q)}</span>
           <ChevronDown
             className={`mt-0.5 h-5 w-5 shrink-0 transition-transform ${open ? "rotate-180 text-brand" : "faint"}`}
             aria-hidden="true"
@@ -48,7 +49,7 @@ function FaqRow({ item }: { item: FaqItem }) {
       </h3>
       {open && (
         <div className="border-t px-5 py-4" style={{ borderColor: "var(--line-soft)" }}>
-          <p className="muted text-sm leading-relaxed">{item.a}</p>
+          <p className="muted text-sm leading-relaxed">{highlightBrand(item.a)}</p>
         </div>
       )}
     </div>

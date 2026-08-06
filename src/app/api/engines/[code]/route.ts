@@ -48,6 +48,12 @@ export const GET = handler(async (req) => {
     ...(config.inputs?.kind === "optimisation"? { optimisation: true } : {}),
     ...(config.inputs?.kind === "selection"   ? { selection: true } : {}),
     ...(config.inputs?.kind === "conflict"    ? { conflict: true } : {}),
+    /* Measured-data archetypes — periods/metrics travel on `inputs`
+       itself (see ModuleInputSpec), these flags just pick the runner. */
+    ...(config.inputs?.kind === "financial"   ? { financial: true } : {}),
+    ...(config.inputs?.kind === "timeseries"  ? { timeseries: true } : {}),
+    ...(config.inputs?.kind === "roster"      ? { roster: true } : {}),
+    ...(config.inputs?.kind === "scenario"    ? { scenario: true } : {}),
   });
 });
 

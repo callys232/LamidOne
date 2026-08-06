@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Mark } from "@/components/ui/Mark";
 import { ThemeToggle } from "./ThemeToggle";
+import { highlightBrand } from "@/lib/highlightBrand";
 
 /**
  * The mega-menu.
@@ -37,7 +38,7 @@ function MenuLink({ link }: { link: NavLink }) {
   const content = (
     <>
       <span className="flex items-center gap-1.5 font-semibold group-hover:text-brand transition-colors">
-        {link.label}
+        {highlightBrand(link.label)}
         {link.external && <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
         {link.badge && (
           <span className="faint rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
@@ -46,7 +47,7 @@ function MenuLink({ link }: { link: NavLink }) {
           </span>
         )}
       </span>
-      {link.description && <span className="muted mt-0.5 block text-[13px] leading-snug">{link.description}</span>}
+      {link.description && <span className="muted mt-0.5 block text-[13px] leading-snug">{highlightBrand(link.description)}</span>}
     </>
   );
 
@@ -67,7 +68,7 @@ function Columns({ columns }: { columns: NavColumn[] }) {
     <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
       {columns.map((col) => (
         <div key={col.title}>
-          <p className="faint mb-3 text-[11px] font-semibold uppercase tracking-[0.14em]">{col.title}</p>
+          <p className="faint mb-3 text-[11px] font-semibold uppercase tracking-[0.14em]">{highlightBrand(col.title)}</p>
           <div className="space-y-1">
             {col.links.map((l) => <MenuLink key={l.label} link={l} />)}
           </div>
@@ -83,8 +84,8 @@ function ProductsPanel() {
       <div className="mb-8 flex flex-col gap-4 border-b pb-6 md:flex-row md:items-end md:justify-between"
            style={{ borderColor: "var(--line-soft)" }}>
         <div className="max-w-xl">
-          <h2 className="h-section text-2xl sm:text-3xl">{PRODUCTS_MENU.header.title}</h2>
-          <p className="lead mt-2 text-sm">{PRODUCTS_MENU.header.blurb}</p>
+          <h2 className="h-section text-2xl sm:text-3xl">{highlightBrand(PRODUCTS_MENU.header.title)}</h2>
+          <p className="lead mt-2 text-sm">{highlightBrand(PRODUCTS_MENU.header.blurb)}</p>
         </div>
         {/* Escape hatches in the most-clicked corner of the panel. */}
         <div className="flex shrink-0 flex-wrap gap-2">
@@ -143,7 +144,7 @@ function SolutionsPanel() {
         <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {panels[rail].map((col) => (
             <div key={col.title}>
-              <p className="faint mb-3 text-[11px] font-semibold uppercase tracking-[0.14em]">{col.title}</p>
+              <p className="faint mb-3 text-[11px] font-semibold uppercase tracking-[0.14em]">{highlightBrand(col.title)}</p>
               <div className="space-y-1">
                 {col.links.map((l) => <MenuLink key={l.label} link={l} />)}
               </div>
@@ -217,7 +218,7 @@ export function Header({ ctaSet = "marketing" }: { ctaSet?: "marketing" | "prici
         <div className="shell flex h-[68px] items-center justify-between gap-6">
           <Link href="/" className="flex shrink-0 items-center gap-2" aria-label={`${BRAND.name} home`}>
             <Mark className="h-7 w-7 text-brand" />
-            <span className="font-display text-lg tracking-tight">{BRAND.wordmark}</span>
+            <span className="font-display text-lg tracking-tight text-brand">{BRAND.wordmark}</span>
           </Link>
 
           <nav className="hidden lg:block" aria-label="Main">

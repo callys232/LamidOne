@@ -52,7 +52,7 @@ export function Footer() {
               width={140}
               height={36}
             />
-            <span className="font-display text-base tracking-tight">{BRAND.wordmark}</span>
+            <span className="font-display text-base tracking-tight text-brand">{BRAND.wordmark}</span>
           </div>
           <p className="faint text-sm">{BRAND.tagline}</p>
           <a href={`mailto:${CONTACT.salesEmail}`} className="muted text-sm hover:text-brand">

@@ -38,8 +38,8 @@ export default function SolutionsIndex() {
               <Eyebrow>Solutions</Eyebrow>
               <h1 className="h-display mt-6">The right starting point for where you are.</h1>
               <p className="lead mt-6">
-                LAMID ONE adapts to your size, your role and your objective — rather than expecting
-                you to adapt to it.
+                <span className="text-brand">LAMID ONE</span> adapts to your size, your role and your objective —
+                rather than expecting you to adapt to it.
               </p>
             </div>
           </div>

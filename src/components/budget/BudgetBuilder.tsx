@@ -44,7 +44,14 @@ const CONFIDENCE_TONE: Record<string, string> = {
   none: "var(--ink-faint)", thin: "var(--warn)", moderate: "var(--ink)", good: "var(--good)",
 };
 
-export function BudgetBuilder({ onNeedsAuth }: { onNeedsAuth?: () => void }) {
+export function BudgetBuilder({
+  onNeedsAuth, onUseEstimate,
+}: {
+  onNeedsAuth?: () => void;
+  /** Present only when the builder is embedded somewhere that wants the
+   *  result back (e.g. the post-a-project form) rather than just shown. */
+  onUseEstimate?: (r: { min: number; max: number; currency: string }) => void;
+}) {
   const [settings, setSettings] = useState<BudgetSettings>({
     projectName: "", projectType: "Consulting Engagement", currency: "USD",
     periods: 6, periodLabel: "Month",
@@ -334,7 +341,7 @@ export function BudgetBuilder({ onNeedsAuth }: { onNeedsAuth?: () => void }) {
         )}
       </div>
 
-      {computed && <Results b={computed} money={money} />}
+      {computed && <Results b={computed} money={money} onUseEstimate={onUseEstimate} />}
     </div>
   );
 }
@@ -487,7 +494,12 @@ function LineRow({
 
 /* ═══════════════════════════════════════════════════════════════ */
 
-function Results({ b, money }: { b: ComputedBudget; money: (n: number) => string }) {
+function Results({
+  b, money, onUseEstimate,
+}: {
+  b: ComputedBudget; money: (n: number) => string;
+  onUseEstimate?: (r: { min: number; max: number; currency: string }) => void;
+}) {
   const c = b.classification;
   return (
     <div className="space-y-6">
@@ -507,6 +519,18 @@ function Results({ b, money }: { b: ComputedBudget; money: (n: number) => string
           </div>
         </div>
         <p className="muted mt-3 text-sm leading-relaxed">{c.fitFor}</p>
+        {onUseEstimate && (
+          <button
+            type="button" className="btn btn-primary mt-4"
+            onClick={() => onUseEstimate({
+              min: Math.max(0, Math.round(c.lowValue)),
+              max: Math.max(0, Math.round(c.highValue)),
+              currency: b.settings.currency,
+            })}
+          >
+            Use this estimate for the brief
+          </button>
+        )}
 
         <details className="mt-4">
           <summary className="faint cursor-pointer text-xs">How this class was derived</summary>

@@ -80,12 +80,18 @@ export async function createMilestone(
     dueDate: input.dueDate,
   };
 
+  let persisted = false;
   if (persistenceEnabled()) {
     await ensureIndexes();
     const col = await collection<Milestone>("milestones");
-    if (col) { await col.insertOne(milestone); return milestone; }
+    if (col) { await col.insertOne(milestone); persisted = true; }
   }
-  store.set(milestone.id, milestone);
+  if (!persisted) store.set(milestone.id, milestone);
+
+  if (project.awardedExpertId) {
+    await notify(project.awardedExpertId, "New milestone funded", `"${milestone.title}" — ${milestone.currency} ${milestone.amount.toLocaleString()} is held in escrow, ready to submit against.`);
+  }
+
   return milestone;
 }
 
@@ -146,6 +152,9 @@ export async function approveMilestone(clientId: string, milestoneId: string): P
 
   await record({ orgId: null, actorId: clientId, actorRole: "client", action: "milestone_approved", target: m.id, detail: `${m.currency} ${m.amount}` });
   await notify(clientId, "Milestone approved", `You approved "${m.title}" — ${m.currency} ${m.amount.toLocaleString()} has been released.`);
+  if (project.awardedExpertId) {
+    await notify(project.awardedExpertId, "Payment released", `"${m.title}" was approved — ${m.currency} ${m.amount.toLocaleString()} has been released to you.`);
+  }
 
   return updated;
 }
@@ -161,7 +170,13 @@ export async function disputeMilestone(milestoneId: string, raisedBy: string): P
   const project = await getProject(m.projectId);
   if (project) {
     const msg = `A dispute was raised on "${m.title}". Arbiter will assemble the evidence from both sides before anything moves. Auto-release is cancelled.`;
-    await notify(project.clientId, "Milestone disputed", msg);
+    /* Notify whichever party did NOT raise it — the one who needs to
+       hear about this from someone other than themselves. Previously
+       this always notified the client even when the client was the one
+       who raised it, and never reached the expert whose payment just
+       froze if the client raised it. */
+    const other = raisedBy === project.clientId ? project.awardedExpertId : project.clientId;
+    if (other) await notify(other, "Milestone disputed", msg);
   }
   await record({ orgId: null, actorId: raisedBy, actorRole: "unknown", action: "milestone_disputed", target: m.id });
 
@@ -244,6 +259,9 @@ export async function processAutoReleases(): Promise<{ released: string[] }> {
     if (project) {
       const msg = `"${m.title}" released automatically — ${m.currency} ${m.amount.toLocaleString()}, no response within ${autoReleaseWindowLabel()}.`;
       await notify(project.clientId, "Milestone auto-released", msg);
+      if (project.awardedExpertId) {
+        await notify(project.awardedExpertId, "Payment released", `"${m.title}" auto-released — ${m.currency} ${m.amount.toLocaleString()} has been released to you (no response within ${autoReleaseWindowLabel()}).`);
+      }
     }
     await record({ orgId: null, actorId: "system", actorRole: "auto-release", action: "milestone_auto_released", target: m.id, detail: `${m.currency} ${m.amount}` });
   }

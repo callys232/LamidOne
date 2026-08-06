@@ -4,6 +4,7 @@ import { Footer } from "./Footer";
 import { Section, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { CTA } from "@/content/brand";
+import { highlightBrand } from "@/lib/highlightBrand";
 
 /**
  * Shell for pages that are a heading plus content — legal, company,
@@ -33,7 +34,7 @@ export function SimplePage({
             <div className="max-w-3xl">
               {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
               <h1 className="h-display mt-6">{title}</h1>
-              {lead && <p className="lead mt-6">{lead}</p>}
+              {lead && <p className="lead mt-6">{highlightBrand(lead)}</p>}
             </div>
           </div>
         </section>

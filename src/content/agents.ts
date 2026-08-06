@@ -1,10 +1,22 @@
 /**
  * LAMID AGENTS — the AI layer, and the meter that prices it.
  *
- * Every agent below maps to a route that already exists in ProdLamid
- * (`src/app/api/ai/*`) or to an admin-side agent component. Nothing here
- * is aspirational: `route` is the implementation it is backed by.
+ * `route` names what actually backs each agent in THIS app, not in
+ * ProdLamid. In practice there is one dispatch endpoint —
+ * `app/api/agents/[id]/run/route.ts` — with two real specialisations:
+ * engine-backed runs (Catalyst, via `runEngine()` in `lib/engines.ts`,
+ * triggered when the caller passes `input.engine`) and Steward (via
+ * `lib/supportAgent.ts`, grounded against real events before the model
+ * sees the ticket). Every other platform agent below — Compass, Scout,
+ * Scribe, Cadence, Sentry, Arbiter, Vantage, Blueprint — falls through
+ * that same route to one generic `chatCompletion()` call with the
+ * agent's persona swapped into the prompt: no dedicated matching,
+ * dispute-evidence, or completeness-check logic exists yet behind those
+ * names. Aide is the one platform agent NOT served by this endpoint at
+ * all — the assistant widget calls `/api/chat` directly. The two admin
+ * agents (Beacon, Herald) have no implementation in this app yet.
  *
+
  * NAMING
  * Each agent has a single-word name drawn from LAMID ONE's own
  * vocabulary rather than invented in isolation — CADENCE and BLUEPRINT
@@ -64,7 +76,7 @@ export const AGENTS: Agent[] = [
     what: "Reads your organisation's answers and returns a scored diagnostic with the reasoning attached. Everything else in the platform starts here.",
     unit: "per completed diagnostic",
     points: 40,
-    route: "app/api/ai/diagnose/route.ts",
+    route: "app/api/agents/[id]/run/route.ts → runEngine() (lib/engines.ts)",
     suite: "core",
     surface: "platform",
     Icon: Stethoscope,
@@ -74,10 +86,14 @@ export const AGENTS: Agent[] = [
     id: "matching",
     name: "Compass",
     role: "Expert matching agent",
-    what: "Returns a shortlist of experts matched to your brief on 40+ signals, rather than a page of search results.",
+    what: "Scores every expert against your brief on discipline overlap, rating, reliability and verification — a ranked shortlist, not a page of search results.",
     unit: "per delivered shortlist",
     points: 30,
-    route: "app/api/ai/match/route.ts",
+    /* Deterministic weighted scoring against real expert records — see
+       lib/matching.ts. No model in the loop; ported from ProdLamid's
+       matcher.ts with its "AI semantic" label corrected to what it
+       actually is (keyword overlap). */
+    route: "app/api/agents/[id]/run/route.ts → matchExperts() (lib/matching.ts)",
     suite: "market",
     surface: "platform",
     Icon: CompassIcon,
@@ -87,10 +103,13 @@ export const AGENTS: Agent[] = [
     id: "project-match",
     name: "Scout",
     role: "Project fit agent",
-    what: "Scores an expert's fit against an open brief, so bids arrive pre-qualified instead of needing to be read cold.",
+    what: "Ranks every open brief against your own disciplines — which ones you actually fit, not a full listing to read cold.",
     unit: "per scored match",
     points: 20,
-    route: "app/api/ai/project-match/route.ts",
+    /* Deterministic weighted scoring, the reverse of Compass — see
+       lib/matching.ts (scoreProject/matchProjects). No model in the
+       loop. */
+    route: "app/api/agents/[id]/run/route.ts → matchProjects() (lib/matching.ts)",
     suite: "market",
     surface: "platform",
     Icon: Target,
@@ -103,7 +122,7 @@ export const AGENTS: Agent[] = [
     what: "Drafts a scoped, costed proposal from diagnostic output — not from a blank page.",
     unit: "per drafted proposal",
     points: 60,
-    route: "app/api/ai/proposal/route.ts",
+    route: "app/api/agents/[id]/run/route.ts (generic language fallback)",
     suite: "desk",
     surface: "platform",
     Icon: FileText,
@@ -116,7 +135,7 @@ export const AGENTS: Agent[] = [
     what: "Breaks an agreed scope into milestones with deliverables and release conditions attached to each.",
     unit: "per generated plan",
     points: 35,
-    route: "app/api/ai/milestones/route.ts",
+    route: "app/api/agents/[id]/run/route.ts (generic language fallback)",
     suite: "desk",
     surface: "platform",
     Icon: Waves,
@@ -129,7 +148,7 @@ export const AGENTS: Agent[] = [
     what: "Checks a submitted deliverable against its milestone before it reaches you for approval.",
     unit: "per checked deliverable",
     points: 25,
-    route: "app/api/ai/deliverable-check/route.ts",
+    route: "app/api/agents/[id]/run/route.ts (generic language fallback)",
     suite: "market",
     surface: "platform",
     Icon: ShieldCheck,
@@ -142,7 +161,7 @@ export const AGENTS: Agent[] = [
     what: "Assembles the evidence on both sides of a disputed milestone and proposes a resolution before any money moves.",
     unit: "per resolved dispute",
     points: 80,
-    route: "app/api/ai/dispute-check/route.ts",
+    route: "app/api/agents/[id]/run/route.ts (generic language fallback)",
     suite: "market",
     surface: "platform",
     Icon: Scale,
@@ -155,7 +174,7 @@ export const AGENTS: Agent[] = [
     what: "Answers a question about your own organisation using the data already sitting in your engines.",
     unit: "per answered question",
     points: 15,
-    route: "app/api/ai/intelligence/route.ts",
+    route: "app/api/agents/[id]/run/route.ts (generic language fallback)",
     suite: "core",
     surface: "platform",
     Icon: Telescope,
@@ -168,7 +187,7 @@ export const AGENTS: Agent[] = [
     what: "Proposes an operating model from your structure, delivery cadence and decision-authority data.",
     unit: "per generated model",
     points: 90,
-    route: "app/api/ai/operating-model/route.ts",
+    route: "app/api/agents/[id]/run/route.ts (generic language fallback)",
     suite: "core",
     surface: "platform",
     Icon: Boxes,
@@ -181,7 +200,9 @@ export const AGENTS: Agent[] = [
     what: "Answers questions anywhere in the platform, grounded in your own records rather than in a general guess.",
     unit: "per conversation",
     points: 10,
-    route: "app/api/ai/chat/route.ts",
+    /* Not served by app/api/agents/[id]/run — the assistant widget
+       (components/layout/AssistantWidget.tsx) calls this directly. */
+    route: "app/api/chat/route.ts",
     suite: "core",
     surface: "platform",
     Icon: MessageSquare,
@@ -194,7 +215,7 @@ export const AGENTS: Agent[] = [
     what: "Drafts a grounded reply to a support ticket — checked against real upcoming events, and handed off honestly to LAMID Learning when a question is about courses or certification rather than the platform itself.",
     unit: "per resolved ticket",
     points: 15,
-    route: "lib/supportAgent.ts",
+    route: "app/api/agents/[id]/run/route.ts → resolveTicket() (lib/supportAgent.ts)",
     suite: "desk",
     surface: "platform",
     Icon: LifeBuoy,
@@ -209,7 +230,8 @@ export const AGENTS: Agent[] = [
     what: "Summarises platform activity and surfaces anomalies for the operations team.",
     unit: "internal — not metered",
     points: 0,
-    route: "components/admin/analyticsAgent.tsx",
+    /* Not implemented in this app yet — no admin surface exists for it. */
+    route: "not yet implemented",
     suite: "core",
     surface: "admin",
     Icon: Radio,
@@ -222,7 +244,8 @@ export const AGENTS: Agent[] = [
     what: "Drafts and sequences operator outreach to clients and experts.",
     unit: "internal — not metered",
     points: 0,
-    route: "components/admin/outreachAgent.tsx",
+    /* Not implemented in this app yet — no admin surface exists for it. */
+    route: "not yet implemented",
     suite: "signal",
     surface: "admin",
     Icon: Send,
@@ -247,7 +270,14 @@ export const ACTION_COSTS = [
   { action: "Boost a bid",         points: 60, who: "Experts — 2× visibility" },
   { action: "Expert match",        points: 30, who: "Clients" },
   { action: "Business diagnostic", points: 40, who: "Clients" },
-] as const;
+  /* Added alongside the post-project enrichment panel — these agents
+     already existed with a defined cost but were missing from this
+     rate card, the one place `/points` reads its "marketplace actions"
+     list from. Derived from AGENTS so this cannot drift from what the
+     agent actually charges. */
+  { action: "Draft a proposal",       points: AGENTS.find((a) => a.id === "proposal")!.points,   who: "Clients — Starter plan and up" },
+  { action: "Break into milestones",  points: AGENTS.find((a) => a.id === "milestones")!.points, who: "Clients — Starter plan and up" },
+];
 
 /**
  * Signup grants.

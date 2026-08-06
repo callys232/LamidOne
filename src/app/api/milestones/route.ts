@@ -2,7 +2,6 @@ import { handler, ok, fail, badRequest, rateLimited } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { listMilestones, createMilestone, submitMilestone, approveMilestone, disputeMilestone, MilestoneError } from "@/lib/milestones";
-import { record } from "@/lib/audit";
 import { requirePersistenceInProd } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -67,13 +66,10 @@ export const PATCH = handler(async (req) => {
 
     if (!milestone) return badRequest(`Unknown action "${body.action}".`);
 
-    if (body.action === "approve") {
-      await record({
-        orgId: identity.orgId, actorId: identity.userId, actorRole: "client",
-        action: "milestone_approved", target: milestone.id,
-        detail: `${milestone.currency} ${milestone.amount}`,
-      });
-    }
+    /* Audit logging for every transition lives inside milestones.ts,
+       next to the state change itself (submit/dispute/auto-release all
+       already log there) — this used to ALSO log "approve" here,
+       writing the same event to the audit trail twice. */
 
     return ok({ milestone });
   } catch (e) {

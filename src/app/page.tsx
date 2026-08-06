@@ -10,7 +10,7 @@ import { SuiteGrid } from "@/components/sections/SuiteGrid";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CaseStudyRail, CASE_STUDIES } from "@/components/sections/CaseStudyRail";
 import { Faq } from "@/components/sections/Faq";
-import { CTA, REACH } from "@/content/brand";
+import { CTA, REACH, yearsOfOperation } from "@/content/brand";
 import { SUITES } from "@/content/suites";
 import { PLATFORM_AGENTS, POINTS_EXPLAINER } from "@/content/agents";
 import { VERIFIED_INTEGRATIONS } from "@/content/platform";
@@ -34,25 +34,22 @@ export default function HomePage() {
       <Header />
       <main id="main">
 
-        {/* ── Hero ──────────────────────────────────────────────
-            Jargon in the eyebrow so the headline can stay human.
-            The headline names the BUYER, not the product — it is a
-            qualification device disguised as a value proposition. */}
+        {/* ── Hero ────────────────────────────────────────────── */}
         <section className="border-b" style={{ borderColor: "var(--line-soft)" }}>
           <div className="shell py-20 sm:py-28">
             <div className="max-w-4xl">
               <Eyebrow>LAMID ONE — Human-AI Consulting Operating System</Eyebrow>
-              {/* The final word rotates so the line reads as a claim about
-                  the whole decision lifecycle rather than one verb. Slow
-                  and short-travel on purpose — see RotatingWord. */}
+              {/* Rotating word maps to the four original suites without
+                  naming them — Strategy → CORE, Growth → GROW,
+                  People → TALENT, Capital → FINANCE. */}
               <h1 className="h-hero mt-6">
-                Where organisations go to{" "}
-                <RotatingWord words={["decide", "plan", "deliver", "grow"]} />
-                <span className="text-brand">.</span>
+                The Future of{" "}
+                <RotatingWord words={["Strategy", "Growth", "People", "Capital"]} />
+                <span className="text-brand">,</span> Delivered as One.
               </h1>
               <p className="lead mt-7 max-w-2xl">
-                Strategy, growth, people, finance and clients on one operating layer — with the
-                arithmetic shown, not generated. Nine suites, eleven agents, one record.
+                A consulting experience built on transparency, reliability, and {yearsOfOperation()}+ years of
+                leadership. A single, trusted system for intelligent consulting and enterprise growth.
               </p>
               <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-10" />
               <p className="faint mt-4 text-sm">
@@ -124,6 +121,10 @@ export default function HomePage() {
                 Every suite writes to the same record, so the diagnostic that started the
                 conversation is still attached when the invoice goes out.
               </p>
+              <p className="muted mt-4 text-sm leading-relaxed">
+                Strategy in CORE, growth in GROW, people in TALENT, capital in FINANCE —
+                one arc, not four disconnected tools.
+              </p>
               <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-8" />
             </div>
             <div className="lg:col-span-8">
@@ -193,10 +194,13 @@ export default function HomePage() {
         {/* ── Customer proof ──────────────────────────────────
             Ships empty until a real, consented story exists. */}
         <Section id="customers">
+          <p className="font-display mb-8 text-lg">
+            {SUITES.length} suites. 1 ecosystem. {yearsOfOperation()}+ years of leadership behind it.
+          </p>
           <SectionHeading
             eyebrow="Customer proof"
             title="Named organisations. Numbers they verified."
-            blurb="We publish case studies with a person, a role and a figure the customer stands behind — or we publish nothing."
+            blurb="We publish named organisations with figures they have verified — not anonymous testimonials. The first studies go up as engagements complete."
           />
           <CaseStudyRail studies={CASE_STUDIES} />
         </Section>

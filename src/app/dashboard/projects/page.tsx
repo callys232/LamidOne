@@ -17,12 +17,13 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl">{isExpert ? "Your bids" : "Your projects"}</h1>
+        {!isExpert && <Link href="/dashboard/projects/new" className="btn btn-primary">Post a brief</Link>}
       </div>
 
       {v.work.projects.length === 0 ? (
         <EmptyState
           text={isExpert ? "You have not bid on anything yet." : "Nothing posted yet."}
-          cta={isExpert ? { label: "Browse open briefs", href: "/dashboard/experts" } : { label: "Post a brief", href: "/api/projects" }}
+          cta={isExpert ? { label: "Browse open briefs", href: "/dashboard/projects/browse" } : { label: "Post a brief", href: "/dashboard/projects/new" }}
         />
       ) : (
         <div className="grid gap-3">

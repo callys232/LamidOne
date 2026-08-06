@@ -17,6 +17,7 @@ import { PLATFORM_AGENTS } from "@/content/agents";
 import { CTA } from "@/content/brand";
 import { suiteFaq } from "@/content/suiteFaq";
 import type { TierId } from "@/content/tiers";
+import { highlightBrand } from "@/lib/highlightBrand";
 
 /**
  * THE SUITE PAGE TEMPLATE — one file, nine pages.
@@ -159,7 +160,7 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
               </div>
 
               <h1 className="h-display mt-7">{suite.headline}</h1>
-              <p className={`lead mt-6 ${studio ? "mx-auto max-w-2xl" : "max-w-2xl"}`}>{suite.subhead}</p>
+              <p className={`lead mt-6 ${studio ? "mx-auto max-w-2xl" : "max-w-2xl"}`}>{highlightBrand(suite.subhead)}</p>
 
               <div className={studio ? "mt-10 flex justify-center" : "mt-10"}>
                 <CtaPair primary={primaryCta} secondary={secondaryCta} />

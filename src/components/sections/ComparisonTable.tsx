@@ -1,5 +1,6 @@
 import { Check, Minus, X } from "lucide-react";
 import type { ComparisonRow } from "@/content/suites";
+import { highlightBrand } from "@/lib/highlightBrand";
 
 /**
  * The three-column competitive comparison — the most transferable thing
@@ -28,8 +29,8 @@ export function ComparisonTable({
   return (
     <div>
       <div className="mb-10 max-w-3xl">
-        <h2 className="h-section">{headline}</h2>
-        <p className="lead mt-4">{blurb}</p>
+        <h2 className="h-section">{highlightBrand(headline)}</h2>
+        <p className="lead mt-4">{highlightBrand(blurb)}</p>
       </div>
 
       <div className="overflow-x-auto">

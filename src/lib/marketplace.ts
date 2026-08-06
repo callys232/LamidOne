@@ -1,6 +1,7 @@
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
 import { ACTION_COSTS } from "@/content/agents";
 import { listMilestones } from "./milestones";
+import { notify } from "./notifications";
 
 /**
  * MARKETPLACE — projects, bids and experts.
@@ -269,7 +270,15 @@ export async function awardBid(clientId: string, projectId: string, bidId: strin
     throw new MarketplaceError("This bid can no longer be awarded.");
   }
 
+  /* Read the other live bids BEFORE declining them, so there is
+     something to notify once the write lands — `updateMany` does not
+     hand results back. */
+  const others = (await listBids(projectId)).filter(
+    (b) => b.id !== bidId && (b.status === "submitted" || b.status === "shortlisted"),
+  );
+
   const now = Date.now();
+  let result: { project: Project; bid: Bid };
 
   if (persistenceEnabled()) {
     const prjCol = await collection<Project>("projects");
@@ -291,10 +300,23 @@ export async function awardBid(clientId: string, projectId: string, bidId: strin
         { $set: { status: "declined" } },
       );
 
-      return { project: updatedProject, bid: { ...bid, status: "accepted" } };
+      result = { project: updatedProject, bid: { ...bid, status: "accepted" } };
+    } else {
+      result = awardInMemory(project, bid, now);
     }
+  } else {
+    result = awardInMemory(project, bid, now);
   }
 
+  await notify(bid.expertId, "You were awarded this project", `"${project.title}" — your bid was accepted. Escrow milestones open next.`);
+  for (const b of others) {
+    await notify(b.expertId, "Bid update", `"${project.title}" went with another bid. Keep an eye on new briefs — this one is closed.`);
+  }
+
+  return result;
+}
+
+function awardInMemory(project: Project, bid: Bid, now: number): { project: Project; bid: Bid } {
   if (project.status !== "open") throw new MarketplaceError("This project was just awarded by another request.");
   project.status = "awarded";
   project.awardedExpertId = bid.expertId;
@@ -302,7 +324,7 @@ export async function awardBid(clientId: string, projectId: string, bidId: strin
   project.updatedAt = now;
   bid.status = "accepted";
   for (const b of bids.values()) {
-    if (b.projectId === projectId && b.id !== bidId && (b.status === "submitted" || b.status === "shortlisted")) {
+    if (b.projectId === project.id && b.id !== bid.id && (b.status === "submitted" || b.status === "shortlisted")) {
       b.status = "declined";
     }
   }

@@ -14,12 +14,20 @@ import { RoadmapRunner } from "@/components/diagnostics/RoadmapRunner";
 import { OptimisationRunner } from "@/components/diagnostics/OptimisationRunner";
 import { SelectionRunner } from "@/components/diagnostics/SelectionRunner";
 import { ConflictRunner } from "@/components/diagnostics/ConflictRunner";
+import { TimeSeriesRunner } from "@/components/diagnostics/TimeSeriesRunner";
+import { FinancialRunner } from "@/components/diagnostics/FinancialRunner";
+import { RosterRunner } from "@/components/diagnostics/RosterRunner";
+import { ScenarioOptionsRunner } from "@/components/diagnostics/ScenarioOptionsRunner";
 import type { RoadmapResult } from "@/lib/intelligence/roadmap";
 import type { OptimisationResult } from "@/lib/intelligence/optimisation";
 import type { SelectionResult } from "@/lib/intelligence/selector";
 import type { ConflictResult } from "@/lib/intelligence/conflict";
 import type { GrowthPathwaysResult, PathwayInput } from "@/lib/intelligence/growthPathways";
 import type { DQQuestion, RequirementMeta, DecisionQualityResult, Consequence, Reversibility } from "@/lib/intelligence/decisionQuality";
+import type { SeriesMetric, SeriesStats } from "@/lib/intelligence/inputSpec";
+import type { FinancialSummary } from "@/lib/intelligence/financial";
+import type { RosterSummary } from "@/lib/intelligence/roster";
+import type { ScenarioSummary } from "@/lib/intelligence/scenario";
 
 /**
  * THE PUBLIC DIAGNOSTIC RUNNER.
@@ -40,7 +48,9 @@ import type { DQQuestion, RequirementMeta, DecisionQualityResult, Consequence, R
 
 type EngineSpec = {
   code: string; suite: string; engineName: string; seriesName: string;
-  purpose: string; inputs: { kind?: string } | null; dimensionLabels: string[]; registered: boolean;
+  purpose: string;
+  inputs: { kind?: string; periodLabel?: string; periods?: number; metrics?: SeriesMetric[] } | null;
+  dimensionLabels: string[]; registered: boolean;
   minTier: string | null;
   /* Present only for modules that ship a fixed anchored question bank
      instead of free-form dimension sliders — see Q44. */
@@ -51,6 +61,10 @@ type EngineSpec = {
   optimisation?: boolean;
   selection?: boolean;
   conflict?: boolean;
+  financial?: boolean;
+  timeseries?: boolean;
+  roster?: boolean;
+  scenario?: boolean;
 };
 
 type Row = { label: string; rating: number; weight: number; evidence: 0 | 1 | 2; note: string };
@@ -91,13 +105,26 @@ export default function PublicDiagnosticPage() {
   const [opResult, setOpResult] = useState<OptimisationResult | null>(null);
   const [selResult, setSelResult] = useState<SelectionResult | null>(null);
   const [cfResult, setCfResult] = useState<ConflictResult | null>(null);
+  const [tsResult, setTsResult] = useState<SeriesStats[] | null>(null);
+  const [finResult, setFinResult] = useState<FinancialSummary | null>(null);
+  const [rosterResult, setRosterResult] = useState<RosterSummary | null>(null);
+  const [scenarioResult, setScenarioResult] = useState<ScenarioSummary | null>(null);
+
+  /* F02 is financial-kind by registry classification, but it runs its
+     own dedicated budget tool rather than the generic financial runner —
+     same exclusion the dashboard engine page applies. */
+  const isF02 = spec?.code === "F02";
 
   /* Which structured runner this module uses, if any. Keeps the render
-     branch to one condition instead of four near-identical blocks. */
+     branch to one condition instead of eight near-identical blocks. */
   const structuredKind = spec?.roadmap ? "roadmap"
     : spec?.optimisation ? "optimisation"
     : spec?.selection ? "selection"
     : spec?.conflict ? "conflict"
+    : spec?.financial && !isF02 ? "financial"
+    : spec?.timeseries ? "timeseries"
+    : spec?.roster ? "roster"
+    : spec?.scenario ? "scenario"
     : null;
 
   /* Structured-input modules post their own payload shape and render
@@ -315,6 +342,41 @@ export default function PublicDiagnosticPage() {
                   onRun={(p) => runStructured(p as never, (s) => setCfResult(s as ConflictResult))}
                   onReset={() => setCfResult(null)} />
               )}
+              {structuredKind === "financial" && (
+                <FinancialRunner
+                  periodLabel={spec!.inputs?.periodLabel ?? "Month"} periods={spec!.inputs?.periods ?? 6}
+                  busy={busy} result={finResult}
+                  onRun={(p) => runStructured(p as never, (s) => setFinResult(s as FinancialSummary))}
+                  onReset={() => setFinResult(null)} />
+              )}
+              {structuredKind === "timeseries" && (
+                <TimeSeriesRunner
+                  metrics={spec!.inputs?.metrics ?? []} periodLabel={spec!.inputs?.periodLabel ?? "Period"}
+                  periods={spec!.inputs?.periods ?? 6}
+                  busy={busy} result={tsResult}
+                  onRun={(p) => runStructured(p as never, (s) => setTsResult(Array.isArray(s) ? s as SeriesStats[] : [s as SeriesStats]))}
+                  onReset={() => setTsResult(null)} />
+              )}
+              {structuredKind === "roster" && (
+                <RosterRunner busy={busy} result={rosterResult}
+                  onRun={(p) => runStructured(p as never, (s) => setRosterResult(s as RosterSummary))}
+                  onReset={() => setRosterResult(null)} />
+              )}
+              {structuredKind === "scenario" && (
+                <ScenarioOptionsRunner busy={busy} result={scenarioResult}
+                  onRun={(p) => runStructured(p as never, (s) => setScenarioResult(s as ScenarioSummary))}
+                  onReset={() => setScenarioResult(null)} />
+              )}
+            </div>
+          )}
+
+          {spec?.financial && isF02 && (
+            <div className="mx-auto max-w-2xl">
+              <div className="card p-6 text-center">
+                <p className="font-display text-lg">This is a budget calculator, not an assessment.</p>
+                <p className="muted mt-2 text-sm">F02 runs its own line-item budget tool.</p>
+                <Link href="/diagnostics/budget" className="btn btn-primary mt-4 inline-flex">Open the budget calculator</Link>
+              </div>
             </div>
           )}
 
@@ -352,7 +414,7 @@ export default function PublicDiagnosticPage() {
             </div>
           )}
 
-          {spec && !spec.decisionQuality && !spec.growthPathways && !spec.scenarioDecision && !structuredKind && !result && (
+          {spec && !spec.decisionQuality && !spec.growthPathways && !spec.scenarioDecision && !structuredKind && !isF02 && !result && (
             <div className="mx-auto max-w-2xl space-y-8">
               <div>
                 <div className="flex items-center gap-2">

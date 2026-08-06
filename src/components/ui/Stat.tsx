@@ -21,7 +21,7 @@ export type StatLike = { value: string; label: string; basis?: string; verified:
 
 export function StatTile({ stat }: { stat: StatLike }) {
   return (
-    <div className="flex-1 px-2 first:pl-0 last:pr-0">
+    <div className="flex-1 px-6 first:pl-0 last:pr-0">
       <p className="stat-value text-brand">{stat.value}</p>
       <p className="stat-label">
         {stat.label}
@@ -47,7 +47,7 @@ export function StatRow({
       style={{ borderColor: "var(--line)" }}
     >
       {shown.map((s) => (
-        <div key={s.label} className="py-5 sm:py-0" style={{ borderColor: "var(--line)" }}>
+        <div key={s.label} className="py-6 sm:py-0" style={{ borderColor: "var(--line)" }}>
           <StatTile stat={s} />
         </div>
       ))}
