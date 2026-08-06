@@ -3,12 +3,14 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
-import { INTEGRATIONS, VERIFIED_INTEGRATIONS, VERIFIED_INTEGRATION_CATEGORIES } from "@/content/platform";
+import { IntegrationCard } from "@/components/integrations/IntegrationCard";
+import { DashboardConnectDemo } from "@/components/integrations/DashboardConnectDemo";
+import { VERIFIED_INTEGRATIONS, VERIFIED_INTEGRATION_CATEGORIES } from "@/content/platform";
 import { CTA } from "@/content/brand";
 
 export const metadata: Metadata = {
   title: "Integrations",
-  description: "What's live today, and what's next.",
+  description: "What's live today, and what's next — plus how to actually turn each one on.",
 };
 
 /**
@@ -22,10 +24,26 @@ export const metadata: Metadata = {
  * for certifications: what is real today, and what genuinely is not
  * yet, named plainly rather than folded into one confident-sounding
  * number.
+ *
+ * Each card expands in place to a "how to use it" explainer —
+ * content/platform.ts's `howTo` field, not invented per-render. The
+ * demo slide shows the one integration flow a customer can run
+ * themselves today (a webhook URL pasted in Dashboard → Settings) as
+ * built mockup frames rather than a recorded video, since no video
+ * asset exists yet and a mockup can't drift out of sync with the real
+ * component the way a recording would.
+ *
+ * The roadmap ("not yet") list that used to run below the directory
+ * has been removed from this page by request — those entries still
+ * exist in content/platform.ts as verified: false for internal
+ * reference, just not rendered here.
+ *
+ * The directory itself is one flat grid rather than a section per
+ * category: at 8 live integrations across 5 categories, several
+ * categories were a single sparse row. Each card carries its own
+ * category pill instead.
  */
 export default function IntegrationsPage() {
-  const roadmap = INTEGRATIONS.filter((i) => !i.verified);
-
   return (
     <>
       <Header ctaSet="neutral" />
@@ -36,50 +54,31 @@ export default function IntegrationsPage() {
               <Eyebrow>Integrations</Eyebrow>
               <h1 className="h-display mt-6">What&apos;s live, and what&apos;s next.</h1>
               <p className="lead mt-6">
-                {VERIFIED_INTEGRATIONS.length} integrations across {VERIFIED_INTEGRATION_CATEGORIES.length} categories
-                are live in production today. The rest are named below, not hidden.
+                Real payments, a real model layer, real data, and real connections to LAMID&apos;s own
+                ecosystem apps — named plainly, not folded into one confident-sounding number.
               </p>
             </div>
           </div>
         </section>
 
-        <Section id="directory">
-          <div className="space-y-12">
-            {VERIFIED_INTEGRATION_CATEGORIES.map((cat) => {
-              const items = VERIFIED_INTEGRATIONS.filter((i) => i.category === cat);
-              return (
-                <section key={cat}>
-                  <div className="mb-6 flex items-baseline gap-5">
-                    <h2 className="font-display text-2xl">{cat}</h2>
-                    <span className="h-px flex-1" style={{ background: "var(--line)" }} aria-hidden="true" />
-                    <span className="faint text-sm tabular-nums">{items.length}</span>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map((i) => (
-                      <div key={i.name} className="card card-interactive p-6">
-                        <h3 className="font-semibold">{i.name}</h3>
-                        <p className="muted mt-2 text-sm leading-relaxed">{i.what}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
+        <Section id="demo" className="border-b" >
+          <SectionHeading
+            eyebrow="See it work"
+            title="Connecting an integration, step by step."
+            blurb="The webhook flow below is the one integration you can wire up yourself right now — everything else on this page is either automatic (no setup) or not built yet."
+          />
+          <DashboardConnectDemo />
         </Section>
 
-        <Section id="roadmap" tone="tint" className="border-t">
+        <Section id="directory">
           <SectionHeading
-            eyebrow="Not yet"
-            title="On the roadmap."
-            blurb="Named because omitting them would be the misleading choice, same as the trust centre."
+            eyebrow="Live directory"
+            title="Everything wired in today."
+            blurb={`${VERIFIED_INTEGRATIONS.length} integrations across ${VERIFIED_INTEGRATION_CATEGORIES.length} categories — open a card for how to actually turn it on.`}
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {roadmap.map((i) => (
-              <div key={i.name} className="card p-6 opacity-70">
-                <h3 className="font-semibold">{i.name}</h3>
-                <p className="muted mt-2 text-sm leading-relaxed">{i.what}</p>
-              </div>
+          <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {VERIFIED_INTEGRATIONS.map((i) => (
+              <IntegrationCard key={i.name} integration={i} />
             ))}
           </div>
         </Section>

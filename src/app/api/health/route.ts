@@ -5,6 +5,9 @@ import { AGENTS } from "@/content/agents";
 import { TIERS } from "@/content/tiers";
 import { REGISTERED_CODES } from "@/lib/engines";
 import { mockEnabled } from "@/lib/mockUsers";
+import { mailerConfigured } from "@/lib/mailer";
+import { turnstileConfigured } from "@/lib/turnstile";
+import { stripeConfigured } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,6 +30,10 @@ export async function GET() {
     paystackWebhook: Boolean(process.env.PAYSTACK_SECRET_KEY),
     cronSecret: Boolean(process.env.LAMID_CRON_SECRET),
     mockAuth: mockEnabled(),
+    mailer: mailerConfigured(),
+    errorMonitoring: Boolean(process.env.SENTRY_DSN),
+    botProtection: turnstileConfigured(),
+    stripeWebhook: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
   };
 
   const warnings: string[] = [];
@@ -42,6 +49,8 @@ export async function GET() {
   if (!configured.paystackWebhook) warnings.push("PAYSTACK_SECRET_KEY unset — /api/webhooks/paystack cannot verify signatures and rejects everything with 503.");
   if (!configured.cronSecret) warnings.push("LAMID_CRON_SECRET unset — /api/cron/auto-release and /api/cron/sweep-holds are unreachable; both still self-correct opportunistically on normal reads, just not on a schedule.");
   if (configured.mockAuth && env.isProd) warnings.push("MOCK AUTH IS ENABLED IN PRODUCTION. Unset LAMID_ALLOW_MOCK_AUTH.");
+  if (!configured.mailer) warnings.push("RESEND_API_KEY unset — password reset, invitations and every other notification email silently do not send; the actions themselves still succeed.");
+  if (!configured.errorMonitoring && env.isProd) warnings.push("SENTRY_DSN unset in production — unhandled errors only reach the server console, not an alertable dashboard.");
 
   return ok({
     status: warnings.length === 0 ? "ok" : "degraded",

@@ -80,6 +80,67 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* ── How it works ─────────────────────────────────────
+            The user's own journey through the product (starting from
+            the free diagnostic — the first thing a visitor actually
+            does), not the architectural layers below it. Reuses the
+            same dark contrast band as the closing CTA (`tone="ink"`,
+            which already inverts correctly per theme) rather than the
+            unrelated blue from the reference design — the accent
+            colour stays the brand red, on the step numerals, matching
+            the one place this design system already permits it
+            (globals.css's own rationing rule). */}
+        <Section id="how-it-works" tone="ink">
+          <div className="text-center">
+            <p
+              className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "var(--page)", opacity: 0.6 }}
+            >
+              <span className="h-[6px] w-[6px] shrink-0 rounded-full" style={{ background: "var(--brand)" }} aria-hidden="true" />
+              How it works
+            </p>
+            <h2 className="h-display mx-auto mt-4 max-w-2xl" style={{ color: "var(--page)" }}>
+              From Diagnostic to Growth.
+            </h2>
+          </div>
+
+          <div className="relative mt-16 grid gap-10 sm:grid-cols-5">
+            <div
+              className="pointer-events-none absolute left-0 right-0 top-6 hidden sm:block"
+              style={{ height: 1, background: "var(--page)", opacity: 0.12 }}
+              aria-hidden="true"
+            />
+            <div
+              className="timeline-line pointer-events-none absolute left-0 right-0 top-6 hidden sm:block"
+              style={{ height: 1, background: "var(--brand)", opacity: 0.8 }}
+              aria-hidden="true"
+            />
+            {[
+              { t: "Diagnose", d: "Take the Enterprise Diagnostic. Tell us where you are across Strategy, Growth, People, and Finance." },
+              { t: "Reveal", d: "See your real score. LAMID ONE surfaces your gaps and strengths across all four pillars — honestly." },
+              { t: "Unlock", d: "Get personalised recommendations matched to your scale, sector, and situation — not a generic report." },
+              { t: "Act", d: "Engage the suite, the experts, or the tools your score says you need most. One ecosystem, one entry point." },
+              { t: "Grow", d: "Track progress. Refine your position. See your organisation evolve in real time — quarter by quarter." },
+            ].map((step, i) => (
+              <div key={step.t} className="relative text-center">
+                <span
+                  className="font-display relative z-10 mx-auto flex h-12 w-12 items-center justify-center rounded-full text-lg"
+                  style={{ background: "var(--brand)", color: "var(--brand-ink)" }}
+                >
+                  {i + 1}
+                </span>
+                <h3 className="mt-4 font-semibold" style={{ color: "var(--page)" }}>{step.t}</h3>
+                <p
+                  className="mt-2 text-sm leading-relaxed text-justify"
+                  style={{ color: "var(--page)", opacity: 0.65, textAlignLast: "justify" }}
+                >
+                  {step.d}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         {/* ── Architecture ────────────────────────────────────
             The one-image claim: what IS this. Answers the first
             question faster than any paragraph can. */}
@@ -167,7 +228,7 @@ export default function HomePage() {
                 <h2 className="h-section text-2xl sm:text-3xl">What actually powers this.</h2>
                 <p className="lead mt-4 text-base">
                   Real payments, a real model layer, and real connections to LAMID&apos;s own
-                  ecosystem apps — {VERIFIED_INTEGRATIONS.length} in production today.
+                  ecosystem apps.
                 </p>
                 <Link href="/integrations" className="link-underline mt-6 inline-flex text-sm">
                   See what&apos;s live and what&apos;s next

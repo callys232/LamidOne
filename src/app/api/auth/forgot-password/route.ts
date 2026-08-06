@@ -3,6 +3,7 @@ import { limit, clientId } from "@/lib/ratelimit";
 import { findUserByEmail, validateEmail } from "@/lib/users";
 import { createResetToken } from "@/lib/passwordReset";
 import { sendEmail, mailerConfigured } from "@/lib/mailer";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { env } from "@/lib/env";
 import { requirePersistenceInProd } from "@/lib/store";
 
@@ -27,8 +28,12 @@ export const POST = handler(async (req) => {
   const rl = await limit("form", clientId(req));
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
-  const body = await req.json().catch(() => null) as { email?: string } | null;
+  const body = await req.json().catch(() => null) as { email?: string; turnstileToken?: string } | null;
   if (!body?.email) return badRequest("`email` is required.");
+
+  if (!(await verifyTurnstile(body.turnstileToken, clientId(req)))) {
+    return badRequest("Verification failed. Please try again.");
+  }
 
   let email: string;
   try {

@@ -46,7 +46,7 @@ export const IDENTITY: Capability[] = [
   { name: "Email verification", description: "Verify address before granting full access.", backedBy: ["api/auth/verify-email"], suite: "core", visibility: "public", verified: false },
   { name: "Enterprise SSO", description: "SSO code issue and validation for enterprise tenants.", backedBy: ["api/auth/sso/validate", "lib/models/SsoCode.ts"], suite: "core", visibility: "public", verified: false },
   { name: "Session refresh and revocation", description: "Rotating tokens with a server-side blocklist.", backedBy: ["api/auth/refresh", "api/auth/logout", "lib/tokenBlocklist.ts"], suite: "core", visibility: "public", verified: false },
-  { name: "Bot protection", description: "Cloudflare Turnstile on public forms.", backedBy: ["lib/turnstile.ts"], suite: "core", visibility: "operator", verified: false },
+  { name: "Bot protection", description: "Cloudflare Turnstile on signup and forgot-password, config-gated.", backedBy: ["lib/turnstile.ts", "components/ui/Turnstile.tsx"], suite: "core", visibility: "operator", verified: true },
   { name: "Account deletion", description: "Self-service deletion with an operator review queue.", backedBy: ["api/auth/delete", "api/support/deletion-request", "api/admin/deletion-requests"], suite: "core", visibility: "public", verified: false },
 ];
 
@@ -88,8 +88,8 @@ export const DELIVERY: Capability[] = [
   { name: "Automatic release policy", description: "Time-based release when no objection is raised, reversible right up to the moment it fires.", backedBy: ["api/cron/auto-release", "lib/autoRelease.ts"], suite: "desk", visibility: "public", verified: true },
   { name: "Wallet and points ledger", description: "Balance, hold, settle and full transaction history.", backedBy: ["api/points", "lib/points.ts"], suite: "desk", visibility: "public", verified: true },
   { name: "Local payment rails", description: "Paystack checkout, real recurring subscriptions, and a signature-verified webhook.", backedBy: ["api/checkout", "api/webhooks/paystack", "lib/paystack.ts", "lib/fulfillment.ts"], suite: "desk", visibility: "public", verified: true },
-  { name: "Card and subscription payments (Stripe)", description: "Stripe checkout, subscription create and cancel.", backedBy: ["api/subscription/create", "api/subscription/cancel", "lib/stripe.ts"], suite: "desk", visibility: "public", verified: false },
-  { name: "Invoicing", description: "Generate, render and email a PDF invoice.", backedBy: ["api/invoice/generate", "lib/pdf/invoiceTemplate.ts", "lib/sendInvoice.ts"], suite: "desk", visibility: "public", verified: false },
+  { name: "Card and subscription payments (Stripe)", description: "A second checkout rail alongside Paystack — same routes, provider: \"stripe\".", backedBy: ["api/checkout/tier", "api/checkout/points", "api/webhooks/stripe", "api/billing/cancel", "lib/stripe.ts"], suite: "desk", visibility: "public", verified: true },
+  { name: "Invoicing", description: "Generate and render a PDF invoice for download.", backedBy: ["api/invoices/[id]/pdf", "lib/pdf/invoiceTemplate.ts", "lib/invoices.ts"], suite: "desk", visibility: "public", verified: true },
   { name: "Contract generation", description: "Generate an engagement contract as a PDF.", backedBy: ["api/contract/generate", "lib/pdf/contractTemplate.ts"], suite: "desk", visibility: "public", verified: false },
   { name: "Receipts", description: "Automatic receipting on every settled transaction.", backedBy: ["lib/sendReceipts.ts"], suite: "desk", visibility: "public", verified: false },
 ];
@@ -139,8 +139,8 @@ export const COLLABORATION: Capability[] = [
   { name: "Messaging", description: "Threaded messaging per engagement with read state.", backedBy: ["api/messages", "lib/models/Message.ts"], suite: "desk", visibility: "public", verified: false },
   { name: "Live message stream", description: "Server-sent events for real-time delivery.", backedBy: ["api/messages/stream", "lib/socketServer.js"], suite: "desk", visibility: "public", verified: false },
   { name: "File attachment", description: "Upload to messages and deliverables via Cloudinary.", backedBy: ["api/messages/upload", "lib/cloudinary.ts"], suite: "docushare", visibility: "public", verified: false },
-  { name: "Document extraction", description: "Read PDF and Word deliverables for review.", backedBy: ["lib/ai/extractDeliverableText.ts"], suite: "docushare", visibility: "public", verified: false },
-  { name: "Transactional email", description: "Templated email across every lifecycle event.", backedBy: ["lib/mailer.ts"], suite: "core", visibility: "operator", verified: false },
+  { name: "Document extraction", description: "Read an uploaded PDF or Word deliverable into plain text.", backedBy: ["lib/extractDeliverableText.ts", "api/milestones/extract"], suite: "docushare", visibility: "public", verified: true },
+  { name: "Transactional email", description: "Password reset, invitations, and every notify() lifecycle event, via Resend.", backedBy: ["lib/mailer.ts", "lib/notifications.ts"], suite: "core", visibility: "operator", verified: true },
   { name: "Newsletter", description: "Subscribe and manage marketing consent.", backedBy: ["api/newsletter"], suite: "signal", visibility: "public", verified: false },
 ];
 
@@ -153,7 +153,7 @@ export const GOVERNANCE: Capability[] = [
   { name: "Health check", description: "Liveness and dependency configuration probe.", backedBy: ["api/health"], suite: "core", visibility: "operator", verified: true },
   { name: "GDPR data export", description: "Export everything held about a data subject.", backedBy: ["api/gdpr/export"], suite: "core", visibility: "public", verified: false },
   { name: "GDPR erasure", description: "Delete on request, with the operator audit trail retained.", backedBy: ["api/gdpr/delete"], suite: "core", visibility: "public", verified: false },
-  { name: "Error monitoring", description: "Sentry capture with structured server-side logging and alerting.", backedBy: ["lib/errorLogger.ts"], suite: "core", visibility: "operator", verified: false },
+  { name: "Error monitoring", description: "Sentry capture, config-gated on a DSN, at the seam this codebase actually catches errors at.", backedBy: ["src/instrumentation.ts", "lib/http.ts", "app/global-error.tsx"], suite: "core", visibility: "operator", verified: true },
 ];
 
 /* ───────────────────────────────────────────────────────────────
@@ -177,30 +177,120 @@ export const ADMIN_MODULES = [
 /* ───────────────────────────────────────────────────────────────
    10. INTEGRATIONS
    ─────────────────────────────────────────────────────────────── */
-export type Integration = { name: string; category: string; what: string; backedBy: string; verified: boolean };
+export type Integration = {
+  name: string;
+  category: string;
+  what: string;
+  backedBy: string;
+  verified: boolean;
+  /** Ordered steps. For verified integrations: how to actually turn it
+   *  on and where it shows up. For roadmap ones: what standing it up
+   *  would genuinely take, stated as plainly as the "verified" split
+   *  itself — no invented setup wizard for something that isn't built. */
+  howTo: string[];
+};
 
 export const INTEGRATIONS: Integration[] = [
-  { name: "Paystack",          category: "Payments",      what: "Checkout, recurring subscriptions and a signature-verified webhook.", backedBy: "lib/paystack.ts",       verified: true },
-  { name: "MongoDB",           category: "Data",          what: "Primary datastore — falls back to in-memory when unset in development.", backedBy: "lib/store.ts",     verified: true },
-  { name: "Upstash Redis",     category: "Data",          what: "Distributed rate limiting in production.",              backedBy: "lib/ratelimit.ts",      verified: true },
-  { name: "OpenAI / OpenRouter", category: "AI",          what: "Model layer behind the language-backed agents.",         backedBy: "lib/ai.ts",             verified: true },
-  { name: "LAMID Learning",    category: "Ecosystem",     what: "Learning management, certification and AI tutoring — a separate live app.", backedBy: "learn-by-lamid.vercel.app", verified: true },
-  { name: "LAMID DocuShare",   category: "Ecosystem",     what: "File infrastructure, workspaces and secure sharing — a separate live app.", backedBy: "fileshare-six-phi.vercel.app", verified: true },
-  { name: "Stripe",            category: "Payments",      what: "Subscriptions, checkout and card payments.",            backedBy: "lib/stripe.ts",          verified: false },
-  { name: "Google Workspace",  category: "Identity",      what: "OAuth sign-in and account linking.",                     backedBy: "lib/passport.ts",        verified: false },
-  { name: "SAML 2.0 / SCIM",   category: "Identity",      what: "Enterprise SSO and directory provisioning.",             backedBy: "api/auth/sso/validate",  verified: false },
-  { name: "Cloudinary",        category: "Files",         what: "Media upload, transformation and delivery.",             backedBy: "lib/cloudinary.ts",      verified: false },
-  { name: "Google Drive",      category: "Files",         what: "Sync files into DocuShare workspaces.",                  backedBy: "DocuShare connectors",   verified: false },
-  { name: "OneDrive",          category: "Files",         what: "Sync files into DocuShare workspaces.",                  backedBy: "DocuShare connectors",   verified: false },
-  { name: "Dropbox",           category: "Files",         what: "Sync files into DocuShare workspaces.",                  backedBy: "DocuShare connectors",   verified: false },
-  { name: "REST and database connectors", category: "Files", what: "Pull from arbitrary APIs and databases.",             backedBy: "DocuShare connectors",   verified: false },
-  { name: "Nodemailer / SMTP", category: "Communication", what: "Transactional and lifecycle email.",                     backedBy: "lib/mailer.ts",          verified: false },
-  { name: "BullMQ",            category: "Infrastructure",what: "Background queues for long-running work.",               backedBy: "lib/queue.ts",           verified: false },
-  { name: "Sentry",            category: "Infrastructure",what: "Error monitoring and release tracking.",                 backedBy: "lib/errorLogger.ts",     verified: false },
-  { name: "Cloudflare Turnstile", category: "Security",   what: "Bot protection on public forms.",                        backedBy: "lib/turnstile.ts",       verified: false },
-  { name: "Puppeteer",         category: "Documents",     what: "Server-side rendering of reports to PDF.",               backedBy: "report generation",      verified: false },
-  { name: "PDFKit",            category: "Documents",     what: "Invoice and contract PDF generation.",                   backedBy: "lib/pdf/*",              verified: false },
-  { name: "Mammoth / pdf-parse", category: "Documents",   what: "Read Word and PDF deliverables for review.",             backedBy: "lib/ai/extractDeliverableText.ts", verified: false },
+  { name: "Paystack",          category: "Payments",      what: "Checkout, recurring subscriptions and a signature-verified webhook.", backedBy: "lib/paystack.ts",       verified: true,
+    howTo: [
+      "Set PAYSTACK_SECRET_KEY in your environment.",
+      "Checkout, subscription billing, and the signature-verified webhook at /api/webhooks/paystack all activate automatically once the key is present — no code changes needed.",
+      "GET /api/health reports whether it's configured, without ever echoing the key itself.",
+    ] },
+  { name: "MongoDB",           category: "Data",          what: "Primary datastore — falls back to in-memory when unset in development.", backedBy: "lib/store.ts",     verified: true,
+    howTo: [
+      "Set MONGODB_URI to a real connection string.",
+      "Left unset in development, the app runs on an in-memory store instead — same code path either way, so nothing breaks while you're building.",
+      "Once set, points, projects, milestones, invoices and every other persisted entity write to that cluster rather than the process's memory.",
+    ] },
+  { name: "Upstash Redis",     category: "Data",          what: "Distributed rate limiting in production.",              backedBy: "lib/ratelimit.ts",      verified: true,
+    howTo: [
+      "Create a free Upstash Redis database and copy its REST URL and token.",
+      "Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
+      "Required in production: without it, limits fall back to an in-memory counter that's per server instance — on serverless, an attacker gets N times the intended limit.",
+    ] },
+  { name: "OpenAI / OpenRouter", category: "AI",          what: "Model layer behind the language-backed agents.",         backedBy: "lib/ai.ts",             verified: true,
+    howTo: [
+      "Set OPENROUTER_API_KEY or OPENAI_API_KEY — OpenRouter takes precedence when both are set.",
+      "Optionally set LAMID_MODEL to choose a specific model; defaults to openai/gpt-4o-mini.",
+      "Powers the language-backed agents and Steward's support-ticket draft replies — the deterministic engines (matching, budget, financial) don't touch this at all.",
+    ] },
+  { name: "LAMID Learning",    category: "Ecosystem",     what: "Learning management, certification and AI tutoring — a separate live app.", backedBy: "learn-by-lamid.vercel.app", verified: true,
+    howTo: [
+      "Nothing to configure here — it's a separate, already-live application at learn-by-lamid.vercel.app.",
+      "Reachable from the main navigation and the LEARN suite page.",
+      "Optionally set LAMID_LMS_BASE_URL / LAMID_LMS_API_KEY so growth pathways can pull real completions instead of manually entered learning — the LMS doesn't expose the read endpoints that needs yet, so this step isn't usable even with a key today.",
+    ] },
+  { name: "LAMID DocuShare",   category: "Ecosystem",     what: "File infrastructure, workspaces and secure sharing — a separate live app.", backedBy: "fileshare-six-phi.vercel.app", verified: true,
+    howTo: [
+      "Nothing to configure here — it's a separate, already-live application at fileshare-six-phi.vercel.app.",
+      "Reachable from the main navigation and the DOCUSHARE suite page.",
+    ] },
+  { name: "Stripe",            category: "Payments",      what: "A second checkout rail alongside Paystack.",             backedBy: "lib/stripe.ts",          verified: true,
+    howTo: [
+      "Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET.",
+      "Pass {\"provider\":\"stripe\"} to POST /api/checkout/tier or /api/checkout/points — same request/response shape as the Paystack default, so nothing else about the flow changes. api/webhooks/stripe and api/billing/cancel handle fulfilment, renewal and cancellation the same way their Paystack equivalents do.",
+      "Left unset, a Stripe-provider request returns 503 and the Paystack-provider (default) path is completely unaffected.",
+      "No live Stripe account has been used to confirm an end-to-end charge — the code follows Stripe's documented Checkout Session and webhook contracts exactly, but that one round-trip hasn't happened, the same disclosed gap as Xero/QuickBooks on the trust page.",
+    ] },
+  { name: "Google Workspace",  category: "Identity",      what: "OAuth sign-in and account linking.",                     backedBy: "lib/passport.ts",        verified: false,
+    howTo: [
+      "Not wired in yet. Would need an OAuth app registered in Google Cloud Console, a client ID/secret, and a callback route — none of which exist in this repo yet.",
+    ] },
+  { name: "SAML 2.0 / SCIM",   category: "Identity",      what: "Enterprise SSO and directory provisioning.",             backedBy: "api/auth/sso/validate",  verified: false,
+    howTo: [
+      "Not wired in yet. Would need a configured identity provider, certificate exchange, and a SCIM provisioning endpoint — none of which exist in this repo yet.",
+    ] },
+  { name: "Cloudinary",        category: "Files",         what: "Media upload, transformation and delivery.",             backedBy: "lib/cloudinary.ts",      verified: false,
+    howTo: [
+      "Not wired in yet. Would need a Cloudinary account and API credentials, plus real upload wiring in the messaging and deliverables flow.",
+    ] },
+  { name: "Google Drive",      category: "Files",         what: "Sync files into DocuShare workspaces.",                  backedBy: "DocuShare connectors",   verified: false,
+    howTo: ["Not wired in yet. Depends on DocuShare building out a connector layer first — no connector exists to configure."] },
+  { name: "OneDrive",          category: "Files",         what: "Sync files into DocuShare workspaces.",                  backedBy: "DocuShare connectors",   verified: false,
+    howTo: ["Not wired in yet. Depends on DocuShare building out a connector layer first — no connector exists to configure."] },
+  { name: "Dropbox",           category: "Files",         what: "Sync files into DocuShare workspaces.",                  backedBy: "DocuShare connectors",   verified: false,
+    howTo: ["Not wired in yet. Depends on DocuShare building out a connector layer first — no connector exists to configure."] },
+  { name: "REST and database connectors", category: "Files", what: "Pull from arbitrary APIs and databases.",             backedBy: "DocuShare connectors",   verified: false,
+    howTo: ["Not wired in yet. Would need a generic connector layer — credentials-per-source, schema mapping, sync scheduling — none of which is built."] },
+  { name: "Resend",            category: "Communication", what: "Transactional and lifecycle email.",                     backedBy: "lib/mailer.ts",          verified: true,
+    howTo: [
+      "Set RESEND_API_KEY (and optionally MAIL_FROM, which defaults to notifications@lamidone.com).",
+      "Password reset, organisation invitations, and every in-app notify() event (awarded, milestone funded/approved/disputed, and so on) then also send a real email — respecting each user's own emailed-notifications preference in Settings.",
+      "Left unset, all of those actions still succeed; the email side is silently skipped rather than failing the request. GET /api/health reports whether it's configured.",
+    ] },
+  { name: "BullMQ",            category: "Infrastructure",what: "Background queues for long-running work.",               backedBy: "lib/queue.ts",           verified: false,
+    howTo: [
+      "Not wired in yet. Would need a Redis-backed queue and a worker process — every job in this app currently runs inline on the request that triggered it.",
+    ] },
+  { name: "Sentry",            category: "Infrastructure",what: "Error monitoring, config-gated on a DSN.",                backedBy: "src/instrumentation.ts", verified: true,
+    howTo: [
+      "Set SENTRY_DSN (server/edge) and, if you also want client-side capture, NEXT_PUBLIC_SENTRY_DSN.",
+      "Every unhandled API error and every uncaught render error then reports to Sentry — wired at the actual seam this codebase already catches errors at (handler() in lib/http.ts and app/global-error.tsx), not just Next's own request-error hook, which most routes here never reach because they catch their own errors first.",
+      "Left unset, Sentry.init is never called — zero SDK overhead, errors just log to the console as before. Optionally set SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN to upload source maps at build time.",
+      "No live DSN has been used to confirm an event actually lands in a Sentry project — the wiring is real and config-gated the same way as every other verified integration here, but that one round-trip hasn't happened.",
+    ] },
+  { name: "Cloudflare Turnstile", category: "Security",   what: "Bot protection on public forms.",                        backedBy: "lib/turnstile.ts",       verified: true,
+    howTo: [
+      "Set NEXT_PUBLIC_TURNSTILE_SITE_KEY (renders the widget) and TURNSTILE_SECRET_KEY (verifies it server-side).",
+      "Wired into signup and forgot-password — both send the challenge token, and the route rejects the request if it doesn't verify.",
+      "Deliberately opt-in: left unset, the widget doesn't render and the server never asks for a token, so an unconfigured deployment behaves exactly as it did before this existed — bot-screening cannot lock out real users just by being unconfigured.",
+      "No live site/secret key pair has been used to confirm a real challenge round-trip — the code follows Cloudflare's documented siteverify contract exactly, but that one test hasn't happened.",
+    ] },
+  { name: "Puppeteer",         category: "Documents",     what: "Server-side rendering of reports to PDF.",               backedBy: "report generation",      verified: false,
+    howTo: [
+      "Not wired in yet. Would launch headless Chrome to render a report page to PDF — PDFKit already covers invoices without needing this dependency.",
+    ] },
+  { name: "PDFKit",            category: "Documents",     what: "Invoice PDF generation.",                                backedBy: "lib/pdf/invoiceTemplate.ts", verified: true,
+    howTo: [
+      "No configuration — it's a server-side library, not an external service or account.",
+      "Any invoice's PDF renders on request at GET /api/invoices/[id]/pdf, and Dashboard → Invoices has a \"Download PDF\" button wired straight to it.",
+    ] },
+  { name: "Mammoth / pdfjs-dist", category: "Documents",  what: "Read Word and PDF deliverables for review.",             backedBy: "lib/extractDeliverableText.ts", verified: true,
+    howTo: [
+      "No configuration — both are server-side libraries, not external services or accounts.",
+      "Upload a .docx or .pdf while submitting a milestone (Dashboard → Engagements) and its text is extracted straight into the submission note, for the reviewer to read and edit before sending.",
+    ] },
 ];
 
 export const VERIFIED_INTEGRATIONS = INTEGRATIONS.filter((i) => i.verified);

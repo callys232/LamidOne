@@ -49,6 +49,14 @@ export function handler(fn: (req: Request) => Promise<Response>) {
         return fail(503, "database_unreachable", e.message);
       }
       console.error("[unhandled]", e);
+      /* The only branch here that is a genuine bug rather than an
+         expected condition (ConfigError, DatabaseError) — reported to
+         Sentry when configured. Dynamic import so an unconfigured
+         deployment never pays for the SDK on a route that never
+         throws. */
+      if (process.env.SENTRY_DSN) {
+        import("@sentry/nextjs").then((Sentry) => Sentry.captureException(e)).catch(() => {});
+      }
       return fail(500, "internal", "Something went wrong. The error has been logged.");
     }
   };

@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Eyebrow } from "@/components/ui/Section";
+import { Turnstile } from "@/components/ui/Turnstile";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstileToken }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Something went wrong.");
@@ -58,6 +60,8 @@ export default function ForgotPasswordPage() {
                   style={{ borderColor: "var(--line)", background: "var(--page)" }}
                 />
               </label>
+
+              <Turnstile onToken={setTurnstileToken} />
 
               {error && <p className="text-sm" style={{ color: "var(--bad)" }}>{error}</p>}
 

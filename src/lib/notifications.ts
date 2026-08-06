@@ -1,5 +1,7 @@
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
 import { dispatchEvent } from "./integrations";
+import { sendEmail, mailerConfigured } from "./mailer";
+import { findUserById } from "./users";
 
 /** NOTIFICATIONS — recent alerts and delivery preferences. */
 
@@ -49,6 +51,37 @@ export async function notify(userId: string, title: string, body: string): Promi
      effort: dispatchEvent never throws, so a broken webhook cannot
      break whatever action triggered this notification. */
   await dispatchEvent(userId, title, n.body);
+
+  /* Same choke-point reasoning for email: every lifecycle event that
+     already calls notify() (awarded, milestone funded/approved,
+     disputed, invitation) now also reaches a real inbox, instead of
+     only ever showing up in-app or on an optionally-configured
+     webhook. Respects the user's own emailed-notifications
+     preference — NotificationPrefs.email already existed for this,
+     just never had a real sender behind it. Best effort: a mailer
+     failure must not break the action that triggered the
+     notification, same as the webhook dispatch above. */
+  if (mailerConfigured()) {
+    try {
+      const prefs = await getPrefs(userId);
+      if (prefs.email) {
+        const user = await findUserById(userId);
+        if (user) {
+          await sendEmail({
+            to: user.email,
+            subject: title,
+            html: `<p>${escapeHtml(n.body)}</p>`,
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[notify] email send failed:", e);
+    }
+  }
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export async function markRead(userId: string, notificationId: string): Promise<void> {

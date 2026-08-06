@@ -5,6 +5,7 @@ import { ensureExpertProfile } from "@/lib/marketplace";
 import { creditAsync } from "@/lib/points";
 import { SIGNUP_GRANTS } from "@/content/agents";
 import { signAccessToken } from "@/lib/auth";
+import { verifyTurnstile } from "@/lib/turnstile";
 import type { DashboardRole } from "@/content/dashboard";
 
 export const runtime = "nodejs";
@@ -32,9 +33,13 @@ export const POST = handler(async (req) => {
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
   const body = await req.json().catch(() => null) as
-    | { name?: string; email?: string; password?: string; role?: string; organisation?: string }
+    | { name?: string; email?: string; password?: string; role?: string; organisation?: string; turnstileToken?: string }
     | null;
   if (!body) return badRequest("Body must be JSON.");
+
+  if (!(await verifyTurnstile(body.turnstileToken, clientId(req)))) {
+    return badRequest("Verification failed. Please try again.");
+  }
 
   const role = (SIGNUP_ROLES as string[]).includes(body.role ?? "") ? (body.role as DashboardRole) : null;
   if (!role) return badRequest(`\`role\` must be one of: ${SIGNUP_ROLES.join(", ")}.`);

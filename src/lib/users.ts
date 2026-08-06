@@ -31,12 +31,17 @@ export type User = {
   role: DashboardRole;
   tier: TierId;
   subscriptionStatus: "active" | "none";
-  /** Set only when the tier came from a real recurring Paystack
-   *  subscription (see lib/subscriptionPlans.ts) rather than the
-   *  dev-only tier-testing shortcut or a one-time charge. Needed to
-   *  cancel the subscription later — Paystack requires the code, not
-   *  just the customer's identity. */
+  /** Set only when the tier came from a real recurring subscription
+   *  (Paystack — see lib/subscriptionPlans.ts — or Stripe) rather than
+   *  the dev-only tier-testing shortcut or a one-time charge. Needed
+   *  to cancel the subscription later — both providers require this
+   *  code/id, not just the customer's identity. */
   subscriptionCode?: string;
+  /** Which rail `subscriptionCode` belongs to — the two providers'
+   *  cancellation APIs are unrelated, so /api/billing/cancel needs to
+   *  know which one to call. Undefined on subscriptions predating this
+   *  field means Paystack, the original and only rail at the time. */
+  subscriptionProvider?: "paystack" | "stripe";
   billingInterval?: "monthly" | "annually";
   orgId: string | null;
   organisation?: string;
@@ -224,9 +229,9 @@ export async function activateTier(id: string, tier: TierId): Promise<User | nul
  * Paystack webhook payload reliably carries.
  */
 export async function attachSubscriptionCode(
-  email: string, code: string, interval: "monthly" | "annually",
+  email: string, code: string, interval: "monthly" | "annually", provider: "paystack" | "stripe" = "paystack",
 ): Promise<User | null> {
-  const patch = { subscriptionCode: code, billingInterval: interval };
+  const patch = { subscriptionCode: code, billingInterval: interval, subscriptionProvider: provider };
   const clean = email.trim().toLowerCase();
   if (persistenceEnabled()) {
     const col = await collection<User>("users");

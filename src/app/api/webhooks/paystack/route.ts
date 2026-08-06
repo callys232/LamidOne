@@ -78,7 +78,7 @@ export async function POST(req: Request) {
         const code = String(data.subscription_code ?? "");
         const email = customer?.email;
         const interval = plan?.interval === "annually" ? "annually" : "monthly";
-        if (code && email) await attachSubscriptionCode(email, code, interval);
+        if (code && email) await attachSubscriptionCode(email, code, interval, "paystack");
         break;
       }
 

@@ -3,6 +3,7 @@ import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } fr
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { initializeTransaction, PaystackError, paystackConfigured } from "@/lib/paystack";
+import { createCheckoutSession, StripeError, stripeConfigured } from "@/lib/stripe";
 import { createOrder } from "@/lib/checkout";
 import { getOrCreatePlanCode } from "@/lib/subscriptionPlans";
 import { requirePersistenceInProd } from "@/lib/store";
@@ -39,13 +40,16 @@ export const POST = handler(async (req) => {
   const rl = await limit("form", identity.userId);
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
-  const body = await req.json().catch(() => null) as { tier?: string; annual?: boolean } | null;
+  const body = await req.json().catch(() => null) as { tier?: string; annual?: boolean; provider?: string } | null;
   const tier = TIERS.find((t) => t.id === body?.tier);
   if (!tier || tier.motion !== "self-serve" || tier.price.monthly === null) {
     return badRequest("`tier` must be a self-serve plan with a published price (starter or growth).");
   }
 
-  if (!paystackConfigured()) return fail(503, "not_configured", "Payments are not configured yet.");
+  const provider = body?.provider === "stripe" ? "stripe" : "paystack";
+  if (provider === "stripe" ? !stripeConfigured() : !paystackConfigured()) {
+    return fail(503, "not_configured", "Payments are not configured yet.");
+  }
 
   const interval: "monthly" | "annually" = body?.annual ? "annually" : "monthly";
   const usd = interval === "annually" ? tier.price.annual! : tier.price.monthly;
@@ -53,6 +57,26 @@ export const POST = handler(async (req) => {
   await createOrder({
     reference, userId: identity.userId, kind: "tier", tier: tier.id as TierId, usd, billingInterval: interval,
   });
+
+  if (provider === "stripe") {
+    try {
+      const session = await createCheckoutSession({
+        email: identity.email,
+        amountMajorUnit: usd,
+        reference,
+        productName: `LAMID ONE — ${tier.name} (${interval})`,
+        successUrl: `${env.siteUrl}/api/checkout/callback?provider=stripe&reference=${reference}&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${env.siteUrl}/dashboard/billing?purchase=cancelled`,
+        metadata: { userId: identity.userId, kind: "tier", tier: tier.id },
+        mode: "subscription",
+        interval: interval === "annually" ? "year" : "month",
+      });
+      return ok({ authorizationUrl: session.url });
+    } catch (e) {
+      if (e instanceof StripeError) return fail(502, "payment_failed", e.message);
+      throw e;
+    }
+  }
 
   try {
     const planCode = await getOrCreatePlanCode(tier, interval);

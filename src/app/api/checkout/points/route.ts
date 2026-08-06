@@ -3,6 +3,7 @@ import { handler, ok, fail, badRequest, tooLarge, rateLimited, bodyTooLarge } fr
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
 import { initializeTransaction, PaystackError, paystackConfigured } from "@/lib/paystack";
+import { createCheckoutSession, StripeError, stripeConfigured } from "@/lib/stripe";
 import { createOrder } from "@/lib/checkout";
 import { requirePersistenceInProd } from "@/lib/store";
 import { env } from "@/lib/env";
@@ -32,14 +33,36 @@ export const POST = handler(async (req) => {
   const rl = await limit("form", identity.userId);
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
-  const body = await req.json().catch(() => null) as { points?: number } | null;
+  const body = await req.json().catch(() => null) as { points?: number; provider?: string } | null;
   const pkg = POINT_PACKAGES.find((p) => p.points === body?.points);
   if (!pkg) return badRequest(`\`points\` must match a real package: ${POINT_PACKAGES.map((p) => p.points).join(", ")}.`);
 
-  if (!paystackConfigured()) return fail(503, "not_configured", "Payments are not configured yet.");
+  const provider = body?.provider === "stripe" ? "stripe" : "paystack";
+  if (provider === "stripe" ? !stripeConfigured() : !paystackConfigured()) {
+    return fail(503, "not_configured", "Payments are not configured yet.");
+  }
 
   const reference = ref();
   await createOrder({ reference, userId: identity.userId, kind: "points", points: pkg.points, usd: pkg.usd });
+
+  if (provider === "stripe") {
+    try {
+      const session = await createCheckoutSession({
+        email: identity.email,
+        amountMajorUnit: pkg.usd,
+        reference,
+        productName: `LAMID ONE — ${pkg.points} points`,
+        successUrl: `${env.siteUrl}/api/checkout/callback?provider=stripe&reference=${reference}&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${env.siteUrl}/dashboard/wallet?purchase=cancelled`,
+        metadata: { userId: identity.userId, kind: "points" },
+        mode: "payment",
+      });
+      return ok({ authorizationUrl: session.url });
+    } catch (e) {
+      if (e instanceof StripeError) return fail(502, "payment_failed", e.message);
+      throw e;
+    }
+  }
 
   try {
     const tx = await initializeTransaction({

@@ -5,6 +5,8 @@ import { resolveIdentity } from "@/lib/entitlements";
 import { listMembers, inviteMember, ensureSelfMember, OrgError, type OrgRole } from "@/lib/organisation";
 import { record } from "@/lib/audit";
 import { notify } from "@/lib/notifications";
+import { sendEmail, mailerConfigured } from "@/lib/mailer";
+import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,11 +51,26 @@ export const POST = handler(async (req) => {
       action: "member_invited", target: invite.email,
     });
     /* Confirms the action to the inviter's own feed — the invitee has
-       no account yet to notify, so ProdLamid's equivalent sends this
-       side as an in-app confirmation and the email as the invite
-       itself (not modelled here; see lib/mailer.ts in ProdLamid). */
+       no account yet, so notify() (which looks up an existing userId)
+       does not apply to them; sent directly instead. This covers the
+       "you've been invited" email only — there is no invitation-token
+       acceptance flow yet, so the link below is a plain sign-up link,
+       not a pre-authorised one that auto-joins the org. */
     await notify(identity.userId, "Invitation sent",
       `${invite.email} has been invited as ${invite.role}. It stays pending until they accept.`);
+
+    if (mailerConfigured()) {
+      try {
+        await sendEmail({
+          to: invite.email,
+          subject: "You've been invited to join a team on LAMID ONE",
+          html: `<p>You've been invited to join an organisation on LAMID ONE as <strong>${invite.role}</strong>.</p><p><a href="${env.siteUrl}/signup">Create an account</a> with this email address to get started.</p>`,
+        });
+      } catch (e) {
+        console.error("[organisation/members] invite email failed:", e);
+      }
+    }
+
     return ok({ invitation: invite }, { status: 201 });
   } catch (e) {
     if (e instanceof OrgError) return badRequest(e.message);

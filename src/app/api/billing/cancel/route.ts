@@ -1,6 +1,7 @@
 import { handler, ok, fail, badRequest } from "@/lib/http";
 import { resolveIdentity } from "@/lib/entitlements";
 import { fetchSubscription, disableSubscription, PaystackError } from "@/lib/paystack";
+import { cancelSubscription, StripeError } from "@/lib/stripe";
 import { findUserById, deactivateSubscription } from "@/lib/users";
 import { requirePersistenceInProd } from "@/lib/store";
 
@@ -30,10 +31,14 @@ export const POST = handler(async (req) => {
   }
 
   try {
-    const sub = await fetchSubscription(user.subscriptionCode);
-    await disableSubscription(user.subscriptionCode, sub.email_token);
+    if (user.subscriptionProvider === "stripe") {
+      await cancelSubscription(user.subscriptionCode);
+    } else {
+      const sub = await fetchSubscription(user.subscriptionCode);
+      await disableSubscription(user.subscriptionCode, sub.email_token);
+    }
   } catch (e) {
-    if (e instanceof PaystackError) return fail(502, "cancel_failed", e.message);
+    if (e instanceof PaystackError || e instanceof StripeError) return fail(502, "cancel_failed", e.message);
     throw e;
   }
 

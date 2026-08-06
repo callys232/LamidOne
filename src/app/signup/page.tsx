@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Eyebrow } from "@/components/ui/Section";
 import { Mark } from "@/components/ui/Mark";
+import { Turnstile } from "@/components/ui/Turnstile";
 import { ROLE_EDUCATION, type SignupRole } from "@/content/roleEducation";
 
 /**
@@ -125,6 +126,7 @@ function SignupChat({ role, onSuccess }: { role: SignupRole; onSuccess: () => vo
 
   const [fields, setFields] = useState<Fields>({ name: "", email: "", organisation: "" });
   const [password, setPassword] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -173,7 +175,7 @@ function SignupChat({ role, onSuccess }: { role: SignupRole; onSuccess: () => vo
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...fields, password, role }),
+        body: JSON.stringify({ ...fields, password, role, turnstileToken }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Could not create your account.");
@@ -254,6 +256,8 @@ function SignupChat({ role, onSuccess }: { role: SignupRole; onSuccess: () => vo
           />
           <Field label="Password" type="password" value={password} onChange={setPassword} hint="At least 8 characters, one letter and one number." />
         </div>
+
+        <Turnstile onToken={setTurnstileToken} />
 
         {error && <p className="mt-4 text-sm" style={{ color: "var(--bad)" }}>{error}</p>}
 

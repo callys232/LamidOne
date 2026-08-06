@@ -196,3 +196,20 @@ body {
   .text-good { color: var(--good); }
   .divide-hairline > * + * { border-top: 1px solid var(--line-soft); }
 }
+
+/* Homepage "How it works" connector — draws left-to-right once on
+   load, brand red rather than the rainbow gradient a generic template
+   would use (teardown §6.3's rationing rule again). Static full-width
+   for anyone who prefers reduced motion, never an infinite loop. */
+@keyframes lamid-line-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.timeline-line {
+  transform-origin: left;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .timeline-line {
+    animation: lamid-line-draw 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}

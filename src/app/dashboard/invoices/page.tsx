@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Printer, Send, CheckCircle2, Ban } from "lucide-react";
+import { Plus, Trash2, Printer, Download, Send, CheckCircle2, Ban } from "lucide-react";
 import { authHeaders } from "@/lib/useApi";
 import type { Invoice, InvoiceLine, InvoiceStatus } from "@/lib/invoices";
 
@@ -11,9 +11,13 @@ import type { Invoice, InvoiceLine, InvoiceStatus } from "@/lib/invoices";
  * Completes the DESK record: proposal (Scribe) → milestones and escrow
  * (Cadence) → invoice. Figures are computed server-side by
  * lib/invoices.ts so the browser never becomes a second source of truth
- * for money, and the printable view is plain CSS — the browser's own
- * print-to-PDF produces a better file than a bundled renderer and adds
- * nothing to the bundle.
+ * for money. Two ways to get a PDF, deliberately both kept:
+ *  · Print / PDF — plain CSS, the browser's own print-to-PDF. Free,
+ *    no dependency, and the better file for "I'm looking at this now."
+ *  · Download — a real file from lib/pdf/invoiceTemplate.ts (PDFKit),
+ *    generated server-side with no browser involved. This is what
+ *    emailing or attaching an invoice needs, which print-to-PDF cannot
+ *    do — it requires an open window and a person clicking through it.
  */
 
 const STATUS_TONE: Record<InvoiceStatus, string> = {
@@ -267,6 +271,10 @@ function InvoiceDetail({
           <button type="button" onClick={() => window.print()} className="btn btn-ghost !px-3 !py-1.5 text-xs">
             <Printer className="h-3.5 w-3.5" aria-hidden="true" /> Print / PDF
           </button>
+          <a href={`/api/invoices/${invoice.id}/pdf`} target="_blank" rel="noopener noreferrer"
+             className="btn btn-ghost !px-3 !py-1.5 text-xs">
+            <Download className="h-3.5 w-3.5" aria-hidden="true" /> Download PDF
+          </a>
           {invoice.status === "draft" && (
             <button type="button" onClick={() => onTransition("sent")} className="btn btn-primary !px-3 !py-1.5 text-xs">
               <Send className="h-3.5 w-3.5" aria-hidden="true" /> Mark sent

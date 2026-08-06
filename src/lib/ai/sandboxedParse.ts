@@ -9,10 +9,16 @@ import { spawn } from "node:child_process";
  * heap with it — one bad upload becomes an outage.
  *
  * A worker thread is not enough here. Threads share the process, so a V8 fatal
- * error still kills everything; pdf-parse v2 wraps pdf.js, which spawns its own
- * worker, and tearing that down took the host process with it. A child process
- * is the isolation that was actually being claimed: its own heap cap, its own
- * address space, and a crash that the parent merely observes.
+ * error still kills everything. A child process is the isolation that was
+ * actually being claimed: its own heap cap, its own address space, and a
+ * crash that the parent merely observes.
+ *
+ * PDF text comes from pdfjs-dist's own legacy Node build directly, with
+ * `disableWorker: true` — no nested worker thread inside this already-isolated
+ * child, and no dependency on pdf-parse (both major versions of that wrapper
+ * proved unusable: 1.x's vendored parser fails on real PDFs with a genuine
+ * "bad XRef entry" bug, 2.x's worker-based API can't resolve its worker file
+ * under this app's bundler).
  */
 
 export interface SandboxResult {
@@ -43,16 +49,31 @@ process.stdin.setEncoding("utf8");
 process.stdin.on("data", (c) => { raw += c; });
 process.stdin.on("end", async () => {
   const reply = (o) => { process.stdout.write(JSON.stringify(o)); process.exit(0); };
-  let parser;
   try {
     const { ext, b64 } = JSON.parse(raw);
     const buf = Buffer.from(b64, "base64");
     let text = "";
 
     if (ext === "pdf") {
-      const { PDFParse } = require("pdf-parse");
-      parser = new PDFParse({ data: buf });
-      text = (await parser.getText()).text || "";
+      const path = require("path");
+      const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      const root = path.join(process.cwd(), "node_modules/pdfjs-dist");
+      const doc = await pdfjs.getDocument({
+        data: new Uint8Array(buf),
+        disableWorker: true,
+        isEvalSupported: false,
+        useSystemFonts: true,
+        cMapUrl: path.join(root, "cmaps") + path.sep,
+        cMapPacked: true,
+        standardFontDataUrl: path.join(root, "standard_fonts") + path.sep,
+      }).promise;
+      const pages = [];
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const content = await page.getTextContent();
+        pages.push(content.items.map((it) => it.str || "").join(" "));
+      }
+      text = pages.join("\\n");
     } else if (ext === "docx") {
       const mod = require("mammoth");
       const mammoth = mod.default || mod;
@@ -61,10 +82,8 @@ process.stdin.on("end", async () => {
       throw new Error("unsupported type for sandboxed parsing");
     }
 
-    try { await parser?.destroy?.(); } catch {}
     reply({ ok: true, text: String(text) });
   } catch (e) {
-    try { await parser?.destroy?.(); } catch {}
     reply({ ok: false, text: "", error: e && e.message ? String(e.message) : "parse failed" });
   }
 });
