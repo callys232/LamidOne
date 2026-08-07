@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Users, FileText, ListChecks, Lock } from "lucide-react";
@@ -17,6 +17,11 @@ type Bid = {
 type Project = {
   id: string; clientId: string; title: string; brief: string; status: string;
   awardedExpertId?: string; budget: { min: number; max: number; currency: string };
+};
+type Milestone = {
+  id: string; title: string; amount: number; currency: string;
+  status: "pending" | "in_progress" | "submitted" | "approved" | "disputed";
+  dueDate?: string;
 };
 
 /**
@@ -69,6 +74,7 @@ export default function ProjectDetailPage() {
   const { project, bids } = data;
   const canAward = v.role !== "expert" && project.status === "open";
   const canBid = v.role === "expert" && project.status === "open";
+  const isAwarded = project.status !== "open" && project.status !== "draft";
 
   return (
     <div className="space-y-8">
@@ -85,6 +91,7 @@ export default function ProjectDetailPage() {
 
       {v.role !== "expert" && <Enrichments projectId={id} isPremium={v.tier !== "free"} />}
       {canBid && <BidForm projectId={id} defaultCurrency={project.budget.currency} onPlaced={reload} />}
+      {isAwarded && v.role !== "expert" && <MilestonesSection projectId={id} defaultCurrency={project.budget.currency} />}
 
       <div>
         <h2 className="mb-4 font-display text-xl">Bids ({bids.length})</h2>
@@ -327,7 +334,7 @@ function MatchList({ matches }: { matches: ConsultantMatch[] }) {
   const toggle = (id: string) =>
     setSelected((s) => {
       const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
 
@@ -389,6 +396,133 @@ function MatchList({ matches }: { matches: ConsultantMatch[] }) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+const MILESTONE_STATUS_TONE: Record<Milestone["status"], string> = {
+  pending: "var(--ink-muted)", in_progress: "var(--ink-muted)", submitted: "var(--brand)",
+  approved: "var(--good)", disputed: "var(--bad)",
+};
+
+/**
+ * Define and fund a milestone on an awarded project — POST /api/milestones
+ * already existed and worked, but nothing in the dashboard ever called it;
+ * a client could accept a bid and then had no way to actually structure
+ * the delivery. NOTE: this records what the milestone is and its status
+ * lifecycle (pending → submitted → approved), which is real and enforced —
+ * it does not yet move a real balance. See the trust centre's "Escrow
+ * fund holds" entry.
+ */
+function MilestonesSection({ projectId, defaultCurrency }: { projectId: string; defaultCurrency: string }) {
+  const { data, loading, reload } = useApi<{ milestones: Milestone[] }>(`/api/milestones?projectId=${projectId}`);
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [dueDate, setDueDate] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!justAddedId) return;
+    const t = setTimeout(() => setJustAddedId(null), 2500);
+    return () => clearTimeout(t);
+  }, [justAddedId]);
+
+  const canSubmit = title.trim().length >= 4 && amount > 0;
+
+  async function submit() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/milestones", {
+        method: "POST", headers: authHeaders(),
+        body: JSON.stringify({ projectId, title: title.trim(), amount, currency: defaultCurrency, ...(dueDate ? { dueDate } : {}) }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body?.error ?? "Could not create this milestone.");
+      setTitle("");
+      setAmount(0);
+      setDueDate("");
+      setJustAddedId(body.milestone?.id ?? null);
+      reload();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card space-y-5 p-5">
+      <div className="flex items-baseline justify-between">
+        <h2 className="font-display text-lg">Milestones</h2>
+        {!loading && data && <span className="faint text-xs tabular-nums">{data.milestones.length}</span>}
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          {[0, 1].map((i) => <div key={i} className="h-14 animate-pulse rounded-lg" style={{ background: "var(--line-soft)" }} />)}
+        </div>
+      ) : data && data.milestones.length === 0 ? (
+        <p className="muted text-sm">No milestones defined yet — break the delivery down below.</p>
+      ) : (
+        <div className="space-y-2">
+          {data?.milestones.map((m) => (
+            <div
+              key={m.id}
+              className="flex items-center justify-between gap-4 rounded-lg border p-3 transition-colors duration-500"
+              style={{ borderColor: m.id === justAddedId ? "var(--brand-line)" : "var(--line-soft)", background: m.id === justAddedId ? "var(--brand-soft)" : "transparent" }}
+            >
+              <div className="min-w-0">
+                <p className="truncate font-medium">{m.title}</p>
+                <p className="faint mt-0.5 text-xs">
+                  {m.currency} {m.amount.toLocaleString()}
+                  {m.dueDate && ` · due ${new Date(m.dueDate).toLocaleDateString()}`}
+                </p>
+              </div>
+              <span
+                className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize"
+                style={{ color: MILESTONE_STATUS_TONE[m.status], border: `1px solid ${MILESTONE_STATUS_TONE[m.status]}` }}
+              >
+                {m.status.replace("_", " ")}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="border-t pt-5" style={{ borderColor: "var(--line-soft)" }}>
+        <label className="block text-sm">
+          <span className="muted mb-1.5 block text-xs font-medium">Milestone title</span>
+          <input
+            value={title} onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Phase 1 — discovery and plan"
+            aria-label="Milestone title" className="input w-full"
+          />
+        </label>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <label className="block text-sm">
+            <span className="muted mb-1.5 block text-xs font-medium">Amount ({defaultCurrency})</span>
+            <input
+              type="number" min={0} value={amount || ""} onChange={(e) => setAmount(Number(e.target.value) || 0)}
+              aria-label="Milestone amount" className="input w-full"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="muted mb-1.5 block text-xs font-medium">Due date (optional)</span>
+            <input
+              type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+              aria-label="Milestone due date" className="input w-full"
+            />
+          </label>
+          <button type="button" onClick={submit} disabled={busy || !canSubmit} className="btn btn-primary !py-2 disabled:opacity-50">
+            {busy ? "Adding…" : "Add milestone"}
+          </button>
+        </div>
+        {error && <p className="mt-3 text-sm" style={{ color: "var(--bad)" }}>{error}</p>}
       </div>
     </div>
   );

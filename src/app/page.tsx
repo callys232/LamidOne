@@ -116,11 +116,11 @@ export default function HomePage() {
               aria-hidden="true"
             />
             {[
-              { t: "Diagnose", d: "Take the Enterprise Diagnostic. Tell us where you are across Strategy, Growth, People, and Finance." },
+              { t: "Diagnose", d: "Take the diagnostic. Tell us where you stand across Strategy, Growth, People, and Finance — free, whatever your size." },
               { t: "Reveal", d: "See your real score. LAMID ONE surfaces your gaps and strengths across all four pillars — honestly." },
-              { t: "Unlock", d: "Get personalised recommendations matched to your scale, sector, and situation — not a generic report." },
-              { t: "Act", d: "Engage the suite, the experts, or the tools your score says you need most. One ecosystem, one entry point." },
-              { t: "Grow", d: "Track progress. Refine your position. See your organisation evolve in real time — quarter by quarter." },
+              { t: "Unlock", d: "Get recommendations matched to your size, sector, and situation — not a generic report." },
+              { t: "Act", d: "Engage the suite, the experts, or the tools your score says you need most — one platform, one entry point." },
+              { t: "Grow", d: "Track progress. Refine your approach. Watch your business evolve in real time — quarter by quarter." },
             ].map((step, i) => (
               <div key={step.t} className="relative text-center">
                 <span

@@ -5,7 +5,6 @@ import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { Faq } from "@/components/sections/Faq";
 import { CONTACT } from "@/content/brand";
-import { DATA_ENTITIES } from "@/content/platform";
 
 export const metadata: Metadata = {
   title: "Trust centre",
@@ -34,26 +33,31 @@ const IMPLEMENTED = [
   { control: "Role-based access control", detail: "Tier and role are re-derived server-side on every request, never trusted from a client-held token." },
   { control: "Audit logging", detail: "Immutable record of consequential actions — awards, approvals, disputes." },
   { control: "Rate limiting", detail: "Per-route limits, distributed via Upstash Redis in production." },
-  { control: "Bot resistance on public forms", detail: "Rate limiting plus a honeypot field — not yet a challenge-based system like Turnstile; see below." },
+  { control: "Bot resistance on public forms", detail: "Rate limiting and a honeypot field always on; Cloudflare Turnstile wired on signup and forgot-password, active once a site/secret key pair is configured." },
   { control: "Input sanitisation and validation", detail: "Length caps and control-character stripping on every request boundary." },
   { control: "Signed payment webhooks", detail: "Paystack events verified by HMAC-SHA512 signature before anything in the payload is trusted." },
+  { control: "Error monitoring", detail: "Sentry, wired at the actual point this app catches errors — not just Next's own request-error hook, which most routes here never reach. Active once SENTRY_DSN is set." },
   { control: "Data export", detail: "Full self-service export of everything held about you." },
   { control: "Data erasure", detail: "Deletion on request, with the operator audit trail retained." },
-  { control: "Escrow segregation", detail: "Client funds held separately and released only on approval or a certified auto-release." },
 ];
 
 const IN_PROGRESS = [
   { item: "Two-factor authentication", status: "Not built yet. Sign-in today is email and password only." },
   { item: "Single sign-on (SAML / SCIM)", status: "Not built yet. Every account signs in the same way, regardless of tier." },
-  { item: "Cloudflare Turnstile", status: "Not integrated. Public forms currently rely on rate limiting and a honeypot field instead." },
   { item: "Field-level permissions", status: "Not built yet. Access control today is role-based, not field-level." },
+  /* Milestone records and their status transitions are real; the actual
+     hold/settle/release against a balance is not — createMilestone and
+     approveMilestone update status and notify, but never call the real
+     hold/settle functions in lib/points.ts. A milestone marked "approved"
+     today does not move any real money. This must not read as
+     Implemented until that wiring exists. */
+  { item: "Escrow fund holds", status: "Not wired yet. Milestone status (pending/submitted/approved/disputed) is real and enforced, but no balance is actually held or released against it — that connection to the points ledger does not exist yet." },
   /* Written, compiles, fails closed without credentials — but has never
      successfully authenticated, because registering a developer app needs
      an account and a reviewed redirect URI on a live domain. Listed here
      rather than under Implemented for exactly that reason. */
   { item: "Xero / QuickBooks accounting sync", status: "Built but UNVERIFIED. The OAuth flow follows each provider's documented grant and fails closed with no credentials set, but it has never completed a live authentication, so we do not count it as working. One real end-to-end test is outstanding." },
   { item: "LAMID LEARN completions sync", status: "Blocked upstream. The learning platform exposes no read endpoint for learner completions, so the bridge reports itself unavailable rather than guessing at course data." },
-  { item: "Error monitoring with alerting", status: "Structured server-side logging exists; a monitoring service with alerting (e.g. Sentry) is not wired up yet." },
   { item: "SOC 2 Type II", status: "Audit not yet commenced. We will publish the report when it exists." },
   { item: "ISO 27001", status: "Not certified. Cloud infrastructure providers hold their own certification." },
   { item: "Penetration test summary", status: "Scheduled. Summary will be published here." },
@@ -127,19 +131,23 @@ export default function TrustPage() {
           </div>
         </Section>
 
-        <Section id="data" className="border-t">
+        <Section id="speed-accuracy" className="border-t">
           <SectionHeading
-            eyebrow="Data we hold"
-            title={`${DATA_ENTITIES.length} record types.`}
-            blurb="Everything below is included in a data export and in an erasure request."
+            eyebrow="Why the output holds up"
+            title="How the agents make this faster and accurate — not just faster."
           />
-          <ul className="flex flex-wrap gap-2">
-            {DATA_ENTITIES.map((e) => (
-              <li key={e} className="muted rounded-lg px-3 py-1.5 text-sm" style={{ border: "1px solid var(--line)" }}>
-                {e}
-              </li>
+          <div className="grid gap-5 lg:grid-cols-3">
+            {[
+              { t: "Arithmetic, not a guess", d: "Diagnostics compute from the numbers you enter, not a model's best guess at a plausible answer. The same input always produces the same output — nothing to hallucinate, so nothing to double-check." },
+              { t: "One record, no re-entry", d: "Every suite reads the same underlying record. Starting a task never means re-explaining what you already told the platform — which is usually where transcription errors get introduced in the first place." },
+              { t: "Narrow tasks, shown before acted on", d: "The genuinely model-backed agents handle contained, reversible work — drafting a reply, helping fill a form — never a financial or legal judgement call. Every output is shown to you first; nothing is applied silently." },
+            ].map((c) => (
+              <div key={c.t} className="card p-7">
+                <h3 className="font-semibold">{c.t}</h3>
+                <p className="muted mt-3 text-sm leading-relaxed">{c.d}</p>
+              </div>
             ))}
-          </ul>
+          </div>
         </Section>
 
         <Section id="accessibility" className="border-t">

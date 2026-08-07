@@ -4,9 +4,10 @@ import { resolveIdentity } from "@/lib/entitlements";
 import { withMeterCost, available, getBalanceAsync } from "@/lib/points";
 import { requirePersistenceInProd } from "@/lib/store";
 import {
-  createProject, listProjects, MarketplaceError, POST_PROJECT_COST,
+  createProject, listProjects, getExpertProfile, MarketplaceError, POST_PROJECT_COST,
   type ProjectStatus,
 } from "@/lib/marketplace";
+import { notify } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +67,22 @@ export const POST = handler(async (req) => {
     const { result, charged, balance: after } = await withMeterCost(
       identity, POST_PROJECT_COST, "project_posted", () => createProject(identity.userId!, body),
     );
+
+    /* The brief posts fully open — anyone can still bid on it — this is
+       a warm lead, not an exclusive lock. Best effort: an invite that
+       fails to send must not undo a project that was already charged
+       for and created. */
+    const invitedExpertId = typeof body.invitedExpertId === "string" ? body.invitedExpertId : null;
+    if (invitedExpertId) {
+      try {
+        const expert = await getExpertProfile(invitedExpertId);
+        if (expert) {
+          await notify(invitedExpertId, "You were invited to bid", `A client invited you directly to bid on "${result.title}".`);
+        }
+      } catch (e) {
+        console.error("[projects] invite notify failed:", e);
+      }
+    }
 
     return ok({ project: result, charged, balance: { available: available(after) } }, { status: 201 });
   } catch (e) {

@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { SimplePage } from "@/components/layout/SimplePage";
+import { ExpertsClient } from "./ExpertsClient";
 
-export const metadata: Metadata = { title: "Expert directory" };
+export const metadata: Metadata = {
+  title: "Expert directory",
+  description: "Browse and vet the network — filter by discipline, check verification and track record, then invite someone into a brief.",
+};
 
 export default function Page() {
-  return (
-    <SimplePage
-      eyebrow="Expert directory"
-      title="Browse the vetted network."
-      lead="Filter by discipline, sector and availability. Engagement counts are published on every profile, including the low ones."
-      appEntry
-    />
-  );
+  return <ExpertsClient />;
 }

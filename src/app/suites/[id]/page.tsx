@@ -12,6 +12,7 @@ import { PricingCards } from "@/components/sections/PricingCards";
 import { Faq } from "@/components/sections/Faq";
 import { ExternalLaunch } from "@/components/sections/SuiteGrid";
 import { SuiteMock } from "@/components/mock/ProductMock";
+import { MilestoneWalkthrough } from "@/components/suites/MilestoneWalkthrough";
 import { SUITES, getSuite, type SuiteId } from "@/content/suites";
 import { PLATFORM_AGENTS } from "@/content/agents";
 import { CTA } from "@/content/brand";
@@ -69,6 +70,18 @@ const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, { label: string; href: string; e
   talent: { label: "Map a talent pathway", href: "/diagnostics/pathway" },
   finance: { label: "Build a budget", href: "/diagnostics/budget" },
   desk: { label: "Raise an invoice", href: "/dashboard/invoices" },
+  /* MARKET is neither a diagnostic nor a calculator — it's sourcing.
+     Previously fell back to CTA.primary ("Book a diagnostic"), which
+     described a suite about hiring an expert as though it were a
+     self-assessment tool. The real flagship is /experts — a genuinely
+     public page, same pattern as every other suite's flagship tool
+     (/diagnostics/budget etc.): vetting the network (verified status,
+     rating, engagement history, LAMID LEARN certification) needs no
+     account. It replaced an honest "this lives in the app" placeholder
+     that used to sit at this route. Only inviting someone into a brief
+     (dashboard/projects/invite/[expertId]) needs sign-in, because
+     that's the step that actually notifies a person and spends points. */
+  market: { label: "Vet and compare experts", href: "/experts" },
 };
 
 /**
@@ -202,24 +215,34 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
 
         {/* ── Dashboard preview ──────────────────────────────
             Illustrative, not a live capture — said so in the alt text
-            and the caption, never implied otherwise. */}
+            and the caption, never implied otherwise. MARKET gets a
+            step-by-step walkthrough of the real milestone form/status
+            lifecycle instead of a static screenshot — see
+            MilestoneWalkthrough's own header comment for what it does
+            and does not claim. */}
         <Section id="preview" className={suite.external ? "pt-4" : ""}>
-          <figure className="mx-auto max-w-4xl">
-            <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid var(--line)", boxShadow: "0 24px 60px -30px rgba(0,0,0,.35)" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={suite.dashboardScreenshot}
-                alt={`Illustrative preview of the ${suite.name} dashboard — not a live product capture`}
-                className="w-full"
-                loading="lazy"
-                width={960}
-                height={600}
-              />
+          {suite.id === "market" ? (
+            <div className="mx-auto max-w-4xl">
+              <MilestoneWalkthrough />
             </div>
-            <figcaption className="faint mt-3 text-center text-xs">
-              Illustrative preview of the {suite.name} dashboard.
-            </figcaption>
-          </figure>
+          ) : (
+            <figure className="mx-auto max-w-4xl">
+              <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid var(--line)", boxShadow: "0 24px 60px -30px rgba(0,0,0,.35)" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={suite.dashboardScreenshot}
+                  alt={`Illustrative preview of the ${suite.name} dashboard — not a live product capture`}
+                  className="w-full"
+                  loading="lazy"
+                  width={960}
+                  height={600}
+                />
+              </div>
+              <figcaption className="faint mt-3 text-center text-xs">
+                Illustrative preview of the {suite.name} dashboard.
+              </figcaption>
+            </figure>
+          )}
         </Section>
 
         {/* ── Use cases: stats travel with the claim ── */}
