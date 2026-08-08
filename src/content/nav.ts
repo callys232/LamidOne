@@ -18,6 +18,7 @@
  */
 
 import { SUITES } from "./suites";
+import { AGENT_COUNT, numberWord } from "./agents";
 
 export type NavLink = {
   label: string;
@@ -64,7 +65,7 @@ const suiteLink = (id: string): NavLink => {
 export const PRODUCTS_MENU = {
   header: {
     title: "The LAMID ONE ecosystem",
-    blurb: "Nine suites on one operating layer — strategy, growth, people, finance, clients, visibility, learning, sourcing and documents.",
+    blurb: "Four engines — CORE, GROW, TALENT and FINANCE — running nine suites on one record. Clarity, transformation, capability and financial performance in a single operating system.",
     ctas: [
       { label: "Free tools", href: "/free-tools" },
       { label: "All products and features", href: "/products" },
@@ -91,7 +92,7 @@ export const PRODUCTS_MENU = {
   /** Demoted below a rule — present, but ranked under the suites. */
   secondary: [
     suiteLink("docushare"),
-    { label: "LAMID Agents", href: "/agents", description: "The eleven AI agents and what each costs" },
+    { label: "LAMID Agents", href: "/agents", description: `The ${numberWord(AGENT_COUNT, true)} AI agents and what each costs` },
     { label: "LAMID Points", href: "/points", description: "Pay per completed outcome" },
     { label: "Integrations", href: "/integrations", description: "Everything it connects to" },
   ] as NavLink[],

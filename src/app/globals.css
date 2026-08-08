@@ -92,6 +92,30 @@ body {
   .muted     { color: var(--ink-muted); }
   .faint     { color: var(--ink-faint); }
 
+  /* Gradient text — the hero's four-value sentence, and nothing else.
+     The accent sweeps into the page's ink across the line, so the four
+     values read as one continuous thread rather than four separate
+     coloured items. That is the argument the sentence is making.
+
+     Theme-aware by construction: --ink flips with the theme, so this
+     resolves to red → black on light and red → white on dark without a
+     second rule. The first stop holds flat to 12% so "Clarity" reads as
+     properly red rather than as a word already fading out. */
+  .text-gradient-brand {
+    background-image: linear-gradient(100deg, var(--brand) 0%, var(--brand) 12%, var(--ink) 78%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  /* Without background-clip the text would render fully transparent. */
+  @supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+    .text-gradient-brand {
+      color: var(--ink);
+      -webkit-text-fill-color: currentColor;
+    }
+  }
+
   /* Eyebrow: red dot + caps label. The jargon lives here so the
      headline can stay human (teardown §1). */
   .eyebrow {
@@ -197,19 +221,29 @@ body {
   .divide-hairline > * + * { border-top: 1px solid var(--line-soft); }
 }
 
-/* Homepage "How it works" connector — draws left-to-right once on
-   load, brand red rather than the rainbow gradient a generic template
-   would use (teardown §6.3's rationing rule again). Static full-width
-   for anyone who prefers reduced motion, never an infinite loop. */
-@keyframes lamid-line-draw {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+/* Echo band — the four "always" beats lift and take the accent on
+   hover. Border colour lives here rather than inline so the hover rule
+   can win without !important; the first beat carries the accent at rest
+   so the row reads as a sequence starting somewhere, not four equals. */
+.echo-beat {
+  border-color: var(--line);
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 220ms ease-out,
+              color 220ms ease-out;
 }
-.timeline-line {
-  transform-origin: left;
+.echo-beat:first-child { border-color: var(--brand); }
+.echo-beat:hover { transform: translateY(-4px); border-color: var(--brand); color: var(--brand); }
+@media (prefers-reduced-motion: reduce) {
+  .echo-beat:hover { transform: none; }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .timeline-line {
-    animation: lamid-line-draw 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
+
+/* Walkthrough orbit — the dashed ring turns only on the final step,
+   where the copy claims the cycle closes and re-enters. Motion that
+   states something, rather than ambience running the whole time. */
+@keyframes lamid-orbit-spin {
+  to { transform: rotate(360deg); }
+}
+.orbit-spin { animation: lamid-orbit-spin 24s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .orbit-spin { animation: none; }
 }

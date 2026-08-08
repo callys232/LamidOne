@@ -429,7 +429,12 @@ export const FEATURE_MATRIX: MatrixGroup[] = [
       { feature: "AI-generated reports", values: [false, false, true, true, true] },
       { feature: "Executive and board reporting", values: [false, false, true, true, true] },
       { feature: "Custom impact and KPI dashboards", values: [false, false, false, "Limited", true] },
-      { feature: "Data export", values: ["CSV", "CSV", "CSV, PDF", "CSV, PDF, API", "CSV, PDF, API"] },
+      /* Was "CSV / CSV / CSV, PDF / CSV, PDF, API". CSV is real on
+         every tier (lib/engineExport.ts). PDF export of a MODEL is not
+         built — only invoices render as PDF — and there is no export
+         API. Promising both in the tier matrix is exactly the kind of
+         claim the trust centre exists to prevent. */
+      { feature: "Data export", values: ["CSV", "CSV", "CSV", "CSV", "CSV"] },
       { feature: "API access", values: [false, false, "Read", "Read / write", "Read / write"] },
     ],
   },

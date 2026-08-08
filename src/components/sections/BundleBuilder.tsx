@@ -77,7 +77,7 @@ export function BundleBuilder() {
         <p className="muted mt-5 text-xs leading-relaxed">
           {selected.size === 0
             ? "Every suite is included on every paid tier — there is no per-suite upgrade. Pick a few to see typical points usage for just those agents."
-            : `${selected.size} of 9 suites selected. All included from Starter up — seat price does not change for using more of them. Below is the points a working month in just these suites typically costs.`}
+            : `${selected.size} of 9 suites selected, across four engines. All included from Starter up — seat price does not change for using more of them. Below is the points a working month in just these suites typically costs.`}
         </p>
       </div>
 

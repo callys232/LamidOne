@@ -13,6 +13,7 @@ import { SOLUTIONS, getSolution } from "@/content/solutions";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
 import { TIERS_BY_ID } from "@/content/tiers";
 import { CTA } from "@/content/brand";
+import { ENGINES } from "@/content/aios";
 
 /** Segment and role pages — one template, ten routes. */
 export function generateStaticParams() {
@@ -34,6 +35,9 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
   const suites = sol.suites.map((id) => SUITES_BY_ID[id as SuiteId]).filter(Boolean);
   const tier = TIERS_BY_ID[sol.recommendedTier];
   const siblings = SOLUTIONS.filter((s) => s.kind === sol.kind && s.slug !== sol.slug);
+  /* Undefined on the three size pages by design — see the `engine` note
+     in solutions.ts. */
+  const engine = sol.engine ? ENGINES.find((e) => e.id === sol.engine) : undefined;
 
   return (
     <>
@@ -45,7 +49,31 @@ export default async function SolutionPage({ params }: { params: Promise<{ slug:
               <Eyebrow>{sol.eyebrow}</Eyebrow>
               <h1 className="h-display mt-6">{sol.headline}</h1>
               <p className="lead mt-6 max-w-2xl">{sol.subhead}</p>
-              <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-10" />
+
+              {/* The value thread, cut two ways.
+                  A role page names the one value that role is actually
+                  shopping for — a CFO buys Financial Performance, a CPO
+                  buys Capability — and carries its engine's tint. A size
+                  page gets all four, because a founder is not buying one
+                  of them; they are buying the whole system at a size
+                  that fits. Same thread either way. */}
+              {engine ? (
+                <p className="mt-8 inline-flex items-center gap-2.5 text-sm font-semibold">
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ background: engine.tint }}
+                    aria-hidden="true"
+                  />
+                  {engine.value}
+                  <span className="faint font-normal">· delivered by {engine.name}</span>
+                </p>
+              ) : (
+                <p className="text-gradient-brand mt-8 text-base font-semibold sm:text-lg">
+                  {ENGINES.map((e) => `${e.value}.`).join(" ")}
+                </p>
+              )}
+
+              <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-9" />
             </div>
           </div>
         </section>

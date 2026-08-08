@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
 import { SUITES } from "@/content/suites";
+import { engineForSuite } from "@/content/aios";
+import { microcopyForEngine } from "@/content/microcopy";
 import { EmptyState } from "@/app/dashboard/page";
 
 /**
@@ -47,13 +49,23 @@ export default function EnginesPage() {
       <section>
         <h2 className="mb-4 font-display text-xl">Run an engine</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SUITES.filter((s) => !s.external).map((s) => (
-            <Link key={s.id} href={`/suites/${s.id}#use-cases`} className="card card-interactive p-5">
-              <s.Icon className="h-5 w-5" style={{ color: s.tint }} strokeWidth={1.75} aria-hidden="true" />
-              <p className="mt-3 font-semibold">{s.name}</p>
-              <p className="faint mt-1 text-xs">{s.kind}</p>
-            </Link>
-          ))}
+          {SUITES.filter((s) => !s.external).map((s) => {
+            /* Before the first run there is nothing to describe, so the
+               card says what to do instead of what the suite is — in
+               that engine's own words. Once anything has been run the
+               category line returns, because the prompt has been
+               answered and repeating it would be nagging. */
+            const mc = v.intelligence.runsMade === 0
+              ? microcopyForEngine(engineForSuite(s.id)?.id)
+              : null;
+            return (
+              <Link key={s.id} href={`/suites/${s.id}#use-cases`} className="card card-interactive p-5">
+                <s.Icon className="h-5 w-5" style={{ color: s.tint }} strokeWidth={1.75} aria-hidden="true" />
+                <p className="mt-3 font-semibold">{s.name}</p>
+                <p className="faint mt-1 text-xs leading-relaxed">{mc?.emptyState ?? s.kind}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

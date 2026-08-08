@@ -11,11 +11,13 @@ import {
   TALENT_OPS, COLLABORATION, GOVERNANCE, type Capability,
 } from "@/content/platform";
 import { CTA } from "@/content/brand";
+import { AGENT_COUNT, AGENT_COUNT_WORD, numberWord } from "@/content/agents";
+import { METHODS, TOTAL_MODULES, moduleCountsByMethod } from "@/content/methods";
 
 export const metadata: Metadata = {
   title: "All products and features",
   description:
-    "Nine suites, eleven agents and every platform capability — the complete directory of what LAMID ONE does.",
+    `Four engines, nine suites, ${numberWord(AGENT_COUNT, true)} agents and every platform capability — the complete directory of what LAMID ONE does.`,
 };
 
 const GROUPS: { title: string; blurb: string; items: Capability[] }[] = [
@@ -37,6 +39,7 @@ const GROUPS: { title: string; blurb: string; items: Capability[] }[] = [
  * it, so nothing built is left unsold or undiscoverable.
  */
 export default function ProductsPage() {
+  const counts = moduleCountsByMethod();
   const publicCount = GROUPS.reduce((n, g) => n + g.items.filter((i) => i.visibility === "public" && i.verified).length, 0);
 
   return (
@@ -47,7 +50,9 @@ export default function ProductsPage() {
           <div className="shell py-20">
             <div className="max-w-3xl">
               <Eyebrow>Everything in the platform</Eyebrow>
-              <h1 className="h-display mt-6">Nine suites. {publicCount} capabilities live today.</h1>
+              <h1 className="h-display mt-6">
+                Four engines. Nine suites. {publicCount} capabilities live today.
+              </h1>
               <p className="lead mt-6">
                 The navigation shows the shortlist. This page is the whole index — every capability,
                 grouped, with nothing hidden behind a sales call. Anything marked &ldquo;Not yet&rdquo;
@@ -68,6 +73,56 @@ export default function ProductsPage() {
             {ADDED_FOR_SMB.length} of these — DESK, SIGNAL, LEARN and MARKET — were added to close
             the small-business gap. The original four suites all assumed an organisation large
             enough to have a strategy function, a workforce to model and a finance team.
+          </p>
+        </Section>
+
+        {/* ── How the engines actually compute ──────────────────
+            This section exists because the page used to sell a count.
+            A count invites the discovery that undermines it: nine of
+            every ten modules run the same evidence-weighted assessment
+            with different question labels, and a buyer who runs three
+            of them works that out unaided.
+
+            The honest framing is also the stronger one — a small set of
+            well-chosen methods applied across many contexts, each
+            picked because the obvious alternative would have been wrong
+            for that shape of question. Counts come from the registry,
+            never from a typed figure. */}
+        <Section id="methods" tone="tint" className="border-t">
+          <SectionHeading
+            eyebrow="How the engines compute"
+            title={`${METHODS.length} methods behind ${TOTAL_MODULES} modules.`}
+            blurb="Depth here is not the number of modules — it is that each method was chosen because averaging, ranking or scoring would have given the wrong answer for that shape of question. Every one names its own reason."
+          />
+          <dl className="space-y-4">
+            {METHODS.map((m) => {
+              const n = counts[m.kind] ?? 0;
+              return (
+                <div key={m.kind} className="card p-6 sm:p-7">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                    <dt className="font-display text-xl">{m.name}</dt>
+                    <span className="faint text-sm tabular-nums">
+                      {n} module{n === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <dd className="mt-3">
+                    <p className="muted text-[15px] leading-relaxed">{m.what}</p>
+                    <p className="mt-3 border-l-2 pl-4 text-sm leading-relaxed" style={{ borderColor: "var(--brand)" }}>
+                      <span className="font-semibold">Why not just average it: </span>
+                      {m.whyNotAverage}
+                    </p>
+                    <p className="faint mt-3 font-mono text-xs">{m.source}</p>
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+          <p className="faint mt-8 text-sm leading-relaxed">
+            The last row is the largest, and it is the one worth reading honestly: most modules run
+            the shared assessment archetype with their own declared dimensions. What differs between
+            them is the question set, not the arithmetic. The eight methods above it are where a
+            module earns its own computation — because for that question, a weighted mean would have
+            been wrong rather than merely imprecise.
           </p>
         </Section>
 
@@ -116,7 +171,7 @@ export default function ProductsPage() {
         <Section id="next" className="border-t">
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { t: "LAMID Agents", d: "Eleven agents and what each costs per outcome.", href: "/agents" },
+              { t: "LAMID Agents", d: `${AGENT_COUNT_WORD} agents and what each costs per outcome.`, href: "/agents" },
               { t: "Integrations", d: "Everything the platform connects to.", href: "/integrations" },
               { t: "Pricing", d: "Five tiers and the complete feature comparison.", href: "/pricing" },
             ].map((c) => (
@@ -134,7 +189,7 @@ export default function ProductsPage() {
               Pick the one thing that hurts most.
             </h2>
             <p className="mx-auto mt-6 max-w-xl" style={{ color: "var(--ink-faint)" }}>
-              You do not have to adopt nine suites. Start with one and add the rest when they earn it.
+              You do not have to adopt all four engines. Start with one and add the rest when they earn it.
             </p>
             <div className="mt-10 flex justify-center gap-3">
               <Button href={CTA.primary.href} variant="primary">{CTA.primary.label}</Button>

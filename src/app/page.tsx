@@ -1,20 +1,23 @@
 import Link from "next/link";
-import { RotatingWord } from "@/components/sections/RotatingWord";
-import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button, CtaPair } from "@/components/ui/Button";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
-import { StatRow, ProofStrip } from "@/components/ui/Stat";
 import { SuiteGrid } from "@/components/sections/SuiteGrid";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { CaseStudyRail, CASE_STUDIES } from "@/components/sections/CaseStudyRail";
 import { Faq } from "@/components/sections/Faq";
-import { CTA, REACH, yearsOfOperation } from "@/content/brand";
+import { CTA, yearsOfOperation } from "@/content/brand";
 import { SUITES } from "@/content/suites";
-import { PLATFORM_AGENTS, POINTS_EXPLAINER } from "@/content/agents";
+import { PLATFORM_AGENTS, POINTS_EXPLAINER, AGENT_COUNT_WORD } from "@/content/agents";
 import { VERIFIED_INTEGRATIONS } from "@/content/platform";
 import { HOME_FAQ, HOME_COMPARISON } from "@/content/home";
+import { AIOS_HERO, AIOS_CTA, ENGINES, BRAND_LINE } from "@/content/aios";
+import {
+  AiosEngines, AiosSystemFlow, AiosWhy, AiosLayer, AiosArchitecture, AiosAdvantage, AiosTriad,
+  AiosHowItWorks, AiosProof, AiosUseCases, AiosIndustries, AiosWalkthrough,
+} from "@/components/sections/Aios";
+import { RotatingWord } from "@/components/sections/RotatingWord";
 import { ScreenshotFrame } from "@/components/mock/ProductMock";
 
 /**
@@ -35,25 +38,108 @@ export default function HomePage() {
       <main id="main">
 
         {/* ── Hero ────────────────────────────────────────────── */}
-        <section className="border-b" style={{ borderColor: "var(--line-soft)" }}>
-          <div className="shell py-20 sm:py-28">
-            <div className="max-w-4xl">
-              <Eyebrow>LAMID ONE — Human-AI Consulting Operating System</Eyebrow>
-              {/* Rotating word maps to the four original suites without
-                  naming them — Strategy → CORE, Growth → GROW,
-                  People → TALENT, Capital → FINANCE. */}
-              <h1 className="h-hero mt-6">
-                The Future of{" "}
-                <RotatingWord words={["Strategy", "Growth", "People", "Capital"]} />
-                <span className="text-brand">,</span> Delivered as One.
+        <section className="relative overflow-hidden border-b" style={{ borderColor: "var(--line-soft)" }}>
+          {/* Ambient backdrop. Generated rather than photographic: there
+              is no hero photograph in the repo, and a stock image would
+              fight a design system built on one rationed accent and a
+              lot of white. This is the same orbital motif the product
+              walkthrough uses — concentric rings with the four engines
+              seated at the compass points — so the backdrop restates
+              "one OS, four engines" instead of decorating around it.
+              Theme-aware (every colour is a token), weightless, and
+              pinned behind the content. */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div
+              className="absolute -right-[14%] -top-[38%] h-[860px] w-[860px] rounded-full"
+              style={{ background: "radial-gradient(circle, var(--brand-soft) 0%, transparent 62%)" }}
+            />
+            <svg
+              className="absolute -right-[16%] -top-[22%] h-[760px] w-[760px]"
+              viewBox="0 0 400 400" fill="none" style={{ opacity: 0.55 }}
+            >
+              <circle cx="200" cy="200" r="62" stroke="var(--line)" strokeWidth="1" />
+              <circle cx="200" cy="200" r="112" stroke="var(--line)" strokeWidth="1" strokeDasharray="2 7" />
+              <circle cx="200" cy="200" r="165" stroke="var(--line)" strokeWidth="1" />
+              <circle cx="200" cy="200" r="198" stroke="var(--line)" strokeWidth="1" strokeDasharray="2 7" />
+              {/* Four engines, seated on the r=165 ring at the compass
+                  points — the same arrangement as the walkthrough orbit. */}
+              {[
+                { cx: 200, cy: 35, i: 0 },
+                { cx: 365, cy: 200, i: 1 },
+                { cx: 200, cy: 365, i: 2 },
+                { cx: 35, cy: 200, i: 3 },
+              ].map((n) => (
+                <circle key={n.i} cx={n.cx} cy={n.cy} r="5.5" fill={ENGINES[n.i].tint} opacity="0.5" />
+              ))}
+            </svg>
+          </div>
+
+          <div className="shell relative py-24 sm:py-32">
+            {/* The document's four-engine hero. The earlier three-verb
+                version ("diagnose, transform, grow") predated FINANCE
+                and never accounted for all four engines — retired. The
+                headline is three complete declaratives, so it is set as
+                three lines rather than one wrapping paragraph.
+
+                One left-hand column, deliberately: every block stacks
+                in reading order — claim, definition, optional detail,
+                mark, ask — which keeps the right two-fifths of the
+                section clear as canvas for the background asset. The
+                longest block (the supporting paragraph) is collapsed
+                so the column stays short enough for the CTA to sit
+                above the fold. */}
+            <div className="max-w-3xl">
+              <Eyebrow>{AIOS_HERO.eyebrow}</Eyebrow>
+
+              {/* The headline leads with the promise, not the org chart.
+                  One domain rotates through the four engines, so the
+                  same sentence reads true four times — "the future of
+                  consulting / growth / talent / finance, delivered as
+                  one" — and the reader watches the scope widen rather
+                  than being told it in a list.
+
+                  Two lines: the rotating clause, then the payoff. The
+                  accent is spent on "one", which is the whole argument. */}
+              <h1 className="font-display mt-8 text-[clamp(2.25rem,5vw,4.25rem)] font-normal leading-[1.08] tracking-[-0.02em]">
+                <span className="block">
+                  {AIOS_HERO.headlineLead}{" "}
+                  <RotatingWord words={AIOS_HERO.headlineWords} suffix="," />
+                </span>
+                {/* Left in ink on purpose. The accent is already spent on
+                    the word that changes; keeping the payoff constant in
+                    colour as well as wording is the argument the line is
+                    making — four domains, one delivery. */}
+                <span className="block">{AIOS_HERO.headlineTail}</span>
               </h1>
-              <p className="lead mt-7 max-w-2xl">
-                A consulting experience built on transparency, reliability, and {yearsOfOperation()}+ years of
-                leadership. A single, trusted system for intelligent consulting and enterprise growth.
+
+              {/* The four values as one sentence — the common thread the
+                  engines are stitched to. Four full stops, not commas:
+                  each is a standalone promise, not an item in a list.
+
+                  One gradient across the whole line rather than four
+                  engine tints: the sentence's job is to read as a single
+                  thread. Attribution to the four engines happens in the
+                  engine section below, so the hero does not need to do
+                  it too. Text is sourced from ENGINES[].value, so the
+                  landing slide and the engine section cannot disagree
+                  about what the four are. */}
+              <p className="text-gradient-brand mt-9 text-lg font-semibold leading-relaxed sm:text-xl">
+                {ENGINES.map((e) => `${e.value}.`).join(" ")}
               </p>
-              <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-10" />
-              <p className="faint mt-4 text-sm">
-                Free plan available. No card required.
+
+              {/* Structurally the same three-part declarative as the
+                  headline, so it sits close enough for the rhyme to
+                  register rather than reading as a stray line. */}
+              <p
+                className="muted mt-8 border-t pt-5 text-[11px] font-semibold uppercase tracking-[0.22em]"
+                style={{ borderColor: "var(--line-soft)" }}
+              >
+                {AIOS_HERO.signature}
+              </p>
+
+              <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-9" />
+              <p className="faint mt-5 text-sm">
+                Free plan available. No card required. Built on {yearsOfOperation()}+ years of consulting leadership.
               </p>
             </div>
 
@@ -70,107 +156,47 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Proof strip ─────────────────────────────────────
-            A precise, countable sentence. We count what is true today
-            rather than publishing outcome figures we have not measured. */}
-        <div className="border-b" style={{ borderColor: "var(--line-soft)" }}>
-          <ProofStrip sentence="Free plan. One real diagnostic, on your own numbers. No card required." />
-          <div className="shell pb-12">
-            <StatRow stats={REACH} />
+        {/* ── The echo ────────────────────────────────────────
+            Replaces the stat strip that used to sit here. That strip
+            repeated the hero's own fine print twice over ("free plan,
+            no card", "38+ years"), and its two remaining figures are
+            each told better by the section that owns them — nine suites
+            by the engines grid directly below, the agent count by the
+            agents section. Four beats for four engines, from the brand
+            document's echo line, which had no home until now. */}
+        <div className="border-b" style={{ borderColor: "var(--line-soft)", background: "var(--brand-soft)" }}>
+          <div className="shell py-8">
+            <ul className="grid gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              {AIOS_HERO.echoBeats.map((beat) => (
+                <li key={beat} className="echo-beat font-display text-lg sm:border-l sm:pl-5">
+                  {beat}
+                  <span className="text-brand">.</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {/* ── How it works ─────────────────────────────────────
-            The user's own journey through the product (starting from
-            the free diagnostic — the first thing a visitor actually
-            does), not the architectural layers below it. Reuses the
-            same dark contrast band as the closing CTA (`tone="ink"`,
-            which already inverts correctly per theme) rather than the
-            unrelated blue from the reference design — the accent
-            colour stays the brand red, on the step numerals, matching
-            the one place this design system already permits it
-            (globals.css's own rationing rule). */}
-        <Section id="how-it-works" tone="ink">
-          <div className="text-center">
-            <p
-              className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em]"
-              style={{ color: "var(--page)", opacity: 0.6 }}
-            >
-              <span className="h-[6px] w-[6px] shrink-0 rounded-full" style={{ background: "var(--brand)" }} aria-hidden="true" />
-              How it works
-            </p>
-            <h2 className="h-display mx-auto mt-4 max-w-2xl" style={{ color: "var(--page)" }}>
-              From Diagnostic to Growth.
-            </h2>
-          </div>
-
-          <div className="relative mt-16 grid gap-10 sm:grid-cols-5">
-            <div
-              className="pointer-events-none absolute left-0 right-0 top-6 hidden sm:block"
-              style={{ height: 1, background: "var(--page)", opacity: 0.12 }}
-              aria-hidden="true"
-            />
-            <div
-              className="timeline-line pointer-events-none absolute left-0 right-0 top-6 hidden sm:block"
-              style={{ height: 1, background: "var(--brand)", opacity: 0.8 }}
-              aria-hidden="true"
-            />
-            {[
-              { t: "Diagnose", d: "Take the diagnostic. Tell us where you stand across Strategy, Growth, People, and Finance — free, whatever your size." },
-              { t: "Reveal", d: "See your real score. LAMID ONE surfaces your gaps and strengths across all four pillars — honestly." },
-              { t: "Unlock", d: "Get recommendations matched to your size, sector, and situation — not a generic report." },
-              { t: "Act", d: "Engage the suite, the experts, or the tools your score says you need most — one platform, one entry point." },
-              { t: "Grow", d: "Track progress. Refine your approach. Watch your business evolve in real time — quarter by quarter." },
-            ].map((step, i) => (
-              <div key={step.t} className="relative text-center">
-                <span
-                  className="font-display relative z-10 mx-auto flex h-12 w-12 items-center justify-center rounded-full text-lg"
-                  style={{ background: "var(--brand)", color: "var(--brand-ink)" }}
-                >
-                  {i + 1}
-                </span>
-                <h3 className="mt-4 font-semibold" style={{ color: "var(--page)" }}>{step.t}</h3>
-                <p
-                  className="mt-2 text-sm leading-relaxed text-justify"
-                  style={{ color: "var(--page)", opacity: 0.65, textAlignLast: "justify" }}
-                >
-                  {step.d}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        {/* ── Architecture ────────────────────────────────────
-            The one-image claim: what IS this. Answers the first
-            question faster than any paragraph can. */}
-        <Section id="architecture">
-          <SectionHeading
-            eyebrow="The operating layer"
-            title="Three layers. One record."
-            blurb="Connected data and tools, so knowing, deciding and doing are the same system rather than three that disagree."
-          />
-          <div className="grid gap-5 lg:grid-cols-3">
-            {[
-              { n: "01", t: "Know", d: "Diagnostics compute your position from your own figures, across every suite. Nothing is estimated by a model.", href: "/suites/core" },
-              { n: "02", t: "Decide", d: "Options, weightings and rationale held together — so the reason survives the decision.", href: "/suites/core#decision" },
-              { n: "03", t: "Do", d: "Source the expert, run the milestones, release the payment, keep the capability.", href: "/suites/market" },
-            ].map((l) => (
-              <Link key={l.n} href={l.href} className="card group flex flex-col p-8 transition-colors hover:border-[color:var(--brand-line)]">
-                <span className="font-display text-brand text-3xl">{l.n}</span>
-                <h3 className="mt-5 font-display text-2xl">{l.t}</h3>
-                <p className="muted mt-3 flex-1 text-sm leading-relaxed">{l.d}</p>
-                <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold transition-colors group-hover:text-brand">
-                  Explore <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </Section>
+        {/* ── The AIOS narrative ──────────────────────────────
+            The brand document's homepage, in its own order: the four
+            engines and what rolls up under each, why the traditional
+            model breaks, how the operating layer works, the
+            architecture, the advantage, the operating logic, and the
+            proof/promise pair. Copy lives in content/aios.ts. */}
+        <AiosEngines />
+        <AiosSystemFlow />
+        <AiosWhy />
+        <AiosLayer />
+        <AiosArchitecture />
+        <AiosAdvantage />
+        <AiosHowItWorks />
+        <AiosProof />
 
         {/* ── Suite inventory ─────────────────────────────────
-            Argument left, inventory right. ~400 routes compressed to
-            nine cards with exactly two bullets each. */}
+            Retained as the detailed inventory behind the engine cards
+            above: AiosEngines names which suites sit in each engine and
+            links to them, this grid is where a reader browses all nine
+            with their two-bullet summaries. */}
         <Section id="suites" className="border-t" >
           <div className="grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-4">
@@ -182,10 +208,6 @@ export default function HomePage() {
                 Every suite writes to the same record, so the diagnostic that started the
                 conversation is still attached when the invoice goes out.
               </p>
-              <p className="muted mt-4 text-sm leading-relaxed">
-                Strategy in CORE, growth in GROW, people in TALENT, capital in FINANCE —
-                one arc, not four disconnected tools.
-              </p>
               <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-8" />
             </div>
             <div className="lg:col-span-8">
@@ -194,13 +216,20 @@ export default function HomePage() {
           </div>
         </Section>
 
+        {/* ── Use cases, industries, walkthrough ──────────────
+            Placed after the suite inventory so a reader meets the nine
+            real suites before the applied-value sections. */}
+        <AiosUseCases />
+        <AiosIndustries />
+        <AiosWalkthrough />
+
         {/* ── Agents ──────────────────────────────────────────
             The one atmospheric field on the page. Every AI claim
             carries a number or a price — "AI-powered" alone is noise. */}
         <Section id="agents" tone="tint">
           <SectionHeading
             eyebrow="LAMID Agents"
-            title="Eleven agents. You pay when the work is done."
+            title={`${AGENT_COUNT_WORD} agents. You pay when the work is done.`}
             blurb={POINTS_EXPLAINER.body}
             action={<Link href="/agents" className="link-underline text-sm">All agents</Link>}
           />
@@ -271,16 +300,18 @@ export default function HomePage() {
           <Faq items={HOME_FAQ} />
         </Section>
 
+        <AiosTriad />
+
         {/* ── Closing ─────────────────────────────────────────
             Maximum contrast at the decision point. Same two buttons,
             third appearance. Consistency over cleverness. */}
         <section style={{ background: "var(--ink)" }}>
           <div className="shell py-24 text-center">
             <h2 className="h-display mx-auto max-w-3xl" style={{ color: "var(--page)" }}>
-              Stop deciding from decks nobody can check.
+              {AIOS_CTA.headline}
             </h2>
-            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed" style={{ color: "var(--ink-faint)" }}>
-              A new account includes one full diagnostic, free. Ten minutes, no card.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed" style={{ color: "var(--ink-faint)" }}>
+              {AIOS_CTA.body}
             </p>
             <div className="mt-10 flex justify-center">
               <div className="flex flex-col gap-3 sm:flex-row">

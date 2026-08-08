@@ -6,9 +6,13 @@ import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button, CtaPair } from "@/components/ui/Button";
 import { ComparisonTable } from "@/components/sections/ComparisonTable";
 import { Faq } from "@/components/sections/Faq";
-import { PLATFORM_AGENTS, ADMIN_AGENTS, POINTS_EXPLAINER, outcomeCost } from "@/content/agents";
+import {
+  PLATFORM_AGENTS, ADMIN_AGENTS, POINTS_EXPLAINER, outcomeCost,
+  AGENT_COUNT, AGENT_COUNT_WORD, numberWord,
+} from "@/content/agents";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
 import { CTA } from "@/content/brand";
+import { ENGINES, engineForSuite } from "@/content/aios";
 import { AgentMock } from "@/components/mock/ProductMock";
 
 export const metadata: Metadata = {
@@ -38,14 +42,53 @@ export default function AgentsPage() {
             <div className="max-w-3xl">
               <Eyebrow>LAMID Agents</Eyebrow>
               <h1 className="h-display mt-6">
-                Eleven agents that work on your own records<span className="text-brand">.</span>
+                {AGENT_COUNT_WORD} agents that work on your own records<span className="text-brand">.</span>
               </h1>
               <p className="lead mt-6">
                 Every agent is grounded in the data already in your engines — not in a general
-                model's guess about your business. You pay per completed outcome, so a run that
+                model&apos;s guess about your business. You pay per completed outcome, so a run that
                 fails costs you nothing.
               </p>
-              <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-10" />
+
+              {/* Which engine each agent serves, counted from the data
+                  rather than asserted. This is the human-AI partnership
+                  the four-engine story rests on, made countable: the
+                  agents are not a separate product bolted alongside the
+                  engines, they are how each engine does its work. */}
+              <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
+                {ENGINES.map((e) => {
+                  const count = PLATFORM_AGENTS.filter(
+                    (a) => engineForSuite(a.suite)?.id === e.id,
+                  ).length;
+                  /* GROW currently has none. Reported rather than
+                     hidden — the same discipline as the trust centre,
+                     which lists what is not certified. Set faint and
+                     worded as "none yet" so it reads as a stated fact
+                     rather than a chip that failed to load. */
+                  return (
+                    <li
+                      key={e.id}
+                      className={`flex items-center gap-2.5 text-sm ${count === 0 ? "faint" : ""}`}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ background: e.tint, opacity: count === 0 ? 0.4 : 1 }}
+                        aria-hidden="true"
+                      />
+                      {count === 0 ? (
+                        <span>none yet in {e.name.replace("LAMID ", "")}</span>
+                      ) : (
+                        <>
+                          <span className="font-semibold tabular-nums">{count}</span>
+                          <span className="muted">in {e.name.replace("LAMID ", "")}</span>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-9" />
             </div>
 
             <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,6 +140,7 @@ export default function AgentsPage() {
               <thead>
                 <tr style={{ background: "var(--line-soft)" }}>
                   <th scope="col" className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Agent</th>
+                  <th scope="col" className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Engine</th>
                   <th scope="col" className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Suite</th>
                   <th scope="col" className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Billed</th>
                   <th scope="col" className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em]">Cost</th>
@@ -106,6 +150,7 @@ export default function AgentsPage() {
               <tbody>
                 {PLATFORM_AGENTS.map((a) => {
                   const suite = SUITES_BY_ID[a.suite as SuiteId];
+                  const engine = engineForSuite(a.suite);
                   return (
                     <tr key={a.id} className="border-b" style={{ borderColor: "var(--line-soft)" }}>
                       <th scope="row" className="px-5 py-4 font-normal">
@@ -118,6 +163,18 @@ export default function AgentsPage() {
                           </span>
                         </span>
                       </th>
+                      <td className="px-5 py-4">
+                        {engine && (
+                          <span className="flex items-center gap-2 text-xs">
+                            <span
+                              className="h-1.5 w-1.5 shrink-0 rounded-full"
+                              style={{ background: engine.tint }}
+                              aria-hidden="true"
+                            />
+                            <span className="font-semibold">{engine.value}</span>
+                          </span>
+                        )}
+                      </td>
                       <td className="px-5 py-4">
                         {suite && (
                           <Link href={`/suites/${suite.id}`} className="muted text-xs hover:text-brand">
@@ -202,7 +259,7 @@ export default function AgentsPage() {
             items={[
               { q: "What is an AI agent?", a: "An agent completes a defined task end to end and returns a result you can act on — a shortlist, a drafted proposal, a scored diagnostic — rather than answering a question in a chat box. Each LAMID agent is scoped to one job and priced by the outcome it produces." },
               { q: "How are LAMID Agents priced?", a: "In LAMID Points, per completed outcome. A resolved dispute costs 80 points, a drafted proposal 60, a delivered shortlist 30, an answered question 15. If a run fails you are not charged. Every paid plan includes a monthly points allowance." },
-              { q: "Can I build my own agent?", a: "Not yet. Custom engine configuration is available on Enterprise, and a custom agent builder is on the roadmap. Today the eleven agents listed above are the full set." },
+              { q: "Can I build my own agent?", a: `Not yet. Custom engine configuration is available on Enterprise, and a custom agent builder is on the roadmap. Today the ${numberWord(AGENT_COUNT, true)} agents listed above are the full set.` },
               { q: "Who can use the agents?", a: "The Assistant, Diagnostic and Matching agents are available on the free plan. Proposal, Milestone, Deliverable and Project Match unlock at Starter. Dispute, Intelligence and Operating Model unlock at Growth. The full breakdown is in the pricing comparison." },
               { q: "How is this different from using ChatGPT directly?", a: "A general assistant cannot see your engagement records, your budget model or your workforce data, so it can only give you a plausible-sounding general answer. LAMID Agents read the data already in your engines, respect the permissions of the person invoking them, and write their output back to the record it belongs to." },
             ]}

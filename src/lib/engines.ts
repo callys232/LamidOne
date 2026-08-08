@@ -6,6 +6,7 @@ import { FEATURE_MATRIX, type TierId } from "@/content/tiers";
 import { computeAssessment, assessmentToPrompt, type AssessmentRow } from "./intelligence/assessment";
 import { computeDecisionQuality, decisionQualityToPrompt } from "./intelligence/decisionQuality";
 import { computeGrowthPathways, growthPathwaysToPrompt } from "./intelligence/growthPathways";
+import { computeBenchStrength, benchStrengthToPrompt } from "./intelligence/benchStrength";
 import { computeScenarioDecision, scenarioDecisionToPrompt } from "./intelligence/scenarioDecision";
 import { computeRoadmap, roadmapToPrompt } from "./intelligence/roadmap";
 import { computeOptimisation, optimisationToPrompt } from "./intelligence/optimisation";
@@ -274,6 +275,22 @@ export function runEngine(ref: EngineRef, input: Record<string, unknown>): Engin
       summary: gp,
       working: growthPathwaysToPrompt(gp),
       warnings: [...gp.warnings, ...gp.portfolioWarnings],
+    } as EngineResult;
+  }
+
+  /* A22 measures succession COVERAGE per seat. A weighted mean would
+     let eight well-covered roles average away the two that will
+     actually break the organisation — the same failure that took Q44
+     off the archetype. See lib/intelligence/benchStrength.ts. */
+  if (kind === "bench-strength") {
+    const bs = computeBenchStrength((input.roles ?? []) as never);
+    return {
+      code: ref.code, suite: ref.suiteId,
+      engineName: config.engineName, seriesName: config.seriesName,
+      kind: "bench-strength",
+      summary: bs,
+      working: benchStrengthToPrompt(bs),
+      warnings: [...bs.warnings, ...bs.planWarnings],
     } as EngineResult;
   }
 

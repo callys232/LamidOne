@@ -1481,6 +1481,10 @@ export const MODULE_REGISTRY: Record<string, ModuleConfig> = {
     id: "A22", seriesName: "A-Series — TALENT Intelligence", engineName: "Leadership Bench Strength",
     purpose: "Measures the depth of your leadership bench — how many ready-now leaders stand behind each key seat.",
     dimensionLabels: ["Bench Depth Score","Leadership Supply Forecast","Vulnerability Zone Count","Bench Resilience Index"],
+    /* Succession is a COVERAGE question answered per seat, not a
+       weighted mean over four abstractions — a seat with nobody behind
+       it is not offset by a seat with three. See benchStrength.ts. */
+    inputs: { kind: "bench-strength" },
     driverContext: "Human Drivers map bench capacity and quality. Structural Drivers determine bench architecture. Direction Drivers reveal the bench strength the enterprise must achieve to execute its future.",
     correctionProtocols: ["Bench Stabilisation","Bench Deepening","Bench Amplification","Bench Alignment","Bench Improvement","Bench Lock-In"],
     backHref: "/a21-succession-pipeline", backLabel: "Succession Pipeline", nextHref: "/a23-behavioral-competency", nextLabel: "Behavioral Competency",

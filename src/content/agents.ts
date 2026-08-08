@@ -42,7 +42,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   MessageSquare, Stethoscope, Compass as CompassIcon, Target, FileText,
   Waves, ShieldCheck, Scale, Telescope, Boxes,
-  Radio, Send, LifeBuoy,
+  Radio, Send, LifeBuoy, Route as RouteIcon,
 } from "lucide-react";
 
 export type AgentSurface = "platform" | "admin";
@@ -81,6 +81,36 @@ export const AGENTS: Agent[] = [
     surface: "platform",
     Icon: Stethoscope,
     minTier: "free",
+  },
+  {
+    id: "growth-pathways",
+    name: "Horizon",
+    role: "Growth pathway agent",
+    what: "Compares your candidate growth pathways against each other and returns a sequenced portfolio you can actually resource — with what was deferred, and why.",
+    unit: "per sequenced portfolio",
+    points: 50,
+    /* Genuinely engine-backed, like Catalyst and unlike the persona
+       agents below it. G03 is not the shared assessment archetype: it
+       compares options against each other under a capacity constraint
+       and returns a recommendation, with structural quadrant risk the
+       caller cannot argue down. See lib/intelligence/growthPathways.ts,
+       which had a complete implementation, a verifier and a public
+       runner at /diagnostics/g03 — and no agent in front of any of it.
+
+       NAMING follows the CADENCE and BLUEPRINT precedent: lifted from
+       the engine's own vocabulary rather than invented. `Horizon` is a
+       first-class type in growthPathways.ts (1 = defend the core,
+       2 = build the emerging, 3 = option on the future), and horizon
+       balance is the portfolio check the engine is built around.
+
+       PRICING sits between Catalyst (40, a diagnostic) and Scribe
+       (60, a drafted proposal). A sequenced portfolio is more work
+       than a score and less than a written document. */
+    route: "app/api/agents/[id]/run/route.ts → runEngine(G03) (lib/intelligence/growthPathways.ts)",
+    suite: "grow",
+    surface: "platform",
+    Icon: RouteIcon,
+    minTier: "growth",
   },
   {
     id: "matching",
@@ -255,6 +285,34 @@ export const AGENTS: Agent[] = [
 
 export const PLATFORM_AGENTS = AGENTS.filter((a) => a.surface === "platform");
 export const ADMIN_AGENTS = AGENTS.filter((a) => a.surface === "admin");
+
+/**
+ * The customer-facing agent count, as a word — derived, never typed.
+ *
+ * This count appeared hardcoded as "Eleven" in seven places across the
+ * marketing pages, the nav, the dashboard and the brand stat row. Adding
+ * one agent made all seven wrong at once, which is precisely the drift
+ * brand.ts exists to prevent (see its header on HubSpot publishing three
+ * different customer counts).
+ *
+ * Spelled out rather than numeric because that is how the copy reads —
+ * "Twelve agents that work on your own records", not "12 agents".
+ * Falls back to the numeral above twenty, where words stop helping.
+ */
+const NUMBER_WORDS = [
+  "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+  "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+  "Seventeen", "Eighteen", "Nineteen", "Twenty",
+];
+
+export const numberWord = (n: number, lower = false) => {
+  const w = NUMBER_WORDS[n] ?? String(n);
+  return lower ? w.toLowerCase() : w;
+};
+
+/** e.g. "Twelve" — the count of agents a customer can actually run. */
+export const AGENT_COUNT = PLATFORM_AGENTS.length;
+export const AGENT_COUNT_WORD = numberWord(AGENT_COUNT);
 
 /* ───────────────────────────────────────────────────────────────
    LAMID POINTS — the meter

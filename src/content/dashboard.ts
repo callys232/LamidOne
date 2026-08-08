@@ -5,6 +5,7 @@ import {
   Bot, Boxes, FileText, Bell, Settings, Gauge, Timer, LifeBuoy,
   BarChart3, ScrollText, UserCheck, Send, Calendar,
 } from "lucide-react";
+import { AGENT_COUNT, numberWord } from "./agents";
 
 /**
  * DASHBOARD MODEL.
@@ -106,7 +107,7 @@ export const SECTIONS: Section[] = [
     roles: ["client", "enterprise", "concierge"] },
 
   { id: "agents", label: "Agents", Icon: Bot, group: "Intelligence",
-    blurb: "The eleven agents, what each costs, and your usage.",
+    blurb: `The ${numberWord(AGENT_COUNT, true)} agents, what each costs, and your usage.`,
     roles: ["client", "expert", "enterprise", "concierge", "operator"] },
 
   { id: "analytics", label: "Analytics", Icon: BarChart3, group: "Intelligence",

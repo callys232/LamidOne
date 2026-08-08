@@ -85,6 +85,16 @@ export interface GrowthPathwaysInputSpec {
 }
 
 /**
+ * Critical seats with their named successors, scored for COVERAGE per
+ * seat rather than averaged into a bench score. Distinct from
+ * `assessment` because a seat with nobody behind it must never be
+ * offset by a seat with three — see lib/intelligence/benchStrength.ts.
+ */
+export interface BenchStrengthInputSpec {
+  kind: "bench-strength";
+}
+
+/**
  * Options evaluated across possible futures. Serves the simulator,
  * foresight and scenario-planner modules — see
  * lib/intelligence/scenarioDecision.ts.
@@ -124,6 +134,7 @@ export interface ConflictInputSpec {
 export type ModuleInputSpec =
   | DecisionQualityInputSpec
   | GrowthPathwaysInputSpec
+  | BenchStrengthInputSpec
   | ScenarioDecisionInputSpec
   | RoadmapInputSpec
   | OptimisationInputSpec

@@ -82,6 +82,23 @@ export const POST = handler(async (req) => {
         return runEngine(engineCode, input);
       }
 
+      /* Horizon is PINNED to G03 rather than relying on the caller to
+         pass `engine`. Without this it would fall through to the
+         generic language path below, and the model would happily write
+         a plausible "sequenced portfolio" with no arithmetic behind it
+         — inventing the one number the agent is sold on. An agent
+         whose whole claim is a computed ranking must never be able to
+         answer from prose. */
+      if (agentId === "growth-pathways") {
+        const pathways = Array.isArray(input.pathways) ? input.pathways : [];
+        if (pathways.length === 0) {
+          throw new EngineInputError(
+            "Horizon needs `pathways` — the candidate growth options to compare. One option is a proposal, not a choice.",
+          );
+        }
+        return runEngine(parseEngineCode("G03")!, input);
+      }
+
       /* Steward: grounded against real events and an honest LMS
          handoff BEFORE the model sees the ticket — see supportAgent.ts
          for why this cannot just be the generic passthrough below. */

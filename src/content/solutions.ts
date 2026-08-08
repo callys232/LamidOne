@@ -8,6 +8,7 @@
 import type { FaqItem } from "@/components/sections/Faq";
 import type { SuiteId } from "./suites";
 import type { TierId } from "./tiers";
+import type { Engine } from "./aios";
 
 export type Solution = {
   slug: string;
@@ -16,6 +17,21 @@ export type Solution = {
   eyebrow: string;
   headline: string;
   subhead: string;
+  /**
+   * The engine whose value this buyer is actually shopping for.
+   *
+   * Set on the four ROLE pages, where the mapping is exact — a CFO is
+   * buying Financial Performance, a CPO is buying Capability. It drives
+   * the value shown in the hero, so the thread that starts on the
+   * landing slide is visible on the page a role-based buyer lands on.
+   *
+   * Deliberately absent on the three SIZE pages. A founder is not
+   * shopping for one of the four values; they are shopping for all of
+   * them at a size that fits. Forcing an engine onto those pages would
+   * narrow the offer rather than clarify it — so they get the full
+   * four-value line instead.
+   */
+  engine?: Engine["id"];
   /** What this buyer is actually trying to avoid. */
   pains: string[];
   /** Ordered starting path — not a feature list. */
@@ -123,6 +139,7 @@ export const SOLUTIONS: Solution[] = [
   /* ── By role ──────────────────────────────────────────── */
   {
     slug: "ceo",
+    engine: "core",
     kind: "role",
     nav: "Chief executive",
     eyebrow: "For chief executives",
@@ -149,6 +166,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "cfo",
+    engine: "finance",
     kind: "role",
     nav: "Chief financial officer",
     eyebrow: "For chief financial officers",
@@ -169,12 +187,18 @@ export const SOLUTIONS: Solution[] = [
     recommendedTier: "growth",
     faq: [
       { q: "Does AI produce any of the financial figures?", a: "No. Every figure is arithmetic computed from your inputs, and the calculation is exportable. Agents can draft commentary around a result but never generate the number." },
-      { q: "Can we keep using Excel alongside it?", a: "Yes. Models export to CSV on every tier and PDF from Growth, including the calculation steps rather than just the final figures." },
+      /* Was "CSV on every tier and PDF from Growth". CSV is now true of
+         every module (lib/engineExport.ts); PDF export of a model is
+         not built, and claiming it here while the trust centre lists
+         what is not done would have been the exact inconsistency this
+         platform sells against. */
+      { q: "Can we keep using Excel alongside it?", a: "Yes. Every engine result exports to CSV on every tier, including the working — the arithmetic behind each figure, not just the final numbers. Invoices export as PDF; models do not yet." },
     ],
     closing: { title: "Rebuild one model and compare.", body: "The budget estimator is free — bring last quarter's numbers." },
   },
   {
     slug: "cpo",
+    engine: "talent",
     kind: "role",
     nav: "Chief people officer",
     eyebrow: "For chief people officers",
@@ -201,6 +225,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "strategy",
+    engine: "grow",
     kind: "role",
     nav: "Strategy and transformation",
     eyebrow: "For strategy and transformation leaders",

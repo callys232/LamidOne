@@ -55,7 +55,7 @@ export default function PricingPage() {
               <Eyebrow>Pricing</Eyebrow>
               <h1 className="h-display mt-6">Start free. Add suites, not invoices.</h1>
               <p className="lead mt-6">
-                One ladder across all nine suites. Seat price follows your account tier rather than
+                One ladder across all four engines. Seat price follows your account tier rather than
                 the number of suites you use — so the second suite costs nothing extra per seat, and
                 the ninth costs nothing extra either.
               </p>
@@ -90,7 +90,7 @@ export default function PricingPage() {
           <SectionHeading
             eyebrow="Every function"
             title="The complete comparison."
-            blurb="Ten groups covering access, points, all nine suites, the agent layer, marketplace, delivery and payments, analytics, learning, documents, security and support."
+            blurb="Ten groups covering access, points, all four engines, the agent layer, marketplace, delivery and payments, analytics, learning, documents, security and support."
           />
           <FeatureMatrix />
         </Section>

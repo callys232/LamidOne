@@ -43,7 +43,9 @@ export default async function FreeToolPage({ params }: { params: Promise<{ slug:
 
   const suite = SUITES_BY_ID[tool.suite as SuiteId];
   const others = FREE_TOOLS.filter((t) => t.slug !== tool.slug).slice(0, 4);
-  const runHref = tool.engineCode === "budget" ? "/diagnostics/budget" : tool.engineCode ? `/diagnostics/${tool.engineCode}` : null;
+  const runHref = tool.engineCode === "budget" ? "/diagnostics/budget"
+    : tool.engineCode ? `/diagnostics/${tool.engineCode}`
+    : tool.toolHref ?? null;
 
   return (
     <>

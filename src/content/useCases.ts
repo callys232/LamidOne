@@ -18,6 +18,7 @@
 
 import type { FaqItem } from "@/components/sections/Faq";
 import type { SuiteId } from "./suites";
+import type { Engine } from "./aios";
 
 export type UseCase = {
   slug: string;
@@ -25,6 +26,25 @@ export type UseCase = {
   nav: string;
   headline: string;
   subhead: string;
+  /**
+   * Which of the four engines owns this use case.
+   *
+   * Structural, not copy. It resolves the value shown in the hero
+   * (ENGINES[].value) and the module content the page pulls — so these
+   * pages state the same four-engine structure as the homepage instead
+   * of flattening `suites` back into a list of peers.
+   *
+   * `suites` still records every suite the work actually touches, which
+   * is frequently more than one engine's worth. The engine named here
+   * is the one that owns the outcome.
+   */
+  engine: Engine["id"];
+  /**
+   * Title of the matching entry in the brand document's USE_CASES, when
+   * there is one. Five of the nine have a document equivalent; the rest
+   * predate it and are left without rather than invented into one.
+   */
+  docUseCase?: string;
   problem: { title: string; body: string; symptoms: string[] };
   framework: { title: string; steps: { n: string; title: string; body: string }[] };
   different: { title: string; body: string; points: string[] };
@@ -36,6 +56,8 @@ export type UseCase = {
 export const USE_CASES: UseCase[] = [
   {
     slug: "diagnose",
+    engine: "core",
+    docUseCase: "Leadership Decision Intelligence",
     nav: "Diagnose the organisation",
     headline: "Turn a vague sense that something is wrong into a specific answer.",
     subhead:
@@ -80,6 +102,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "align-strategy",
+    engine: "core",
     nav: "Align strategy and execution",
     headline: "Turn a strategy nobody follows into one the work actually reflects.",
     subhead:
@@ -124,6 +147,8 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "fix-cadence",
+    engine: "core",
+    docUseCase: "Operational Performance Improvement",
     nav: "Fix the execution cadence",
     headline: "Turn inconsistent delivery into a rhythm you can plan against.",
     subhead:
@@ -168,6 +193,8 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "model-financials",
+    engine: "finance",
+    docUseCase: "Financial Foresight & Performance Optimisation",
     nav: "Model the financials",
     headline: "Turn a spreadsheet nobody trusts into numbers you can defend.",
     subhead:
@@ -205,13 +232,15 @@ export const USE_CASES: UseCase[] = [
     faq: [
       { q: "What is financial modelling software?", a: "It computes budgets, forecasts, cost structure and valuation from structured inputs, keeping the assumptions explicit and the calculation reproducible — which a spreadsheet does not." },
       { q: "Does AI generate the financial figures?", a: "No. Every figure is arithmetic computed from your inputs, and the working is exportable. AI agents can explain a result or draft commentary around it, but they never produce the numbers." },
-      { q: "Can I export to Excel?", a: "Yes. Models export as CSV on every tier, and PDF from Growth. The export includes the calculation steps, not only the final figures." },
+      { q: "Can I export to Excel?", a: "Yes. Every engine result exports as CSV on every tier, and the export includes the working — the calculation steps behind each figure, not only the final numbers. PDF export of a model is not built yet." },
       { q: "How is this different from a spreadsheet?", a: "Same arithmetic, but versioned, permissioned, validated on input, and attached to the decision and engagement the number was for. A spreadsheet forgets why the figure existed; this does not." },
     ],
     closing: { title: "Build one costed budget.", body: "The budget estimator is free — bring last quarter's numbers." },
   },
   {
     slug: "find-growth",
+    engine: "grow",
+    docUseCase: "Transformation Acceleration",
     nav: "Find where growth is leaking",
     headline: "Turn a growth plan built on hope into one built on signal.",
     subhead:
@@ -256,6 +285,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "get-paid",
+    engine: "finance",
     nav: "Get paid faster",
     headline: "Turn a proposal, a contract and an invoice into one record.",
     subhead:
@@ -300,6 +330,8 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "build-bench",
+    engine: "talent",
+    docUseCase: "Workforce Capability Mapping & Skill Acceleration",
     nav: "Build the talent bench",
     headline: "Turn a succession plan in a spreadsheet into cover you can rely on.",
     subhead:
@@ -344,6 +376,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "source-experts",
+    engine: "talent",
     nav: "Source specialist expertise",
     headline: "Turn a six-week procurement into a shortlist this week.",
     subhead:
@@ -388,6 +421,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "certify-teams",
+    engine: "talent",
     nav: "Certify your teams",
     headline: "Turn a dependency on consultants into capability you own.",
     subhead:

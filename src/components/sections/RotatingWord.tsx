@@ -23,9 +23,19 @@ import { useEffect, useState } from "react";
  */
 export function RotatingWord({
   words,
+  suffix = "",
   intervalMs = 3200,
 }: {
   words: string[];
+  /**
+   * Punctuation that belongs to the rotating word rather than the line.
+   *
+   * The container is sized to the longest word, so a comma written after
+   * the component would sit at that fixed edge and visibly detach from
+   * the shorter words. Passing it here moves it inside each animated
+   * span, so it travels with the word it punctuates.
+   */
+  suffix?: string;
   intervalMs?: number;
 }) {
   const [i, setI] = useState(0);
@@ -48,9 +58,13 @@ export function RotatingWord({
       {/* Reserves the width of the longest word so nothing reflows. */}
       <span aria-hidden="true" className="invisible col-start-1 row-start-1 whitespace-nowrap">
         {longest}
+        {suffix}
       </span>
 
-      <span className="sr-only">{words[0]}</span>
+      <span className="sr-only">
+        {words[0]}
+        {suffix}
+      </span>
 
       {animate ? (
         words.map((w, n) => (
@@ -65,11 +79,13 @@ export function RotatingWord({
             }}
           >
             {w}
+            {suffix}
           </span>
         ))
       ) : (
         <span aria-hidden="true" className="col-start-1 row-start-1 whitespace-nowrap text-brand">
           {words[0]}
+          {suffix}
         </span>
       )}
     </span>

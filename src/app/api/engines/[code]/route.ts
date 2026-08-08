@@ -4,6 +4,8 @@ import { resolveIdentity } from "@/lib/entitlements";
 import { withMeter, available, getBalanceAsync } from "@/lib/points";
 import { parseEngineCode, configFor, runEngine, EngineInputError, REGISTERED_CODES, minTierForEngine, meetsEngineTier } from "@/lib/engines";
 import { recordRun, nextSteps } from "@/lib/bundles";
+import { recordEngineRun, latestRun } from "@/lib/engineRuns";
+import { numericDeltas } from "@/lib/engineExport";
 import { DQ_QUESTIONS, REQUIREMENTS } from "@/lib/intelligence/decisionQuality";
 import { QUADRANTS } from "@/lib/intelligence/growthPathways";
 import { requirePersistenceInProd } from "@/lib/store";
@@ -43,6 +45,9 @@ export const GET = handler(async (req) => {
     ...(config.inputs?.kind === "growth-pathways"
       ? { growthPathways: { quadrants: QUADRANTS } }
       : {}),
+    /* Bench strength takes a set of SEATS with named successors, not
+       ratings — the runner renders a seat editor. */
+    ...(config.inputs?.kind === "bench-strength" ? { benchStrength: true } : {}),
     ...(config.inputs?.kind === "scenario-decision" ? { scenarioDecision: true } : {}),
     ...(config.inputs?.kind === "roadmap"     ? { roadmap: true } : {}),
     ...(config.inputs?.kind === "optimisation"? { optimisation: true } : {}),
@@ -107,6 +112,10 @@ export const POST = handler(async (req) => {
     });
   }
 
+  /* Read BEFORE the run is recorded, or the comparison compares this
+     run against itself. */
+  const prior = await latestRun(identity.userId!, ref.code);
+
   try {
     const { result, charged, balance: after } = await withMeter(identity, AGENT, async () =>
       runEngine(ref, body.input!),
@@ -120,10 +129,25 @@ export const POST = handler(async (req) => {
       ? await recordRun(identity.userId!, body.bundleId, result, body.input!)
       : null;
 
+    /* Recorded for EVERY run, bundled or not. The bundle record above
+       keeps only a trimmed headline and only when a bundleId was sent,
+       which the public runner never does — so before this, a public
+       diagnostic left no record at all and "the second diagnostic is a
+       comparison, not a restart" was not true of it. Also after
+       settlement, for the same reason. */
+    const stored = await recordEngineRun(identity.userId!, result, body.input!);
+
     return ok({
       ...result,
       charged,
       balance: { available: available(after) },
+      runId: stored.id,
+      /* Only the deltas, not the whole earlier payload — the client
+         renders a comparison strip, and shipping the previous summary
+         wholesale would double the response for no gain. */
+      comparison: prior
+        ? { ranAt: new Date(prior.at).toISOString(), deltas: numericDeltas(prior.summary, result.summary) }
+        : null,
       bundle: bundle
         ? { id: bundle.id, runs: bundle.runs.length, next: nextSteps(bundle) }
         : null,

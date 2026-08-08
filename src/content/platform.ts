@@ -103,10 +103,13 @@ export const INTELLIGENCE: Capability[] = [
   { name: "Assessment engine", description: "Scores an organisation across defined, weighted dimensions.", backedBy: ["lib/intelligence/assessment.ts", "lib/intelligence/dimensions.ts"], suite: "core", visibility: "public", verified: true },
   { name: "Financial computation", description: "Budget and financial arithmetic, computed in-process — shown, not generated.", backedBy: ["api/budget", "lib/budget/compute.ts"], suite: "finance", visibility: "public", verified: true },
   { name: "Engine and agent handoffs", description: "Pass output from one run into the next as input.", backedBy: ["lib/bundles.ts"], suite: "core", visibility: "public", verified: true },
+  { name: "Saved engine runs", description: "Every run is kept, so the next run of the same module arrives as a comparison rather than a fresh start.", backedBy: ["lib/engineRuns.ts", "api/engines/[code]/route.ts"], suite: "core", visibility: "public", verified: true },
+  { name: "Engine result export", description: "Any module’s result as CSV, including the working — the arithmetic behind the figures, not just the figures.", backedBy: ["lib/engineExport.ts", "api/engines/[code]/export/route.ts"], suite: "core", visibility: "public", verified: true },
+  { name: "Succession coverage engine", description: "Counts ready successors per critical seat inside the notice period — coverage, not an averaged bench score.", backedBy: ["lib/intelligence/benchStrength.ts"], suite: "talent", visibility: "public", verified: true },
   { name: "Scenario modelling", description: "Compare outcomes across modelled scenarios.", backedBy: ["lib/intelligence/scenario.ts"], suite: "core", visibility: "public", verified: false },
   { name: "Roster modelling", description: "Workforce roster computation for talent engines.", backedBy: ["lib/intelligence/roster.ts"], suite: "talent", visibility: "public", verified: false },
   { name: "Deferred runs", description: "Queue long-running engine work and notify on completion.", backedBy: ["lib/intelligence/pendingRun.ts", "lib/queue.ts"], suite: "core", visibility: "public", verified: false },
-  { name: "Tool usage history", description: "Every engine run recorded, re-openable and exportable.", backedBy: ["api/tools/usage", "lib/models/ToolUsage.ts"], suite: "core", visibility: "public", verified: false },
+  { name: "Tool usage history", description: "Every engine run recorded and exportable, with the next run of the same module returned as a comparison.", backedBy: ["lib/engineRuns.ts", "api/engines/[code]/export/route.ts"], suite: "core", visibility: "public", verified: true },
   { name: "Finance dashboard", description: "Live financial position across the organisation.", backedBy: ["api/finance/dashboard", "lib/models/FinanceDashboard.ts"], suite: "finance", visibility: "public", verified: false },
 ];
 
@@ -151,7 +154,7 @@ export const GOVERNANCE: Capability[] = [
   { name: "Activity log", description: "Immutable record of consequential actions — awards, approvals, disputes.", backedBy: ["lib/audit.ts"], suite: "core", visibility: "operator", verified: true },
   { name: "Input sanitisation", description: "Length caps and control-character stripping at every request boundary.", backedBy: ["lib/http.ts"], suite: "core", visibility: "operator", verified: true },
   { name: "Health check", description: "Liveness and dependency configuration probe.", backedBy: ["api/health"], suite: "core", visibility: "operator", verified: true },
-  { name: "GDPR data export", description: "Export everything held about a data subject.", backedBy: ["api/gdpr/export"], suite: "core", visibility: "public", verified: false },
+  { name: "GDPR data export", description: "Export everything held about a data subject, as CSV — account, points ledger, bundles and every engine run with its working.", backedBy: ["api/gdpr/export/route.ts", "lib/engineRuns.ts"], suite: "core", visibility: "public", verified: true },
   { name: "GDPR erasure", description: "Delete on request, with the operator audit trail retained.", backedBy: ["api/gdpr/delete"], suite: "core", visibility: "public", verified: false },
   { name: "Error monitoring", description: "Sentry capture, config-gated on a DSN, at the seam this codebase actually catches errors at.", backedBy: ["src/instrumentation.ts", "lib/http.ts", "app/global-error.tsx"], suite: "core", visibility: "operator", verified: true },
 ];

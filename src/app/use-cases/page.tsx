@@ -26,7 +26,7 @@ export default function UseCasesIndex() {
               <Eyebrow>Solutions by objective</Eyebrow>
               <h1 className="h-display mt-6">What are you trying to fix?</h1>
               <p className="lead mt-6">
-                The same nine suites, filed by the job rather than the product. Start from the
+                The same four engines, filed by the job rather than the product. Start from the
                 problem you actually have.
               </p>
             </div>

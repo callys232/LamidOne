@@ -9,6 +9,7 @@ import { SuiteGrid } from "@/components/sections/SuiteGrid";
 import { Faq } from "@/components/sections/Faq";
 import { HOME_COMPARISON } from "@/content/home";
 import { CTA } from "@/content/brand";
+import { ENGINES } from "@/content/aios";
 
 export const metadata: Metadata = {
   title: "Why LAMID ONE",
@@ -90,12 +91,33 @@ export default function WhyPage() {
           </dl>
         </Section>
 
+        {/* The four engines, then the nine suites underneath them.
+            This page used to open the section with "Nine suites on one
+            record" and drop straight into a flat grid — which read as
+            nine peer products and contradicted the structure stated on
+            the homepage. The engine row is the missing layer: each
+            engine leads with the value it delivers, and the suite grid
+            below is what actually runs inside them. */}
         <Section id="suites" className="border-t">
           <SectionHeading
             eyebrow="The ecosystem"
-            title="Nine suites on one record."
+            title="Four engines. Nine suites. One record."
+            blurb="Each engine owns one of the four outcomes. The suites are how that engine does the work — not nine separate products you have to assemble yourself."
             action={<Link href="/products" className="link-underline text-sm">All features</Link>}
           />
+
+          <ul className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ENGINES.map((e) => (
+              <li key={e.id} className="card p-6" style={{ borderTop: `3px solid ${e.tint}` }}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: e.tint }}>
+                  {e.value}
+                </p>
+                <h3 className="mt-3 font-display text-lg">{e.name}</h3>
+                <p className="muted mt-2 text-sm leading-relaxed">{e.role}</p>
+              </li>
+            ))}
+          </ul>
+
           <SuiteGrid />
         </Section>
 
@@ -104,7 +126,7 @@ export default function WhyPage() {
             items={[
               { q: "Who is LAMID ONE for?", a: "Organisations that make consequential decisions regularly enough to want a record of them — typically from around ten people up to enterprise and government. Below that, the free plan and free tools are usually the right level." },
               { q: "Do you replace our consultants?", a: "Partly, and deliberately not entirely. The engines replace the diagnostic and modelling work that consultancies charge most for. When you need genuine specialist expertise, LAMID MARKET sources it per engagement rather than on a retainer." },
-              { q: "What happens to our data if we leave?", a: "You export everything at any time in CSV, and PDF from Growth. Exports include the calculation steps, not just outputs, so a model you built here remains usable elsewhere." },
+              { q: "What happens to our data if we leave?", a: "You export everything at any time in CSV — your account, points ledger, bundles and every engine run, each with the working attached. The calculation steps travel with the figures, so a model you built here remains usable elsewhere. PDF export of a model is not built yet." },
               { q: "How is this different from hiring a consulting firm?", a: "A consulting engagement produces a recommendation and ends; the reasoning leaves with the firm. Here the model, the inputs and the rationale stay, can be re-run, and are priced per seat and per outcome rather than per partner day." },
             ]}
           />

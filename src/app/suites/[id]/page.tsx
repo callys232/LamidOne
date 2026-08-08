@@ -13,6 +13,8 @@ import { Faq } from "@/components/sections/Faq";
 import { ExternalLaunch } from "@/components/sections/SuiteGrid";
 import { SuiteMock } from "@/components/mock/ProductMock";
 import { MilestoneWalkthrough } from "@/components/suites/MilestoneWalkthrough";
+import { ModuleSections, SuiteParentBand } from "@/components/sections/ModuleSections";
+import { MODULE_BY_ENGINE } from "@/content/modules";
 import { SUITES, getSuite, type SuiteId } from "@/content/suites";
 import { PLATFORM_AGENTS } from "@/content/agents";
 import { CTA } from "@/content/brand";
@@ -113,6 +115,9 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
   const subNavItems = [
     { id: "preview", label: "Preview" },
     { id: "use-cases", label: "Use cases" },
+    ...(MODULE_BY_ENGINE[suite.id]
+      ? [{ id: "how-it-works", label: "How it works" }, { id: "capabilities", label: "Capabilities" }]
+      : []),
     ...(agents.length ? [{ id: "agents", label: "Agents" }] : []),
     { id: "features", label: "Features" },
     { id: "compare", label: "Compare" },
@@ -130,6 +135,10 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
       : CTA.primary;
   const secondaryCta = suite.external ? CTA.secondary : CTA.secondary;
   const heroCapabilities = HERO_CAPABILITIES[suite.id];
+  /* The brand document wrote a full landing page for the four engines.
+     Where one exists its hero supersedes suites.ts, and its sections
+     render below the use cases. The other five suites are untouched. */
+  const modulePage = MODULE_BY_ENGINE[suite.id];
 
   return (
     <>
@@ -172,8 +181,8 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
                 )}
               </div>
 
-              <h1 className="h-display mt-7">{suite.headline}</h1>
-              <p className={`lead mt-6 ${studio ? "mx-auto max-w-2xl" : "max-w-2xl"}`}>{highlightBrand(suite.subhead)}</p>
+              <h1 className="h-display mt-7">{modulePage?.headline ?? suite.headline}</h1>
+              <p className={`lead mt-6 ${studio ? "mx-auto max-w-2xl" : "max-w-2xl"}`}>{highlightBrand(modulePage?.subhead ?? suite.subhead)}</p>
 
               <div className={studio ? "mt-10 flex justify-center" : "mt-10"}>
                 <CtaPair primary={primaryCta} secondary={secondaryCta} />
@@ -212,6 +221,11 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
             <ExternalLaunch suite={suite} />
           </div>
         )}
+
+        {/* Where this suite sits in the four-engine structure. Renders
+            only for the five that run inside an engine (or, for
+            DOCUSHARE, underneath all four). */}
+        <SuiteParentBand suiteId={suite.id} />
 
         {/* ── Dashboard preview ──────────────────────────────
             Illustrative, not a live capture — said so in the alt text
@@ -280,6 +294,13 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
             ))}
           </div>
         </Section>
+
+        {/* ── The brand document's module landing page ──────────
+            Purpose, how the engine works, capabilities, its
+            intelligence flow, industry applications and the module CTA.
+            Renders only for CORE, GROW, TALENT and FINANCE — the four
+            the document actually wrote. */}
+        <ModuleSections suiteId={suite.id} />
 
         {/* ── Agents in this suite ── */}
         {agents.length > 0 && (

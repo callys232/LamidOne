@@ -94,6 +94,14 @@ export async function ensureIndexes(): Promise<void> {
     db.collection("bundles").createIndex({ id: 1 }, { unique: true }),
     db.collection("bundles").createIndex({ userId: 1, updatedAt: -1 }),
 
+    /* Engine runs are read two ways: "my previous run of THIS module"
+       (comparison, on every run) and "everything I have run" (the data
+       portability export). Both are covered by the compound index, with
+       `at` descending because every read is newest-first. */
+    db.collection("engineRuns").createIndex({ id: 1 }, { unique: true }),
+    db.collection("engineRuns").createIndex({ userId: 1, code: 1, at: -1 }),
+    db.collection("engineRuns").createIndex({ userId: 1, at: -1 }),
+
     /* Every collection below was being queried with zero indexes —
        a full collection scan on every request. `users.email` is the
        one that matters beyond performance: without it, createUser()'s

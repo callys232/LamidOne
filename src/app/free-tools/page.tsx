@@ -19,7 +19,7 @@ function ToolCard({ tool }: { tool: FreeTool }) {
     <article className="card card-interactive flex flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-display text-xl">{tool.name}</h3>
-        {!tool.engineCode && !tool.externalHref && (
+        {!tool.engineCode && !tool.externalHref && !tool.toolHref && (
           <span
             className="faint shrink-0 rounded px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
             style={{ border: "1px solid var(--line)" }}
@@ -41,7 +41,7 @@ function ToolCard({ tool }: { tool: FreeTool }) {
         )}
       </div>
       <Button href={`/free-tools/${tool.slug}`} variant="ghost" className="mt-6 w-full">
-        {tool.externalHref ? "Open" : tool.engineCode ? "Try it — free" : "Learn more"}
+        {tool.externalHref ? "Open" : tool.engineCode || tool.toolHref ? "Try it — free" : "Learn more"}
       </Button>
     </article>
   );

@@ -6,8 +6,13 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { authHeaders } from "@/lib/useApi";
+import type { Delta } from "@/lib/engineExport";
+import { engineForSuite } from "@/content/aios";
+import { microcopyForEngine } from "@/content/microcopy";
 import { DecisionQualityRunner } from "@/components/diagnostics/DecisionQualityRunner";
 import { GrowthPathwaysRunner } from "@/components/diagnostics/GrowthPathwaysRunner";
+import { RunRecord } from "@/components/diagnostics/RunRecord";
+import { BenchStrengthRunner } from "@/components/diagnostics/BenchStrengthRunner";
 import { ScenarioDecisionRunner } from "@/components/diagnostics/ScenarioDecisionRunner";
 import type { ScenarioDecisionResult } from "@/lib/intelligence/scenarioDecision";
 import { RoadmapRunner } from "@/components/diagnostics/RoadmapRunner";
@@ -23,6 +28,7 @@ import type { OptimisationResult } from "@/lib/intelligence/optimisation";
 import type { SelectionResult } from "@/lib/intelligence/selector";
 import type { ConflictResult } from "@/lib/intelligence/conflict";
 import type { GrowthPathwaysResult, PathwayInput } from "@/lib/intelligence/growthPathways";
+import type { BenchStrengthResult } from "@/lib/intelligence/benchStrength";
 import type { DQQuestion, RequirementMeta, DecisionQualityResult, Consequence, Reversibility } from "@/lib/intelligence/decisionQuality";
 import type { SeriesMetric, SeriesStats } from "@/lib/intelligence/inputSpec";
 import type { FinancialSummary } from "@/lib/intelligence/financial";
@@ -56,6 +62,7 @@ type EngineSpec = {
      instead of free-form dimension sliders — see Q44. */
   decisionQuality?: { requirements: RequirementMeta[]; questions: DQQuestion[] };
   growthPathways?: { quadrants: { id: string; label: string; what: string }[] };
+  benchStrength?: boolean;
   scenarioDecision?: boolean;
   roadmap?: boolean;
   optimisation?: boolean;
@@ -98,8 +105,13 @@ export default function PublicDiagnosticPage() {
   const [needsUpgrade, setNeedsUpgrade] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /* Set by every submit path, so the export-and-compare strip below
+     works identically whichever runner produced the result. */
+  const [comparison, setComparison] = useState<{ ranAt: string; deltas: Delta[] } | null>(null);
+  const [ran, setRan] = useState(false);
   const [dqResult, setDqResult] = useState<DecisionQualityResult | null>(null);
   const [gpResult, setGpResult] = useState<GrowthPathwaysResult | null>(null);
+  const [bsResult, setBsResult] = useState<BenchStrengthResult | null>(null);
   const [sdResult, setSdResult] = useState<ScenarioDecisionResult | null>(null);
   const [rmResult, setRmResult] = useState<RoadmapResult | null>(null);
   const [opResult, setOpResult] = useState<OptimisationResult | null>(null);
@@ -114,6 +126,14 @@ export default function PublicDiagnosticPage() {
      own dedicated budget tool rather than the generic financial runner —
      same exclusion the dashboard engine page applies. */
   const isF02 = spec?.code === "F02";
+
+  /* The engine's own voice for this module — its run label, its empty
+     state, and the sentence shown when a run fails. Resolved from the
+     suite the module rolls up into, so CORE modules speak as CORE and
+     FINANCE modules as FINANCE without any per-module wiring.
+     Null for anything outside the four engines; every use falls back to
+     the neutral string rather than borrowing another engine's voice. */
+  const mc = microcopyForEngine(engineForSuite(spec?.suite ?? "")?.id);
 
   /* Which structured runner this module uses, if any. Keeps the render
      branch to one condition instead of eight near-identical blocks. */
@@ -139,7 +159,8 @@ export default function PublicDiagnosticPage() {
       const body = await res.json();
       if (res.status === 401) { setNeedsAuth(true); return; }
       if (res.status === 403 && body?.code === "tier_required") { setNeedsUpgrade(body.remedy?.tier ?? spec?.minTier ?? null); return; }
-      if (!res.ok) throw new Error(body?.error ?? "The engine could not complete.");
+      if (!res.ok) throw new Error(body?.error ?? mc?.error ?? "The engine could not complete.");
+      setComparison(body.comparison ?? null); setRan(true);
       onOk(body.summary);
     } catch (e) {
       setRunError((e as Error).message);
@@ -160,7 +181,8 @@ export default function PublicDiagnosticPage() {
       const body = await res.json();
       if (res.status === 401) { setNeedsAuth(true); return; }
       if (res.status === 403 && body?.code === "tier_required") { setNeedsUpgrade(body.remedy?.tier ?? spec?.minTier ?? null); return; }
-      if (!res.ok) throw new Error(body?.error ?? "The engine could not complete.");
+      if (!res.ok) throw new Error(body?.error ?? mc?.error ?? "The engine could not complete.");
+      setComparison(body.comparison ?? null); setRan(true);
       setDqResult(body.summary as DecisionQualityResult);
     } catch (e) {
       setRunError((e as Error).message);
@@ -200,7 +222,8 @@ export default function PublicDiagnosticPage() {
       const body = await res.json();
       if (res.status === 401) { setNeedsAuth(true); return; }
       if (res.status === 403 && body?.code === "tier_required") { setNeedsUpgrade(body.remedy?.tier ?? spec?.minTier ?? null); return; }
-      if (!res.ok) throw new Error(body?.error ?? "The engine could not complete.");
+      if (!res.ok) throw new Error(body?.error ?? mc?.error ?? "The engine could not complete.");
+      setComparison(body.comparison ?? null); setRan(true);
       setResult(body);
     } catch (e) {
       setRunError((e as Error).message);
@@ -291,6 +314,40 @@ export default function PublicDiagnosticPage() {
                 busy={busy} result={gpResult}
                 onRun={(payload) => runStructured(payload as never, (s) => setGpResult(s as GrowthPathwaysResult))}
                 onReset={() => setGpResult(null)}
+              />
+            </div>
+          )}
+
+          {spec?.benchStrength && (
+            <div className="mx-auto max-w-3xl space-y-8">
+              <div>
+                <p className="faint text-xs font-semibold uppercase tracking-wide">{spec.seriesName}</p>
+                <h1 className="h-section mt-2">{spec.engineName}</h1>
+                <p className="lead mt-3">{spec.purpose}</p>
+              </div>
+
+              {needsAuth && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">Create a free account to see the cover.</p>
+                  <p className="muted mt-2 text-sm">Your seats stay as they are — sign up in another tab and run it again.</p>
+                  <div className="mt-4 flex justify-center gap-3">
+                    <Link href="/signup" target="_blank" className="btn btn-primary">Create a free account</Link>
+                    <Link href="/signin" target="_blank" className="btn btn-ghost">Sign in</Link>
+                  </div>
+                </div>
+              )}
+              {needsUpgrade && (
+                <div className="card p-6 text-center" style={{ borderColor: "var(--brand)" }}>
+                  <p className="font-display text-lg">This one needs the {needsUpgrade} plan.</p>
+                  <Link href="/pricing" target="_blank" className="btn btn-primary mt-4">See plans</Link>
+                </div>
+              )}
+              {runError && <p className="text-sm" style={{ color: "var(--bad)" }}>{runError}</p>}
+
+              <BenchStrengthRunner
+                busy={busy} result={bsResult}
+                onRun={(payload) => runStructured(payload as never, (x) => setBsResult(x as BenchStrengthResult))}
+                onReset={() => setBsResult(null)}
               />
             </div>
           )}
@@ -414,7 +471,7 @@ export default function PublicDiagnosticPage() {
             </div>
           )}
 
-          {spec && !spec.decisionQuality && !spec.growthPathways && !spec.scenarioDecision && !structuredKind && !isF02 && !result && (
+          {spec && !spec.decisionQuality && !spec.growthPathways && !spec.benchStrength && !spec.scenarioDecision && !structuredKind && !isF02 && !result && (
             <div className="mx-auto max-w-2xl space-y-8">
               <div>
                 <div className="flex items-center gap-2">
@@ -501,7 +558,7 @@ export default function PublicDiagnosticPage() {
 
               <div className="flex items-center gap-3">
                 <button type="button" onClick={run} disabled={busy} className="btn btn-primary disabled:opacity-50">
-                  {busy ? "Running…" : "Run diagnostic"}
+                  {busy ? "Running…" : mc?.buttons.run ?? "Run diagnostic"}
                 </button>
                 <span className="faint text-xs">Free to fill in. 40 points to see the score, charged only on completion.</span>
               </div>
@@ -509,6 +566,17 @@ export default function PublicDiagnosticPage() {
           )}
 
           {result && <ResultView result={result} onRunAgain={() => setResult(null)} />}
+
+          {/* One strip for every module. Placed here rather than inside
+              each result renderer so a runner added later inherits the
+              export and the comparison without anyone remembering to
+              wire them — which is how the budget calculator ended up
+              being the only tool on the platform that could export. */}
+          {ran && (
+            <div className="mx-auto mt-8 max-w-4xl">
+              <RunRecord code={code} comparison={comparison} successNote={mc?.success} />
+            </div>
+          )}
         </div>
       </main>
       <Footer />

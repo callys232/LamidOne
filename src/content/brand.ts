@@ -16,10 +16,24 @@
  * exposure, not just a credibility one.
  */
 
+import { AGENT_COUNT } from "./agents";
+
 export const BRAND = {
   name: "LAMID ONE",
   wordmark: "LAMID ONE",
-  tagline: "The evolution of consulting.",
+  /**
+   * Goes into <title> on every page via layout.tsx, so it is the single
+   * highest-reach string on the site — browser tab, search result title,
+   * every social share.
+   *
+   * Was "The evolution of consulting." That predated FINANCE and the
+   * four-engine structure entirely, and named only the thing being
+   * replaced rather than the thing being offered. The brand document
+   * never wrote a direct replacement, so this is its signature line —
+   * the same one that closes the homepage hero, which keeps the tab
+   * title and the first thing on the page saying the same thing.
+   */
+  tagline: "One OS. Four Engines. Unified Growth.",
   domain: "lamidone.com",
   accent: "#C12129",
   /** LAMID Consulting mark, carried over from ProdLamid's public folder. */
@@ -54,8 +68,8 @@ export const REACH: Countable[] = [
   { value: `${yearsOfOperation()}+`, label: "years of advisory work behind the platform", verified: true },
   { value: "30+", label: "industries covered by the expert network", verified: false },
   { value: "5",   label: "plans, from free to concierge",             verified: true  },
-  { value: "11",  label: "AI agents running across the platform",     verified: true  },
-  { value: "9",   label: "suites on one operating layer",             verified: true  },
+  { value: String(AGENT_COUNT), label: "AI agents running across the platform", verified: true },
+  { value: "4",   label: "engines running nine suites on one record", verified: true  },
 ];
 
 /** Outcome claims. All unverified until a real engagement is measured. */

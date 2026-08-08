@@ -34,6 +34,13 @@ export type FreeTool = {
    *  computed result (e.g. LAMID LEARN's template library) — these
    *  skip the fill/gate pattern entirely since there's no "result". */
   externalHref?: string;
+  /** An in-app destination for a tool whose real implementation is a
+   *  PAGE rather than a registered module. Distinct from engineCode
+   *  (which routes to /diagnostics/{code}) and from externalHref
+   *  (which leaves the site). Using engineCode for these would claim a
+   *  module that does not exist; leaving them null would list a live
+   *  capability as "coming soon". */
+  toolHref?: string;
 };
 
 export const FREE_TOOLS: FreeTool[] = [
@@ -74,6 +81,19 @@ export const FREE_TOOLS: FreeTool[] = [
     engineCode: "budget",
   },
   {
+    /* GROW was the only engine suite with no tool listed here, despite
+       having the most substantial engine on the platform. G03 has been
+       live at /diagnostics/g03 with a full runner since the port — it
+       was simply reachable from nowhere except the GROW suite page. */
+    slug: "growth-pathways",
+    name: "Growth pathway sequencer",
+    what: "Compare the growth options in front of you and get a sequenced portfolio you can resource — with what was deferred, and why.",
+    poweredBy: "G03 — Growth Pathways",
+    suite: "grow",
+    minutes: 8,
+    engineCode: "g03",
+  },
+  {
     slug: "bench-strength",
     name: "Bench strength snapshot",
     what: "Score succession cover across your critical roles and export the gap list.",
@@ -92,13 +112,20 @@ export const FREE_TOOLS: FreeTool[] = [
     engineCode: null,
   },
   {
+    /* Was listed as "coming soon" and attributed to Scribe — a persona
+       over a generic completion. The real, shipped capability behind
+       this is deterministic weighted matching against actual expert
+       records (lib/matching.ts), which is what /experts runs. Pointed
+       at that rather than at an agent that would have written prose
+       about a shortlist instead of computing one. */
     slug: "brief-builder",
-    name: "Engagement brief builder",
-    what: "Turn a problem statement into a scoped brief you can send to experts.",
-    poweredBy: "Scribe — proposal drafting agent",
+    name: "Expert shortlist from a brief",
+    what: "Describe the problem and get experts scored against it on discipline overlap, rating, reliability and verification — a ranked shortlist, not a directory.",
+    poweredBy: "Compass — deterministic matching, no model in the loop",
     suite: "market",
-    minutes: 8,
+    minutes: 5,
     engineCode: null,
+    toolHref: "/experts",
   },
   {
     slug: "templates",
