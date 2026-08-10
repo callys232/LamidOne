@@ -170,7 +170,7 @@ export function BenchStrengthRunner({
               onClick={() => setRoles((rs) => rs.map((r, n) => n === i ? { ...r, successors: [...r.successors, blankSuccessor()] } : r))}
               className="link-underline mt-3 inline-flex items-center gap-1.5 text-sm"
             >
-              <UserPlus className="h-4 w-4" aria-hidden="true" /> Add a successor
+              <UserPlus className="h-4 w-4" aria-hidden="true" /> <span>Add a successor</span>
             </button>
             <p className="faint mt-3 text-xs leading-relaxed">
               Leave it empty if there genuinely is nobody. An empty seat is the finding — filling it

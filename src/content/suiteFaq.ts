@@ -42,7 +42,7 @@ const SPECIFIC: Partial<Record<string, FaqItem[]>> = {
   market: [
     {
       q: "How does escrow protect me?",
-      a: "Funds are held against a milestone and released only when you approve the deliverable. If you dispute it, the Dispute Agent assembles the evidence from both sides and proposes a resolution before any money moves.",
+      a: "Work is agreed as milestones, and a milestone only clears when you approve the deliverable — or automatically if you raise no objection inside the review window. A dispute stops that immediately and the Dispute Agent assembles the evidence from both sides before anything clears. Fund holds are not built yet: approval marks a milestone cleared for payment, it does not move money. The trust centre lists this.",
     },
   ],
 };

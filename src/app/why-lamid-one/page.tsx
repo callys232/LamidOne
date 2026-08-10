@@ -10,6 +10,7 @@ import { Faq } from "@/components/sections/Faq";
 import { HOME_COMPARISON } from "@/content/home";
 import { CTA } from "@/content/brand";
 import { ENGINES } from "@/content/aios";
+import { AiosAdvantage, AiosProof, AiosWhy } from "@/components/sections/Aios";
 
 export const metadata: Metadata = {
   title: "Why LAMID ONE",
@@ -63,6 +64,20 @@ export default function WhyPage() {
             ))}
           </div>
         </Section>
+
+        {/* Moved off the homepage. This page exists to argue why the
+            unified OS is different — which is exactly what these two
+            sections do, and exactly why they were redundant on a
+            homepage that had already made the point twice. */}
+        {/* Moved off the homepage with the rest of the AIOS sections.
+            It pairs each of the four failures with the engine that
+            answers it and the three steps to use that engine — the
+            argument this page exists to make, and one of four competing
+            versions of it that were on the homepage. */}
+        <AiosWhy />
+
+        <AiosAdvantage />
+        <AiosProof />
 
         <Section id="compare" tone="tint" className="border-t">
           <ComparisonTable {...HOME_COMPARISON} />

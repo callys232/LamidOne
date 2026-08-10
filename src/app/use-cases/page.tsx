@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { USE_CASES } from "@/content/useCases";
+import { AiosUseCases } from "@/components/sections/Aios";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
 import { CTA } from "@/content/brand";
 
@@ -62,6 +63,13 @@ export default function UseCasesIndex() {
             ))}
           </div>
         </Section>
+
+        {/* Moved off the homepage. These six are the document's own
+            framing of where the OS delivers, and five of them link
+            through to the page that argues them at length — which makes
+            this the index's natural second layer rather than a
+            duplicate of the grid above it. */}
+        <AiosUseCases />
 
         <section style={{ background: "var(--ink)" }}>
           <div className="shell py-24 text-center">

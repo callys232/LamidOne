@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { SuiteGrid } from "@/components/sections/SuiteGrid";
-import { SUITES, ADDED_FOR_SMB } from "@/content/suites";
+import { SUITES } from "@/content/suites";
 import {
   IDENTITY, ORGANISATION, MARKETPLACE, DELIVERY, INTELLIGENCE,
   TALENT_OPS, COLLABORATION, GOVERNANCE, type Capability,
@@ -13,11 +13,14 @@ import {
 import { CTA } from "@/content/brand";
 import { AGENT_COUNT, AGENT_COUNT_WORD, numberWord } from "@/content/agents";
 import { METHODS, TOTAL_MODULES, moduleCountsByMethod } from "@/content/methods";
+import { AiosLayer, AiosSystemFlow, AiosArchitecture, AiosIndustries } from "@/components/sections/Aios";
 
 export const metadata: Metadata = {
   title: "All products and features",
   description:
-    `Four engines, nine suites, ${numberWord(AGENT_COUNT, true)} agents and every platform capability — the complete directory of what LAMID ONE does.`,
+    /* Was "Four engines, nine suites". Wrong on both counts: the four
+       are SUITES, and engines are the tools inside them. */
+    `Four suites, ${numberWord(AGENT_COUNT, true)} agents and every platform capability — the complete directory of what LAMID ONE does.`,
 };
 
 const GROUPS: { title: string; blurb: string; items: Capability[] }[] = [
@@ -69,12 +72,25 @@ export default function ProductsPage() {
             blurb="Each suite rolls up dozens of engines. Open one to see its use cases, features, comparison and pricing."
           />
           <SuiteGrid columns={2} scrollable />
-          <p className="faint mt-8 text-sm">
-            {ADDED_FOR_SMB.length} of these — DESK, SIGNAL, LEARN and MARKET — were added to close
-            the small-business gap. The original four suites all assumed an organisation large
-            enough to have a strategy function, a workforce to model and a finance team.
-          </p>
+          {/* A note here used to single out DESK, SIGNAL, LEARN and
+              MARKET as four suites "added to close the small-business
+              gap". Removed: they are sub-suites of the four, not a
+              second cohort standing beside them, and framing them as a
+              later bolt-on told a small-business reader that the
+              product was built for someone else first. The capabilities
+              are folded into the four on the homepage for the same
+              reason. */}
         </Section>
+
+        {/* ── The architecture ─────────────────────────────────
+            Moved here off the homepage, where it was three of twenty
+            sections all describing the same loop. This is the page
+            about what the platform IS, so the OS layer, the flow
+            between engines and the feedback loop belong on it — a
+            reader who has come this far is asking how it is built. */}
+        <AiosLayer />
+        <AiosSystemFlow />
+        <AiosArchitecture />
 
         {/* ── How the engines actually compute ──────────────────
             This section exists because the page used to sell a count.
@@ -167,6 +183,8 @@ export default function ProductsPage() {
             ))}
           </div>
         </Section>
+
+        <AiosIndustries />
 
         <Section id="next" className="border-t">
           <div className="grid gap-4 sm:grid-cols-3">

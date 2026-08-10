@@ -61,7 +61,7 @@ export function SuiteParentBand({ suiteId }: { suiteId: SuiteId }) {
                 href={`/suites/${engine.id}`}
                 className="link-underline mt-6 inline-flex items-center gap-1.5 text-sm"
               >
-                Open {engine.name} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <span>Open {engine.name}</span> <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             )}
           </div>

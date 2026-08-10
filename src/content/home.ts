@@ -63,3 +63,87 @@ export const HOME_FAQ: FaqItem[] = [
     a: "Spreadsheets do arithmetic well and everything else badly: no audit trail, no version everyone trusts, and no link between a number and the decision it was for. LAMID ONE shows the same arithmetic — you can export the working — but keeps it versioned, permissioned, and attached to the decision, the engagement and the payment it relates to.",
   },
 ];
+
+/**
+ * WHAT HAPPENS AFTER THE ANSWER.
+ *
+ * The homepage showed a visitor how to get a diagnosis and then stopped,
+ * which left the most important thing about this platform unsaid: the
+ * engines do not implement. Every function in lib/intelligence is a
+ * `compute*` that returns a result — analysis, diagnosis and, in the
+ * twenty specialised modules, a recommendation. Nothing in there
+ * executes anything.
+ *
+ * That is the product, not a gap. A traditional engagement ends with a
+ * consultant leaving and taking the reasoning with them. Here the
+ * reasoning stays, and the customer decides who acts on it — themselves,
+ * a specialist they source per engagement, or a dedicated manager. The
+ * user is in the chair.
+ *
+ * ⚠️  ACCURACY: escrow does NOT hold money. Milestone status
+ * (pending/submitted/approved/disputed) is real and enforced, but no
+ * balance is held or released against it — see the trust centre, which
+ * lists this under "Not wired yet". The copy below says approval gates
+ * the work, never that funds are held. Do not "improve" it into a
+ * payment-protection claim.
+ */
+export const AFTER_THE_ANSWER = {
+  eyebrow: "After the answer",
+  title: "The engines stop at the recommendation. You decide who acts on it.",
+  blurb:
+    "A consulting engagement ends when the consultant leaves, and the reasoning leaves with them. Here the reasoning stays on your record — and acting on it is your call, not a renewal conversation.",
+  /* `id` selects the artwork in components/graphics/RouteArt.tsx;
+     `tint` is the accent that artwork and the slide are drawn in.
+     Route 1 takes the brand blue because doing it yourself is the
+     default path; 2, 3 and 4 borrow the suite colour of whatever they
+     hand off to — TALENT sources the specialist, GROW carries the
+     pathway — so the palette stays the four-suite one rather than
+     introducing a fifth set of colours. */
+  routes: [
+    {
+      id: "self",
+      tint: "#1A7CFF",
+      title: "Run it yourself",
+      body:
+        "The engines return a sequenced pathway with the working attached, not a deck. Re-run it after you have changed something and the next result comes back as a comparison. A new account includes one full diagnostic, free.",
+      cta: { label: "Start with a diagnostic", href: "/diagnostics/q44" },
+    },
+    {
+      id: "sourced",
+      tint: "#1A7CFF",
+      title: "Bring in a vetted specialist",
+      /* The breadth line is checkable: lib/matching.ts scores on the
+         disciplines a brief actually names, as free text, so the
+         network is not a fixed panel of practice areas. The named
+         fields are illustrative and the sentence says so — deliberately
+         NOT "30+ industries", which is the figure in brand.ts REACH and
+         carries verified: false. */
+      body:
+        "Consulting in any discipline your brief names — strategy, finance, operations, people, technology, market entry. Every expert is scored against it on discipline overlap, rating, reliability and verification: a ranked shortlist, not a directory. Delivery is split into milestones you approve before the work moves on.",
+      cta: { label: "Vet and compare experts", href: "/experts" },
+    },
+    {
+      id: "managed",
+      tint: "#1A7CFF",
+      title: "Hand delivery to a dedicated manager",
+      body:
+        "For complex, high-value programmes, Concierge puts a named delivery manager on it — running the engines, the specialists and the milestones on your behalf. Access is reviewed and approved rather than purchased.",
+      cta: { label: "Request Concierge access", href: "/concierge" },
+    },
+    {
+      /* The fourth route is a different KIND of answer to the other
+         three, and that is the point. One, two and three are "who does
+         this piece of work" — you, a specialist, a manager. This one is
+         "and then what", which is the question a diagnosis actually
+         leaves behind. Without it the section ends at delivery and the
+         platform reads as a one-off engagement, which is the exact
+         model it exists to replace. */
+      id: "growth",
+      tint: "#1A7CFF",
+      title: "Compound it into a growth pathway",
+      body:
+        "GROW takes what the diagnosis found and sequences it against your real capacity — which options you can resource, in what order, and what gets deferred and why. Progress writes back to the same record, so the next diagnostic starts where this one ended rather than from scratch.",
+      cta: { label: "Open LAMID GROW", href: "/suites/grow" },
+    },
+  ],
+};

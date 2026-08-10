@@ -9,6 +9,12 @@
  * inner corner so the counter reads as deliberate rather than as a
  * plain letterform. The foot terminates short of the full width, which
  * gives the mark an axis to sit on next to the wordmark.
+ *
+ * Geometry is unchanged from the original design. The colour is not
+ * set here at all — both shapes take `currentColor` through
+ * `.text-brand`, so the mark followed the palette from red to blue on
+ * its own. The negative space stays negative space: the notch is a
+ * translucent cut, not a filled dot.
  */
 export function Mark({
   className = "h-8 w-8",

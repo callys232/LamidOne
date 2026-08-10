@@ -11,6 +11,24 @@ import { record } from "./audit";
  * (LAMID DESK) at the moment it has milestones. This is the DESK side:
  * the deliverable-by-deliverable record that escrow releases against.
  *
+ * ⚠️  WORDING — DO NOT REVERT WITHOUT WIRING THE MONEY FIRST.
+ * These notifications used to say a milestone amount "has been
+ * released" and titled the expert's message "Payment released". No
+ * money moves anywhere in this file: approveMilestone() flips a status,
+ * writes an audit row and notifies. It imports no points, payment or
+ * ledger module, and no hold is placed when a milestone is created.
+ *
+ * Telling a client their money left, and a freelancer they have been
+ * paid, when neither happened is a false statement of fact delivered to
+ * both sides of a transaction — materially worse than an overclaim on a
+ * marketing page. The strings now say APPROVED and CLEARED FOR PAYOUT,
+ * which is exactly what this code does.
+ *
+ * When holds and settlement are wired (points.ts already has
+ * hold/settle/release), the "released" wording becomes true and should
+ * come back — together with the trust-centre entry, which currently
+ * lists "Escrow fund holds" as not wired.
+ *
  * AUTO-FUNCTIONS, ported from ProdLamid's deliverable-check pipeline:
  *   submit → Sentry auto-certifies the deliverable and starts the
  *            silence-fallback clock if certified (see lib/autoRelease.ts)
@@ -128,11 +146,11 @@ export async function submitMilestone(expertId: string, milestoneId: string, not
   if (project) {
     const window = autoReleaseWindowLabel();
     const clientMsg = certified
-      ? `Sentry certified the deliverable for "${m.title}" at ${score}/100. Approve it to release funds now, or it releases automatically in ${window} if you do neither.`
+      ? `Sentry certified the deliverable for "${m.title}" at ${score}/100. Approve it now, or it is approved automatically in ${window} if you do neither.`
       : `A deliverable was submitted for "${m.title}" but did not pass automatic certification (${score}/100${reasons[0] ? `: ${reasons[0]}` : ""}). Review it directly — this one will not auto-release.`;
     await notify(project.clientId, "Deliverable submitted", clientMsg);
     await notify(expertId, "Submission recorded", certified
-      ? `Your deliverable for "${m.title}" was certified at ${score}/100. It releases automatically in ${window} unless the client approves sooner or raises a dispute.`
+      ? `Your deliverable for "${m.title}" was certified at ${score}/100. It is approved automatically in ${window} unless the client approves sooner or raises a dispute.`
       : `Your deliverable for "${m.title}" was recorded but did not pass automatic certification (${score}/100). The client will review it directly.`);
   }
 
@@ -151,9 +169,9 @@ export async function approveMilestone(clientId: string, milestoneId: string): P
   if (!updated) throw new MilestoneError("This milestone was just handled by another request — refresh to see its current status.");
 
   await record({ orgId: null, actorId: clientId, actorRole: "client", action: "milestone_approved", target: m.id, detail: `${m.currency} ${m.amount}` });
-  await notify(clientId, "Milestone approved", `You approved "${m.title}" — ${m.currency} ${m.amount.toLocaleString()} has been released.`);
+  await notify(clientId, "Milestone approved", `You approved "${m.title}" — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout.`);
   if (project.awardedExpertId) {
-    await notify(project.awardedExpertId, "Payment released", `"${m.title}" was approved — ${m.currency} ${m.amount.toLocaleString()} has been released to you.`);
+    await notify(project.awardedExpertId, "Milestone approved", `"${m.title}" was approved — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout.`);
   }
 
   return updated;
@@ -257,10 +275,10 @@ export async function processAutoReleases(): Promise<{ released: string[] }> {
 
     const project = await getProject(m.projectId);
     if (project) {
-      const msg = `"${m.title}" released automatically — ${m.currency} ${m.amount.toLocaleString()}, no response within ${autoReleaseWindowLabel()}.`;
+      const msg = `"${m.title}" was approved automatically — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout, no response within ${autoReleaseWindowLabel()}.`;
       await notify(project.clientId, "Milestone auto-released", msg);
       if (project.awardedExpertId) {
-        await notify(project.awardedExpertId, "Payment released", `"${m.title}" auto-released — ${m.currency} ${m.amount.toLocaleString()} has been released to you (no response within ${autoReleaseWindowLabel()}).`);
+        await notify(project.awardedExpertId, "Milestone approved", `"${m.title}" was approved automatically — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout (no response within ${autoReleaseWindowLabel()}).`);
       }
     }
     await record({ orgId: null, actorId: "system", actorRole: "auto-release", action: "milestone_auto_released", target: m.id, detail: `${m.currency} ${m.amount}` });

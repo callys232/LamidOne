@@ -383,7 +383,7 @@ export function AiosUseCases() {
               <p className="muted mt-3 text-sm leading-relaxed">{u.body}</p>
               {page && (
                 <span className="link-underline mt-4 inline-flex items-center gap-1.5 text-sm">
-                  {page.nav}
+                  <span>{page.nav}</span>
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </span>
               )}

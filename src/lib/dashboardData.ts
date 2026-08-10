@@ -159,9 +159,11 @@ export async function buildDashboard(identity: Identity, roleOverride?: Dashboar
       held: 0,
       released: completed.reduce((s, c) => s + c.finalValue, 0),
       currency: "USD",
+      /* "approved", not "released" — nothing is transferred when a
+         milestone is approved. See the wording note in lib/milestones.ts. */
       note: completed.length === 0
-        ? "Nothing has been released yet."
-        : `${completed.length} engagement${completed.length === 1 ? "" : "s"} settled.`,
+        ? "Nothing approved yet."
+        : `${completed.length} engagement${completed.length === 1 ? "" : "s"} completed.`,
     },
     intelligence: {
       enginesAvailable: REGISTERED_CODES.length,

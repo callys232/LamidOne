@@ -322,7 +322,7 @@ export const USE_CASES: UseCase[] = [
     suites: ["desk", "market"],
     faq: [
       { q: "What is quote-to-cash software?", a: "It connects the commercial lifecycle — proposal, quote, signature, contract, delivery milestones, invoice and payment — so each step inherits the last rather than being re-entered." },
-      { q: "How does escrow work?", a: "Funds are held against a milestone before work begins and released when the deliverable is approved. If it is disputed, the Dispute Agent assembles evidence from both sides before anything moves." },
+      { q: "How do milestones work?", a: "Work is agreed as milestones. A milestone clears when you approve the deliverable, or automatically if you raise no objection inside the review window; a dispute stops that and the Dispute Agent assembles evidence from both sides first. Fund holds are not built yet — approval marks a milestone cleared for payment rather than moving money — and that is listed on the trust centre." },
       { q: "Which payment methods are supported?", a: "Card and subscription payments through Stripe, and local collection and payout rails through Paystack, with webhook reconciliation. Checkout supports nine currencies." },
       { q: "How is this different from using separate tools?", a: "Separate tools each hold part of the truth and disagree at the edges. Here the proposal, the contract, the milestone and the invoice are views of one record, so a change in one is a change in all." },
     ],

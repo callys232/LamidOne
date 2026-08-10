@@ -108,11 +108,24 @@ export const LEGAL_DOCS: LegalDoc[] = [
         ],
       },
       {
-        heading: "Marketplace engagements and escrow",
+        /* ⚠️  These clauses previously stated that LAMID ONE provides
+           escrow and that "escrowed funds are held against agreed
+           milestones". No fund holds exist — lib/milestones.ts imports
+           no payment or ledger module and places no hold. A term of
+           service promising custody of a client's money, where no
+           custody occurs, is a misrepresentation in a contract rather
+           than a marketing overstatement, and it exposes the business
+           far more than any homepage line.
+
+           Restated to describe the milestone-approval mechanism that
+           genuinely runs. Restore the custody wording only once holds
+           and settlement are wired, and have it reviewed before it
+           ships. */
+        heading: "Marketplace engagements and milestones",
         body: [
-          "Engagements are contracts between the client and the expert. LAMID ONE provides the platform, matching and escrow, and is not a party to the engagement itself.",
-          "Escrowed funds are held against agreed milestones and released on client approval, or under the automatic release policy where no objection is raised.",
-          "Disputes follow the platform's structured resolution process. Our determination on release of escrowed funds is final as between the parties for platform purposes, and does not limit either party's legal rights.",
+          "Engagements are contracts between the client and the expert. LAMID ONE provides the platform, matching and the milestone record, and is not a party to the engagement itself.",
+          "Work is agreed as milestones. A milestone is approved by the client, or approved automatically where no objection is raised inside the stated review window. Approval marks the milestone as cleared for payment between the parties; LAMID ONE does not currently hold, transfer or take custody of engagement funds, and payment is settled directly between client and expert.",
+          "Disputes follow the platform's structured resolution process. Our determination is final as between the parties for platform purposes, and does not limit either party's legal rights.",
         ],
       },
       {

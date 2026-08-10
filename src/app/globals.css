@@ -4,32 +4,55 @@
 
 /* ─────────────────────────────────────────────────────────────
    LAMID ONE design system
-   Accent: #C12129 (red). Dark mode: true black.
+   Accent: #1A7CFF (electric blue). Depth: #0A0F1F (midnight).
 
-   Rationing rule, carried over from the HubSpot teardown (§6.3):
-   the accent appears on the mark, primary CTA fills, checkmarks,
-   suite glyphs, eyebrow dots and stat numerals — nowhere else.
-   Comparison-table ticks use `--good`, not the accent, so a table
-   of forty marks never spends the brand colour on rows nobody
-   clicks.
+   PALETTE CHANGE. This was a rationed single red (#C12129) on warm
+   off-white. It is now the electric-blue-on-midnight system from the
+   approved homepage design: midnight for depth surfaces, electric blue
+   for action, cyan (#4FD3FF) for accents on dark, graphite for body
+   text on light.
+
+   The RATIONING RULE survives the palette and still applies: the accent
+   appears on the mark, primary CTA fills, checkmarks, suite glyphs,
+   eyebrow dots and stat numerals — nowhere else. Comparison-table ticks
+   use `--good`, not the accent, so a table of forty marks never spends
+   the brand colour on rows nobody clicks. A brighter accent makes that
+   discipline matter more, not less.
+
+   `--accent-glow` (cyan) is deliberately NOT a second brand colour. It
+   reads legibly on midnight where electric blue starts to vibrate, so
+   it is the accent for dark surfaces only. Using it on light breaks
+   contrast and doubles the palette.
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  --font-display: ui-serif, Georgia, "Times New Roman", serif;
-  --font-sans: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* HubSpot's pairing, in free equivalents — see the note in
+     layout.tsx. Instrument Serif carries display (headlines, section
+     headings, stat numerals); Lexend Deca carries everything a user
+     reads at length or operates.
 
-  --page: #FBF9F8;
+     The display fallback is a serif stack, not sans, so a failed load
+     degrades to the right SHAPE rather than to something that looks
+     like body copy. */
+  --font-display: var(--font-serif-face), ui-serif, Georgia, serif;
+  --font-sans: var(--font-sans-face), system-ui, sans-serif;
+
+  --page: #FFFFFF;
   --raised: #FFFFFF;
-  --ink: #16161A;
-  --ink-muted: #5C5C66;
-  --ink-faint: #8A8A94;
-  --line: rgba(22, 22, 26, 0.10);
-  --line-soft: rgba(22, 22, 26, 0.06);
+  /* The light-grey band used to separate alternating sections. */
+  --surface: #F4F5F7;
+  --ink: #2C2F36;          /* graphite */
+  --depth: #0A0F1F;        /* midnight — dark surfaces */
+  --ink-muted: #565B66;
+  --ink-faint: #9199A6;
+  --line: #E6E8EC;
+  --line-soft: #F0F1F3;
 
-  --brand: #C12129;
+  --brand: #1A7CFF;
   --brand-ink: #FFFFFF;
-  --brand-soft: rgba(193, 33, 41, 0.08);
-  --brand-line: rgba(193, 33, 41, 0.22);
+  --brand-soft: rgba(26, 124, 255, 0.07);
+  --brand-line: rgba(26, 124, 255, 0.28);
+  --accent-glow: #4FD3FF;  /* dark surfaces only — see header note */
 
   --good: #15803D;
   --warn: #B45309;
@@ -37,20 +60,23 @@
 }
 
 .dark {
-  --page: #000000;
-  --raised: #0C0C0D;
-  --ink: #F5F5F6;
-  --ink-muted: #A1A1AA;
-  --ink-faint: #71717A;
+  --page: #0A0F1F;        /* midnight */
+  --raised: #101A33;
+  --surface: #0D1730;
+  --ink: #FFFFFF;
+  --depth: #060C1A;
+  --ink-muted: rgba(255, 255, 255, 0.72);
+  --ink-faint: rgba(255, 255, 255, 0.48);
   --line: rgba(255, 255, 255, 0.12);
   --line-soft: rgba(255, 255, 255, 0.07);
 
   /* Red lifts one step in dark so it clears contrast on true black
      without glowing. Never reuse the light-mode step here. */
-  --brand: #E2555C;
-  --brand-ink: #140405;
-  --brand-soft: rgba(226, 85, 92, 0.12);
-  --brand-line: rgba(226, 85, 92, 0.28);
+  --brand: #4A93FF;        /* lifted for contrast on midnight */
+  --brand-ink: #04101F;
+  --brand-soft: rgba(26, 124, 255, 0.14);
+  --brand-line: rgba(79, 211, 255, 0.30);
+  --accent-glow: #4FD3FF;
 
   --good: #4ADE80;
   --warn: #FBBF24;
@@ -69,6 +95,32 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+
+  /* Killing the DURATION is not the same as killing the MOTION — a
+     zeroed transition just makes the lift instantaneous, which is the
+     jump this preference exists to avoid. The hover cards therefore
+     surrender the translate outright and keep the colour and the
+     shadow, which still say "this one" without anything moving. */
+  .card-interactive:hover,
+  .card-interactive:focus-within,
+  .arrow-card:hover,
+  .arrow-card:focus-within,
+  .arrow-card:hover .arrow-circle,
+  .arrow-card:focus-within .arrow-circle,
+  .route-tab:not([data-on]):hover,
+  .route-tab:not([data-on]):focus-visible,
+  .card-interactive:hover .engine-in,
+  .card-interactive:focus-within .engine-in,
+  .card-interactive:hover .engine-core,
+  .card-interactive:focus-within .engine-core,
+  .card-interactive:hover .engine-out,
+  .card-interactive:focus-within .engine-out { transform: none !important; }
+
+  /* The feed loop is the one INFINITE animation on the page. The global
+     duration override above would run it 500 times a second rather than
+     stop it, so it is cancelled outright. */
+  .card-interactive:hover .engine-feed,
+  .card-interactive:focus-within .engine-feed { animation: none !important; }
 }
 
 @layer components {
@@ -134,6 +186,42 @@ body {
     @apply rounded-2xl;
   }
   .card-quiet { background: var(--raised); border: 1px solid var(--line-soft); @apply rounded-2xl; }
+
+  /* ── Arrow card ─────────────────────────────────────────
+     The design's running-arrow interaction, as one class rather than
+     six group-hover utilities repeated per card.
+
+     On hover the whole card lifts and takes the brand border, and the
+     arrow RUNS: the circle fills with the accent and slides right while
+     the glyph inside flips to white. The two motions are the point —
+     the circle moving is what makes it read as departure rather than
+     decoration, and it is why the translate sits on the circle and not
+     on the arrow inside it.
+
+     `will-change` is deliberately absent: three cards promoting layers
+     permanently costs more than the 200ms of compositing it saves. */
+  .arrow-card {
+    background: var(--raised);
+    border: 1px solid var(--line);
+    @apply rounded-2xl transition-all duration-200;
+  }
+  .arrow-card:hover,
+  .arrow-card:focus-within {
+    border-color: var(--brand);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(20, 25, 40, 0.09);
+  }
+  .arrow-circle {
+    background: var(--surface);
+    color: var(--brand);
+    @apply flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-all duration-200;
+  }
+  .arrow-card:hover .arrow-circle,
+  .arrow-card:focus-within .arrow-circle {
+    background: var(--brand);
+    color: #FFFFFF;
+    transform: translateX(3px);
+  }
   .hairline { border-color: var(--line); }
 
   /* ── Buttons — the dual CTA pair ───────────────────────── */
@@ -156,9 +244,26 @@ body {
      header's red buttons directly above it (teardown §7.11). */
   .btn-contrast { background: var(--ink); color: var(--page); }
 
+  /* ── Underlined link ────────────────────────────────────
+     The rule is an inset box-shadow on the element itself, which is
+     correct for a text-only link and WRONG the moment a trailing icon
+     is added: the element is an inline-flex, so the shadow paints the
+     whole border box — text, the 6px gap, and the 16px arrow — and the
+     line visibly overshoots the words by ~22px. Thirteen call sites
+     had that shape.
+
+     Fixed here rather than at each of them. Wrap the label in a <span>
+     and the rule moves onto the label; leave a link as bare text and it
+     behaves exactly as before. `:has()` is Baseline since 2023, and
+     where it is unsupported the result is the previous long underline —
+     the old appearance, not a broken one. */
   .link-underline {
     @apply inline-flex items-center gap-1.5 font-semibold;
     color: var(--ink);
+    box-shadow: inset 0 -2px 0 0 var(--brand);
+  }
+  .link-underline:has(> span) { box-shadow: none; }
+  .link-underline:has(> span) > span {
     box-shadow: inset 0 -2px 0 0 var(--brand);
   }
   .link-underline:hover { color: var(--brand); }
@@ -188,14 +293,164 @@ body {
      tiles, trust cards, module tiles. Keeps one hover language across
      the ecosystem instead of three. Deliberately NOT applied to
      container cards (pricing cards, the points estimator), where a
-     hover state would suggest the whole card is clickable. */
+     hover state would suggest the whole card is clickable.
+
+     THE POP, in four parts, all keyed to the same `--suite-tint` so a
+     card answers in its own colour rather than in brand red:
+
+       · the ground warms      6% tint over the raised surface
+       · the border commits    a faint hairline becomes the suite's
+       · it lifts              3px, less than `.arrow-card`'s 4 — that
+                               one is a link and is meant to depart;
+                               this is often a container and only needs
+                               to acknowledge the cursor
+       · it casts              a TINTED shadow, not a grey one, which is
+                               what makes the lift read as the card
+                               rising off the page rather than as a box
+                               that grew a drop shadow
+
+     Transform and shadow get the long ease-out curve (220ms) and colour
+     gets the short one (150ms), so the movement settles a beat after the
+     colour lands. Both on their own properties rather than
+     `transition-all` — animating `all` here would also catch the
+     border-top/left accents these cards carry inline. */
   .card-interactive {
-    @apply transition-colors duration-150;
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 150ms ease-out,
+                border-color 150ms ease-out;
   }
   .card-interactive:hover,
   .card-interactive:focus-within {
     background: color-mix(in srgb, var(--suite-tint, var(--brand)) 6%, var(--raised));
-    border-color: color-mix(in srgb, var(--suite-tint, var(--brand)) 30%, transparent);
+    border-color: color-mix(in srgb, var(--suite-tint, var(--brand)) 42%, var(--line));
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -10px color-mix(in srgb, var(--suite-tint, var(--brand)) 32%, transparent);
+  }
+
+  /* ── Engine graphic — the diagnostic card's artwork ─────
+     Drives components/graphics/EngineCard.tsx. The card it sits in
+     already lifts; this makes the DRAWING answer the same hover, so the
+     graphic states its transaction in motion rather than in a still:
+     inputs advance, the feed flows, the engine swells, the answer
+     extends out of it.
+
+     Hung off `.card-interactive` rather than a Tailwind `group` so the
+     rule follows the graphic into any interactive card that uses it,
+     with no group class to remember at the call site.
+
+     `transform-box: fill-box` is required on every transformed SVG
+     child here — without it a transform-origin resolves against the
+     nearest viewport rather than the shape, and `left center` would
+     scale the bar from somewhere outside the artwork entirely. */
+  .engine-in,
+  .engine-core,
+  .engine-out {
+    transform-box: fill-box;
+    transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 420ms ease-out;
+  }
+  .engine-in { transform-origin: left center; }
+  .engine-core { transform-origin: center; }
+  .engine-out { transform-origin: left center; }
+
+  .card-interactive:hover .engine-in,
+  .card-interactive:focus-within .engine-in {
+    transform: translateX(6px);
+    /* Beats the `opacity="0.30"` presentation attribute on the rect —
+       author CSS outranks presentation attributes, which is what lets
+       the resting value stay declared in the markup where it is read. */
+    opacity: 0.55;
+  }
+  .card-interactive:hover .engine-core,
+  .card-interactive:focus-within .engine-core { transform: scale(1.06); }
+  .card-interactive:hover .engine-out,
+  .card-interactive:focus-within .engine-out { transform: scaleX(1.14); }
+
+  /* 6 = two full 3-3 dash cycles, so the loop is seamless. */
+  @keyframes engine-feed { to { stroke-dashoffset: -6; } }
+  .card-interactive:hover .engine-feed,
+  .card-interactive:focus-within .engine-feed {
+    animation: engine-feed 500ms linear infinite;
+  }
+
+  /* ── Mount fade ────────────────────────────────────────
+     Content that ARRIVES rather than content that was always there —
+     currently the three "Why" cards, which remount when the size
+     toggle changes. Without it the copy swaps under a fixed frame and
+     the switch reads as a glitch rather than as a new answer.
+
+     Runs on mount, so the delay is set per item at the call site to
+     stagger a set. Deliberately NOT a hover or state transition: this
+     fires once, when the element enters. */
+  @keyframes disclose {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .disclose { animation: disclose 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* ── Showcase deck ─────────────────────────────────────
+     The three layered panels in SuiteShowcase. Each slide deals them to
+     a different arrangement, so changing suite visibly re-lays the deck
+     rather than swapping one static picture for another.
+
+     WHY CUSTOM PROPERTIES AND NOT TAILWIND CLASSES. The resting angle
+     is now per-slide, which means it has to come from the component —
+     and an inline `transform` outranks every class rule, so the hover
+     fan would silently stop working the moment the angle went inline.
+     Instead the component sets `--rot` and `left` only, this rule
+     composes the transform, and hover adds `--rot-hover` and a nudge on
+     top. Both effects survive because they are additive terms in one
+     expression rather than two rules fighting over one property.
+
+     `left` is transitioned as well as transform: the panels change
+     their horizontal anchor between arrangements, and animating only
+     the transform would leave them teleporting sideways while rotating
+     smoothly. */
+  .deck-panel {
+    transform: rotate(calc(var(--rot) + var(--rot-hover, 0deg)))
+               translate(var(--dx, 0px), var(--dy, 0px));
+    transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                left 620ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .deck:hover .deck-back  { --rot-hover: -5deg; --dx: -12px; }
+  .deck:hover .deck-mid   { --rot-hover: -3deg; --dy: -8px; }
+  /* Straightens to true square whatever this slide dealt it, so the
+     diagram on the front panel becomes properly readable on hover. */
+  .deck:hover .deck-front { --rot-hover: calc(-1 * var(--rot)); --dx: 8px; }
+
+  /* ── Route tab — the numbered steps in AfterTheAnswer ───
+     A tablist styled as four cards. `data-on` marks the selected one,
+     set from React state, so all three visual states resolve here
+     instead of from inline style objects the hover rule could not
+     outrank. `--route-tint` is the only thing the component passes in.
+
+     The hover is a PREVIEW of the selected state — same warm ground,
+     same coloured rule, arriving at partial strength. That is what
+     tells a reader the four are controls before they click one. It is
+     scoped to `:not([data-on])` because offering the selected tab a
+     hover would promise a click that changes nothing. */
+  .route-tab {
+    background: transparent;
+    border-top: 3px solid var(--line);
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 200ms ease-out,
+                background-color 200ms ease-out,
+                border-color 200ms ease-out,
+                color 200ms ease-out;
+  }
+  .route-tab[data-on] {
+    background: var(--raised);
+    border-top-color: var(--route-tint, var(--brand));
+    box-shadow: 0 12px 28px rgba(20, 25, 40, 0.08);
+  }
+  .route-tab:not([data-on]):hover,
+  .route-tab:not([data-on]):focus-visible {
+    background: color-mix(in srgb, var(--route-tint, var(--brand)) 7%, var(--raised));
+    border-top-color: color-mix(in srgb, var(--route-tint, var(--brand)) 55%, var(--line));
+    /* 2px, against a card's 3 — a tab that travels as far as the panel
+       it opens starts to read as the panel. */
+    transform: translateY(-2px);
   }
 
   /* ── Tier rank dots (teardown §7.10) ───────────────────── */

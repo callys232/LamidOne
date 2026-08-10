@@ -111,7 +111,7 @@ export const CORE: Suite = {
   name: "LAMID CORE",
   kind: "Strategy and execution software",
   audience: "both",
-  tint: "#1E4FD8",
+  tint: "#1A7CFF",
   Icon: Network,
   headline: "Human-AI Fusion: The Operating System for Modern Consulting",
   subhead:
@@ -220,7 +220,7 @@ export const GROW: Suite = {
   name: "LAMID GROW",
   kind: "Digital Growth & Advisory",
   audience: "both",
-  tint: "#0E7A5F",
+  tint: "#1A7CFF",
   Icon: TrendingUp,
   headline: "Where People and AI Build the Future — Helping Organisations Grow Smarter and Faster",
   subhead:
@@ -301,7 +301,7 @@ export const TALENT: Suite = {
   name: "LAMID TALENT",
   kind: "Human-AI Talent Intelligence & Workforce Acceleration",
   audience: "both",
-  tint: "#6D28D9",
+  tint: "#1A7CFF",
   Icon: GraduationCap,
   headline: "People Intelligence Software That Reads Your Workforce Like Your Numbers",
   subhead:
@@ -376,7 +376,7 @@ export const FINANCE: Suite = {
   name: "LAMID FINANCE",
   kind: "Financial clarity software",
   audience: "both",
-  tint: "#B45309",
+  tint: "#1A7CFF",
   Icon: Landmark,
   headline: "Finance That Drives Decisions, Not Just Reports Them",
   subhead:
@@ -464,7 +464,7 @@ export const DESK: Suite = {
   name: "LAMID DESK",
   kind: "Client and revenue operations software",
   audience: "smb",
-  tint: "#0369A1",
+  tint: "#1A7CFF",
   Icon: Inbox,
   headline: "Run the client, the contract, and the cash in one place.",
   subhead:
@@ -547,7 +547,7 @@ export const SIGNAL: Suite = {
   name: "LAMID SIGNAL",
   kind: "Market visibility and content software",
   audience: "smb",
-  tint: "#BE185D",
+  tint: "#1A7CFF",
   Icon: Radar,
   headline: "Be findable when buyers ask an AI instead of a search engine.",
   subhead:
@@ -614,7 +614,7 @@ export const LEARN: Suite = {
   name: "LAMID LEARN",
   kind: "Learning management and certification platform",
   audience: "smb",
-  tint: "#7C2D12",
+  tint: "#1A7CFF",
   Icon: BookOpen,
   treatment: "studio",
   external: {
@@ -688,7 +688,7 @@ export const DOCUSHARE: Suite = {
   name: "LAMID DOCUSHARE",
   kind: "File infrastructure and secure sharing platform",
   audience: "both",
-  tint: "#0F766E",
+  tint: "#1A7CFF",
   Icon: FolderLock,
   treatment: "studio",
   external: {
@@ -779,7 +779,7 @@ export const MARKET: Suite = {
   name: "LAMID MARKET",
   kind: "Expert marketplace and sourcing software",
   audience: "both",
-  tint: "#334155",
+  tint: "#1A7CFF",
   Icon: Store,
   headline: "Source the expert, run the engagement, release the payment.",
   subhead:

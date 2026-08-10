@@ -65,7 +65,7 @@ export const ENGINES: Engine[] = [
       "Strategic clarity delivered through the AIOS",
     ],
     suites: ["core"],
-    tint: "#0052CC",
+    tint: "#1A7CFF",
   },
   {
     id: "grow",
@@ -81,7 +81,7 @@ export const ENGINES: Engine[] = [
       "Continuous transformation momentum",
     ],
     suites: ["grow", "signal"],
-    tint: "#00A86B",
+    tint: "#1A7CFF",
   },
   {
     id: "talent",
@@ -97,7 +97,7 @@ export const ENGINES: Engine[] = [
       "Unified human-capital insight across your business",
     ],
     suites: ["talent", "learn", "market"],
-    tint: "#C75CFF",
+    tint: "#1A7CFF",
   },
   {
     id: "finance",
@@ -113,7 +113,7 @@ export const ENGINES: Engine[] = [
       "Intelligent capital allocation pathways",
     ],
     suites: ["finance", "desk"],
-    tint: "#FFB400",
+    tint: "#1A7CFF",
   },
 ];
 
@@ -242,24 +242,77 @@ export const AIOS_WORKS: { title: string; body: string }[] = [
 /* ───────────────────────────────────────────────────────────────
    WHY — the four places traditional consulting breaks
    ─────────────────────────────────────────────────────────────── */
-export const WHY_BREAKS: { title: string; body: string }[] = [
+/**
+ * The four places traditional consulting breaks — each paired with the
+ * engine that answers it and the three steps to actually use that
+ * engine.
+ *
+ * The pairing is not decoration. Each break is a symptom, and a page
+ * that names four symptoms without naming the cure is just complaining
+ * about the competition. The `use` steps are what turns the section
+ * from an argument into an instruction: they describe what the reader
+ * types in, what computes, and what comes back — and `run` opens the
+ * tool that does it.
+ *
+ * Every `run` target is a live engine. If one is ever retired the link
+ * must go with it rather than degrade to a marketing page.
+ */
+export type WhyBreak = {
+  title: string;
+  body: string;
+  /** The engine that answers this failure. In ENGINES order. */
+  engine: Engine["id"];
+  /** How you actually use it — what you enter, what it does, what returns. */
+  use: string[];
+  run: { label: string; href: string };
+};
+
+export const WHY_BREAKS: WhyBreak[] = [
   {
     title: "Diagnosis is fragmented",
+    engine: "core",
+    use: [
+      "Answer a structured intake — typed questions per dimension, not a blank form.",
+      "The CORE engines score decision quality, cadence, alignment and governance against what you entered.",
+      "Read the gap with the engine that flagged it attached — then re-run it later and get a comparison, not a restart.",
+    ],
+    run: { label: "Run a decision diagnostic", href: "/diagnostics/q44" },
     body:
       "Consultants gather data manually, interpret it episodically, and deliver insight long after conditions have changed. Blind spots multiply. Leaders make decisions without real-time clarity.",
   },
   {
     title: "Transformation is inconsistent",
+    engine: "grow",
+    use: [
+      "List the growth options actually in front of you, and rate each on market pull and what you can already do.",
+      "Set how many you can genuinely resource at once — the constraint is the point.",
+      "Get them sequenced under that constraint, with the structural risk priced in and what was deferred stated.",
+    ],
+    run: { label: "Sequence your growth options", href: "/diagnostics/g03" },
     body:
       "Strategies are delivered, but execution is disconnected. Teams operate in silos. Momentum fades between workshops, check-ins, and quarterly reviews.",
   },
   {
     title: "Talent development is reactive",
+    engine: "talent",
+    use: [
+      "Name the seats you cannot afford to leave empty, and how much notice you would realistically get.",
+      "Name who is behind each one and how soon they could actually hold it — leave it blank if there is nobody.",
+      "Get cover counted per seat, so a role with nobody is never averaged away by a role with three.",
+    ],
+    run: { label: "Score your bench", href: "/diagnostics/a22" },
     body:
       "Workforce capability is assessed infrequently, training is generic, and skill acceleration is disconnected from transformation goals. Organisations cannot build future-ready teams fast enough.",
   },
   {
     title: "Financial intelligence is isolated",
+    engine: "finance",
+    use: [
+      "Enter your cost lines — quantities, unit costs, periods.",
+      "Set overhead, contingency and tax. Every figure is arithmetic computed from your inputs; no model writes a number.",
+      "Export the working alongside the figures, so the model stays usable outside this platform.",
+    ],
+    run: { label: "Build a costed budget", href: "/diagnostics/budget" },
     body:
       "Finance operates on delayed reporting, disconnected dashboards, and backward-looking analysis. Leaders cannot see the financial impact of decisions, talent moves, or transformation pathways in real time.",
   },
