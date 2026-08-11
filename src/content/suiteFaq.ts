@@ -41,8 +41,16 @@ const SPECIFIC: Partial<Record<string, FaqItem[]>> = {
   ],
   market: [
     {
-      q: "How does escrow protect me?",
-      a: "Work is agreed as milestones, and a milestone only clears when you approve the deliverable — or automatically if you raise no objection inside the review window. A dispute stops that immediately and the Dispute Agent assembles the evidence from both sides before anything clears. Fund holds are not built yet: approval marks a milestone cleared for payment, it does not move money. The trust centre lists this.",
+      /* Rewritten twice now — first to stop claiming a fund hold that
+         was never built, then again because the second fix (approval
+         now genuinely releases the expert's withdrawable balance — see
+         lib/milestones.ts) made "it does not move money" stale in the
+         OTHER direction. Both halves are true simultaneously: nothing
+         is captured from the client up front, and approval does
+         release real money to the expert — just not by holding the
+         client's funds first. */
+      q: "How does milestone approval protect me?",
+      a: "Work is agreed as milestones, and a milestone only clears when you approve the deliverable — or automatically if you raise no objection inside the review window. A dispute stops that immediately and the Dispute Agent assembles the evidence from both sides before anything clears. Nothing is captured from you up front — there is no fund hold. Approval releases that amount to the expert's withdrawable balance immediately, which they draw out to their own bank whenever they choose. The trust centre lists exactly what is and is not built.",
     },
   ],
 };

@@ -33,6 +33,7 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selected, setSelected] = useState<Invoice | null>(null);
   const [creating, setCreating] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +61,30 @@ export default function InvoicesPage() {
     load();
   }
 
+  /** Auto-pulls every approved, not-yet-invoiced milestone across every
+   *  project the caller is the awarded expert on, and raises one
+   *  invoice per project that has any. See lib/invoices.ts's
+   *  `generateOutstandingInvoices` for the actual logic — this just
+   *  calls it and refetches, same shape as `transition` above. */
+  async function generateAll() {
+    setGenerating(true); setError(null);
+    try {
+      const res = await fetch("/api/invoices/generate", {
+        method: "POST", headers: authHeaders(), body: JSON.stringify({}),
+      });
+      const b = await res.json();
+      if (!res.ok) throw new Error(b?.error ?? "Could not generate invoices.");
+      const { invoices: created, skipped } = b as {
+        invoices: Invoice[]; skipped: { projectId: string; reason: string }[];
+      };
+      if (created.length === 0) {
+        setError(skipped.length > 0 ? "No outstanding milestones were ready to invoice." : "Nothing to invoice yet.");
+      }
+      await load();
+    } catch (e) { setError((e as Error).message); }
+    finally { setGenerating(false); }
+  }
+
   if (selected) {
     return <InvoiceDetail invoice={selected} onBack={() => setSelected(null)}
                           onTransition={(s) => transition(selected, s)} error={error} />;
@@ -75,9 +100,19 @@ export default function InvoicesPage() {
             references through, so the amount invoiced stays traceable to work that was signed off.
           </p>
         </div>
-        <button type="button" onClick={() => setCreating(true)} className="btn btn-primary shrink-0">
-          <Plus className="h-4 w-4" aria-hidden="true" /> New invoice
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            onClick={generateAll}
+            disabled={generating}
+            className="btn btn-ghost"
+          >
+            {generating ? "Generating…" : "Generate all outstanding invoices"}
+          </button>
+          <button type="button" onClick={() => setCreating(true)} className="btn btn-primary shrink-0">
+            <Plus className="h-4 w-4" aria-hidden="true" /> New invoice
+          </button>
+        </div>
       </div>
 
       {error && <p className="text-sm" style={{ color: "var(--bad)" }}>{error}</p>}
@@ -90,7 +125,7 @@ export default function InvoicesPage() {
           <p className="font-display text-lg">No invoices yet.</p>
           <p className="muted mx-auto mt-2 max-w-md text-sm">
             Raise one directly, or generate one from a project&apos;s approved milestones so the
-            invoice and the escrow record cannot drift apart.
+            invoice and the milestone record cannot drift apart.
           </p>
         </div>
       )}

@@ -1,5 +1,5 @@
 import { collection, persistenceEnabled, ensureIndexes } from "./store";
-import { getProject } from "./marketplace";
+import { getProject, listProjects } from "./marketplace";
 import { scoreDeliverable, autoReleaseDeadline, autoReleaseWindowLabel, CERTIFY_THRESHOLD, BLOCKS_AUTO_RELEASE } from "./autoRelease";
 import { notify } from "./notifications";
 import { record } from "./audit";
@@ -9,25 +9,28 @@ import { record } from "./audit";
  *
  * A project moves from the marketplace (LAMID MARKET) into delivery
  * (LAMID DESK) at the moment it has milestones. This is the DESK side:
- * the deliverable-by-deliverable record that escrow releases against.
+ * the deliverable-by-deliverable record that approval pays out against.
  *
- * ⚠️  WORDING — DO NOT REVERT WITHOUT WIRING THE MONEY FIRST.
- * These notifications used to say a milestone amount "has been
- * released" and titled the expert's message "Payment released". No
- * money moves anywhere in this file: approveMilestone() flips a status,
- * writes an audit row and notifies. It imports no points, payment or
- * ledger module, and no hold is placed when a milestone is created.
+ * ⚠️  WORDING — WHAT APPROVAL NOW DOES, AND WHAT IT STILL DOES NOT.
  *
- * Telling a client their money left, and a freelancer they have been
- * paid, when neither happened is a false statement of fact delivered to
- * both sides of a transaction — materially worse than an overclaim on a
- * marketing page. The strings now say APPROVED and CLEARED FOR PAYOUT,
- * which is exactly what this code does.
+ * IT DOES release money. `approvedEarnings()` below is the balance that
+ * /api/withdrawals pays against, so approving a milestone makes that
+ * amount withdrawable that instant, and the expert can move it to their
+ * bank through Paystack (lib/payouts.ts → createTransfer). That is real
+ * money leaving a real account, so the notification saying so is now a
+ * true statement rather than the overclaim it was.
  *
- * When holds and settlement are wired (points.ts already has
- * hold/settle/release), the "released" wording becomes true and should
- * come back — together with the trust-centre entry, which currently
- * lists "Escrow fund holds" as not wired.
+ * IT DOES NOT hold client funds. Nothing is captured from the client
+ * when a milestone is created, so there is no ring-fenced pot that
+ * approval opens — the platform pays out against approved work, which
+ * is a payout rail, not custody. Do NOT reintroduce the words "escrow",
+ * "held" or "in escrow" into any client-facing string here until
+ * capture-on-fund is wired, and do not describe approval as protecting
+ * the client's money: the money was never taken.
+ *
+ * The distinction matters because it points in the direction that hurts
+ * the CLIENT. Telling a client their funds are protected when they are
+ * not is the one claim here nobody can verify until it fails.
  *
  * AUTO-FUNCTIONS, ported from ProdLamid's deliverable-check pipeline:
  *   submit → Sentry auto-certifies the deliverable and starts the
@@ -107,7 +110,7 @@ export async function createMilestone(
   if (!persisted) store.set(milestone.id, milestone);
 
   if (project.awardedExpertId) {
-    await notify(project.awardedExpertId, "New milestone funded", `"${milestone.title}" — ${milestone.currency} ${milestone.amount.toLocaleString()} is held in escrow, ready to submit against.`);
+    await notify(project.awardedExpertId, "New milestone added", `"${milestone.title}" — ${milestone.currency} ${milestone.amount.toLocaleString()}, ready to submit against. It is released to you on approval.`);
   }
 
   return milestone;
@@ -119,10 +122,10 @@ export async function createMilestone(
  * Automatically runs Sentry's completeness check and, if certified,
  * starts the silence-fallback clock — mirroring ProdLamid's route,
  * which does this inline rather than waiting for a separate request.
- * Free: this is the escrow safety mechanism protecting a transaction
- * that has already been paid into, not a value-creating agent run, so
- * it is not metered the way an on-demand Sentry invocation from the
- * agent directory is.
+ * Free: this is the safety check standing between a deliverable and a
+ * payout, not a value-creating agent run, so it is not metered the way
+ * an on-demand Sentry invocation from the agent directory is. Charging
+ * for it would put a price on the step that protects both parties.
  */
 export async function submitMilestone(expertId: string, milestoneId: string, note?: string): Promise<Milestone> {
   const m = await findOne(milestoneId);
@@ -157,7 +160,7 @@ export async function submitMilestone(expertId: string, milestoneId: string, not
   return updated;
 }
 
-/** Client approves — this is the trigger that releases escrow. */
+/** Client approves — this is what makes the amount withdrawable. */
 export async function approveMilestone(clientId: string, milestoneId: string): Promise<Milestone> {
   const m = await findOne(milestoneId);
   if (!m) throw new MilestoneError("No such milestone.");
@@ -169,12 +172,51 @@ export async function approveMilestone(clientId: string, milestoneId: string): P
   if (!updated) throw new MilestoneError("This milestone was just handled by another request — refresh to see its current status.");
 
   await record({ orgId: null, actorId: clientId, actorRole: "client", action: "milestone_approved", target: m.id, detail: `${m.currency} ${m.amount}` });
-  await notify(clientId, "Milestone approved", `You approved "${m.title}" — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout.`);
+  await notify(clientId, "Milestone approved", `You approved "${m.title}" — ${m.currency} ${m.amount.toLocaleString()} has been released to the expert.`);
   if (project.awardedExpertId) {
-    await notify(project.awardedExpertId, "Milestone approved", `"${m.title}" was approved — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout.`);
+    await notify(project.awardedExpertId, "Milestone approved", `"${m.title}" was approved — ${m.currency} ${m.amount.toLocaleString()} is now available to withdraw.`);
   }
 
   return updated;
+}
+
+/**
+ * An expert's RELEASED earnings — what approval has actually freed up.
+ *
+ * This is the number the withdrawal route pays against, and it is the
+ * whole of what "approval releases funds" means here: the moment a
+ * client approves a milestone, that amount becomes withdrawable, and
+ * `/api/withdrawals` transfers it out through Paystack.
+ *
+ * WHAT IT REPLACED, and why the change matters. The balance used to be
+ * `trackRecord().totalValueDelivered` — the sum of `finalValue` across
+ * COMPLETED engagements. An expert with four approved milestones on a
+ * live project could withdraw nothing until the whole engagement
+ * closed, which is the opposite of what milestone approval is for.
+ *
+ * CURRENCY IS A FILTER, NOT A DETAIL. Milestones carry their own
+ * currency; payouts are NGN (see payouts.ts). Summing across currencies
+ * would turn 100 USD into 100 NGN of withdrawable balance, so anything
+ * not in the payout currency is excluded rather than converted — this
+ * module has no business holding an exchange rate.
+ *
+ * Disputed and auto-released milestones: a dispute moves the row OUT of
+ * `approved`, so a disputed milestone stops counting the moment it is
+ * raised. An auto-released one IS approved (the silence fallback sets
+ * the same status) and counts, which is correct — the client had the
+ * window and did not use it.
+ */
+export async function approvedEarnings(expertId: string, currency: string): Promise<number> {
+  const projects = await listProjects({ awardedExpertId: expertId, take: 500 });
+  if (projects.length === 0) return 0;
+
+  const perProject = await Promise.all(projects.map((p) => listMilestones(p.id)));
+  const want = currency.toUpperCase();
+
+  return perProject
+    .flat()
+    .filter((m) => m.status === "approved" && m.currency.toUpperCase() === want)
+    .reduce((sum, m) => sum + m.amount, 0);
 }
 
 export async function disputeMilestone(milestoneId: string, raisedBy: string): Promise<Milestone> {
@@ -275,10 +317,10 @@ export async function processAutoReleases(): Promise<{ released: string[] }> {
 
     const project = await getProject(m.projectId);
     if (project) {
-      const msg = `"${m.title}" was approved automatically — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout, no response within ${autoReleaseWindowLabel()}.`;
+      const msg = `"${m.title}" was approved automatically — ${m.currency} ${m.amount.toLocaleString()} has been released, no response within ${autoReleaseWindowLabel()}.`;
       await notify(project.clientId, "Milestone auto-released", msg);
       if (project.awardedExpertId) {
-        await notify(project.awardedExpertId, "Milestone approved", `"${m.title}" was approved automatically — ${m.currency} ${m.amount.toLocaleString()} is cleared for payout (no response within ${autoReleaseWindowLabel()}).`);
+        await notify(project.awardedExpertId, "Milestone approved", `"${m.title}" was approved automatically — ${m.currency} ${m.amount.toLocaleString()} is now available to withdraw (no response within ${autoReleaseWindowLabel()}).`);
       }
     }
     await record({ orgId: null, actorId: "system", actorRole: "auto-release", action: "milestone_auto_released", target: m.id, detail: `${m.currency} ${m.amount}` });

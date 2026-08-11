@@ -10,7 +10,10 @@ import { SuiteShowcase } from "@/components/sections/SuiteShowcase";
 import { Diagnose } from "@/components/sections/Diagnose";
 import { AfterTheAnswer } from "@/components/sections/AfterTheAnswer";
 import { WhyScale } from "@/components/sections/WhyScale";
-import { HP_HERO, HP_PROMISE, HP_HOW, HP_CTA } from "@/content/homepage";
+import { EcosystemMap } from "@/components/graphics/EcosystemMap";
+import { Faq } from "@/components/sections/Faq";
+import { HOME_FAQ } from "@/content/home";
+import { HP_HERO, HP_PROMISE, HP_HOW, HP_FAQ, HP_CTA } from "@/content/homepage";
 
 /**
  * HOMEPAGE — the approved design, end to end.
@@ -185,19 +188,131 @@ export default function HomePage() {
         {/* The handoff. The engines compute; people implement. */}
         <AfterTheAnswer />
 
-        {/* ── How it works ───────────────────────────────────── */}
+        {/* ── How it works ─────────────────────────────────────
+            A RAIL, not a list. This was five rows separated by
+            hairlines — the least designed thing left on the page, and
+            wrong for the content besides: hairlines say "these items
+            are siblings", and these five are a SEQUENCE where each step
+            is only reachable from the one above it.
+
+            The spine says that instead. It also makes the section
+            visually distinct from its neighbours, which matters here:
+            the four sections around it are card grids and carousels, so
+            a fifth grid would have read as more of the same.
+
+            THE LOOP. The spine does not stop at 5 — it continues past
+            the last node as a dashed arc turning back on itself,
+            because step 5 is "re-run it" and the process is a circle.
+            A consulting engagement ends; this does not, and that is the
+            single most important thing the section has to say. Drawing
+            it costs one small SVG and saves a sentence asserting it. */}
         <Section id="how" className="border-t">
           <SectionHeading eyebrow={HP_HOW.eyebrow} title={HP_HOW.title} />
-          <ol className="divide-hairline">
-            {HP_HOW.steps.map((st) => (
-              <li key={st.n} className="flex flex-col gap-1 py-4 sm:flex-row sm:gap-6">
-                <span className="font-semibold sm:w-40 sm:shrink-0">
-                  <span className="text-brand">{st.n}.</span> {st.label}
-                </span>
-                <span className="muted text-[15.5px] leading-relaxed">{st.body}</span>
-              </li>
-            ))}
+
+          <div className="mx-auto mt-12 max-w-3xl">
+          {HP_HOW.phases.map((ph) => {
+            const steps = HP_HOW.steps.filter((s) => s.phase === ph.id);
+            if (steps.length === 0) return null;
+            return (
+              <section key={ph.id} className="mt-10 first:mt-0">
+                {/* The phase header. A rule spanning to the right edge
+                    with the fact parked at the end of it — the label
+                    says WHEN, the meta says what that costs you, and
+                    the rule between them is what makes the pair read as
+                    one line rather than two stacked labels. */}
+                <div className="mb-7 flex items-center gap-4">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em]">
+                    {ph.label}
+                  </span>
+                  <span className="h-px flex-1" style={{ background: "var(--line)" }} aria-hidden="true" />
+                  <span className="faint text-[12px]">{ph.meta}</span>
+                </div>
+
+          {/* `start` continues the count across the phase break — two
+              <ol>s would otherwise number 1,2,3 then 1,2 for assistive
+              tech while the page shows 4 and 5. */}
+          <ol start={Number(steps[0].n)}>
+            {steps.map((st, i) => {
+              const lastInPhase = i === steps.length - 1;
+              /* The loop hangs off the final step of the FINAL phase. */
+              const last = ph.id === HP_HOW.phases[HP_HOW.phases.length - 1].id && lastInPhase;
+              return (
+                <li
+                  key={st.n}
+                  className="group/step relative grid grid-cols-[44px_1fr] gap-5 pb-9 last:pb-0 sm:grid-cols-[52px_1fr] sm:gap-7"
+                >
+                  {/* Spine + node. The line is drawn from BELOW the node
+                      to the bottom of the row, so it joins this node to
+                      the next one rather than passing behind either. */}
+                  <div className="relative flex justify-center">
+                    {/* Stops at each PHASE break, not just the end of
+                        the section — a spine running past the last step
+                        of phase one would trail into the phase header
+                        below it and undo the grouping the header just
+                        made. */}
+                    {!lastInPhase && (
+                      <span
+                        className="absolute bottom-0 top-[46px] w-px"
+                        style={{ background: "var(--line)" }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    {/* Fills with the accent on row hover — the step
+                        being read separates from the four that are not,
+                        which is the same job the card lift does
+                        elsewhere on the page, at a scale that suits a
+                        rail. `aria-hidden` because the <ol> already
+                        numbers these for assistive tech; rendering the
+                        digit again would announce every step twice. */}
+                    <span
+                      className="step-node relative flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-[15px] font-semibold tabular-nums"
+                      aria-hidden="true"
+                    >
+                      {st.n}
+                    </span>
+                  </div>
+
+                  <div className="pt-2">
+                    <h3 className="font-display text-lg font-semibold">{st.label}</h3>
+                    <p className="muted mt-2 text-[15.5px] leading-relaxed">{st.body}</p>
+                  </div>
+
+                  {/* The return. Hangs off the last node, curving left
+                      and back up — the only mark in the section that is
+                      not part of the straight run. */}
+                  {last && (
+                    <div className="col-start-1 row-start-2 flex justify-center pt-3" aria-hidden="true">
+                      {/* Down out of the node, a U-turn, then back UP —
+                          the arrowhead has to point the way the process
+                          goes, and the process goes back to step 1.
+                          Pointing it down would draw an exit. */}
+                      <svg width="30" height="34" viewBox="0 0 30 34" fill="none">
+                        <path
+                          d="M15 0v14c0 10-11 10-11 0v-6"
+                          stroke="var(--brand)"
+                          strokeWidth="1.5"
+                          strokeDasharray="4 4"
+                          opacity="0.5"
+                        />
+                        <path
+                          d="M1 11l3-4 3 4"
+                          stroke="var(--brand)"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.5"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ol>
+              </section>
+            );
+          })}
+          </div>
         </Section>
 
         {/* ── Why LAMID ONE ────────────────────────────────────
@@ -207,14 +322,57 @@ export default function HomePage() {
             themselves are unchanged. */}
         <WhyScale />
 
+        {/* ── FAQ ──────────────────────────────────────────────
+            The last content section, and deliberately BEFORE the
+            closing band rather than after it. The band is the page's
+            terminus — one ask, no competing option — and a section
+            underneath it would leave that ask stranded mid-page. An FAQ
+            is also the right thing to sit immediately before a CTA: it
+            is where the last objection gets answered. */}
+        <Section id="faq" className="border-t">
+          <p className="eyebrow">{HP_FAQ.eyebrow}</p>
+          <div className="mt-5">
+            <Faq items={HOME_FAQ} title={HP_FAQ.title} />
+          </div>
+
+          {/* Two ways out, for two different unanswered questions —
+              see the note in content/homepage.ts. */}
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Button href={HP_FAQ.primary.href} variant="primary">
+              {HP_FAQ.primary.label}
+            </Button>
+            <Link
+              href={HP_FAQ.secondary.href}
+              className="link-underline inline-flex items-center gap-1.5 text-sm font-semibold"
+            >
+              <span>{HP_FAQ.secondary.label}</span>
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </Section>
+
         {/* ── Closing ────────────────────────────────────────────
             The design's own band: electric blue, one ask, no second
             option competing with it. */}
         <section
-          className="text-center"
+          className="relative overflow-hidden text-center"
           style={{ background: "linear-gradient(135deg, var(--brand), #0F5FE0)" }}
         >
-          <div className="shell py-24">
+          {/* The ecosystem's own shape, in faint white line work — one
+              node branching to four suites branching to their tools.
+              The page has just spent a section defining those three
+              levels; this is the same structure a second time, at the
+              moment of the ask.
+
+              Behind the content and pointer-events-none, so nothing
+              here can intercept the one button this band exists to
+              hold. Kept far below legibility on purpose: anything
+              readable would compete with that button. */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <EcosystemMap />
+          </div>
+
+          <div className="shell relative py-24">
             <h2 className="text-[clamp(1.6rem,3.6vw,2.4rem)] font-semibold" style={{ color: "#FFFFFF" }}>
               {HP_CTA.title}
             </h2>

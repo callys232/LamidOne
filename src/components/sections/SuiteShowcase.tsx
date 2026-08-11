@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { HP_SHOWCASE } from "@/content/homepage";
 import { SHOWCASE_ART, SHOWCASE_BACKING } from "@/components/graphics/ShowcaseArt";
@@ -84,6 +85,20 @@ export function SuiteShowcase() {
                 {s.title}
               </h3>
               <p className="muted mt-4 text-[15px] leading-relaxed">{s.body}</p>
+
+              {/* The way out of the slide. Without it a reader
+                  convinced by one suite had to scroll back up to the
+                  ecosystem grid to act on it. */}
+              <Link
+                href={s.cta.href}
+                className="link-underline group/cta mt-6 inline-flex items-center gap-1.5 text-sm font-semibold"
+              >
+                <span>{s.cta.label}</span>
+                <ArrowRight
+                  className="h-4 w-4 transition-transform duration-200 ease-out group-hover/cta:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
             </div>
           ))}
         </div>

@@ -84,7 +84,13 @@ export const MARKETPLACE: Capability[] = [
    4. DELIVERY, ESCROW AND MONEY
    ─────────────────────────────────────────────────────────────── */
 export const DELIVERY: Capability[] = [
-  { name: "Milestones and escrow lifecycle", description: "Submit, approve, dispute and auto-release, with funds released only on approval.", backedBy: ["api/milestones", "lib/milestones.ts"], suite: "desk", visibility: "public", verified: true },
+  /* Renamed off "escrow". Approval now genuinely releases money — it
+     credits the expert's withdrawable balance, which /api/withdrawals
+     pays out through Paystack — but no client funds are captured or
+     held beforehand, so calling the whole lifecycle "escrow" claimed a
+     custody arrangement that does not exist. The trust centre is the
+     one page where that distinction has to be exact. */
+  { name: "Milestones and payout lifecycle", description: "Submit, approve, dispute and auto-release. Approval releases the amount to the expert's withdrawable balance, paid out by bank transfer on request. Client funds are not held in advance.", backedBy: ["api/milestones", "lib/milestones.ts", "lib/payouts.ts"], suite: "desk", visibility: "public", verified: true },
   { name: "Automatic release policy", description: "Time-based release when no objection is raised, reversible right up to the moment it fires.", backedBy: ["api/cron/auto-release", "lib/autoRelease.ts"], suite: "desk", visibility: "public", verified: true },
   { name: "Wallet and points ledger", description: "Balance, hold, settle and full transaction history.", backedBy: ["api/points", "lib/points.ts"], suite: "desk", visibility: "public", verified: true },
   { name: "Local payment rails", description: "Paystack checkout, real recurring subscriptions, and a signature-verified webhook.", backedBy: ["api/checkout", "api/webhooks/paystack", "lib/paystack.ts", "lib/fulfillment.ts"], suite: "desk", visibility: "public", verified: true },

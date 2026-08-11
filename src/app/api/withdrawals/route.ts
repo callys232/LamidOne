@@ -1,9 +1,9 @@
 import { handler, ok, fail, badRequest, rateLimited, bodyTooLarge, tooLarge } from "@/lib/http";
 import { limit } from "@/lib/ratelimit";
 import { resolveIdentity } from "@/lib/entitlements";
-import { listWithdrawals, requestWithdrawal, PayoutError } from "@/lib/payouts";
+import { listWithdrawals, requestWithdrawal, PayoutError, PAYOUT_CURRENCY } from "@/lib/payouts";
 import { PaystackError } from "@/lib/paystack";
-import { trackRecord } from "@/lib/marketplace";
+import { approvedEarnings } from "@/lib/milestones";
 import { record } from "@/lib/audit";
 import { notify } from "@/lib/notifications";
 
@@ -17,16 +17,29 @@ export const GET = handler(async (req) => {
   const rl = await limit("read", identity.userId);
   if (!rl.ok) return rateLimited(rl.retryAfter);
 
-  const trackRecordResult = await trackRecord(identity.userId);
-  const paid = (await listWithdrawals(identity.userId))
-    .filter((w) => w.status === "paid" || w.status === "processing")
-    .reduce((s, w) => s + w.amount, 0);
+  const [released, prior] = await Promise.all([
+    approvedEarnings(identity.userId, PAYOUT_CURRENCY),
+    listWithdrawals(identity.userId),
+  ]);
 
   return ok({
-    withdrawals: await listWithdrawals(identity.userId),
-    available: Math.max(0, trackRecordResult.totalValueDelivered - paid),
+    withdrawals: prior,
+    available: Math.max(0, released - movingOrPaid(prior)),
   });
 });
+
+/**
+ * Money already out or on its way. Counted against the released balance
+ * so the same approval cannot fund two withdrawals.
+ *
+ * `failed` is deliberately excluded — a transfer Paystack rejected did
+ * not move, and leaving it counted would strand the money permanently.
+ */
+function movingOrPaid(prior: { status: string; amount: number }[]) {
+  return prior
+    .filter((w) => w.status === "paid" || w.status === "processing")
+    .reduce((s, w) => s + w.amount, 0);
+}
 
 /**
  * Request a withdrawal.
@@ -48,12 +61,14 @@ export const POST = handler(async (req) => {
   const body = await req.json().catch(() => null) as { amount?: number } | null;
   if (typeof body?.amount !== "number") return badRequest("`amount` is required.");
 
-  const [trackRecordResult, prior] = await Promise.all([
-    trackRecord(identity.userId),
+  /* Recomputed here rather than trusted from the GET above — the two
+     requests are seconds apart and a milestone can be disputed in
+     between, which takes it out of `approved` and out of the balance. */
+  const [released, prior] = await Promise.all([
+    approvedEarnings(identity.userId, PAYOUT_CURRENCY),
     listWithdrawals(identity.userId),
   ]);
-  const alreadyMoving = prior.filter((w) => w.status === "paid" || w.status === "processing").reduce((s, w) => s + w.amount, 0);
-  const available = Math.max(0, trackRecordResult.totalValueDelivered - alreadyMoving);
+  const available = Math.max(0, released - movingOrPaid(prior));
 
   try {
     const withdrawal = await requestWithdrawal(identity.userId, body.amount, available);

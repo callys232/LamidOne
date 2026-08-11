@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="t d">
   <title id="t">LAMID DESK — client pipeline dashboard preview</title>
-  <desc id="d">Illustrative dashboard preview: engagement pipeline, escrow status and invoicing.</desc>
+  <desc id="d">Illustrative dashboard preview: engagement pipeline, milestone status and invoicing.</desc>
   <rect x="1" y="1" width="958" height="598" rx="18" fill="#FBF9F8" stroke="#E7E4E1" stroke-width="2"/>
   <rect x="1" y="1" width="958" height="52" rx="18" fill="#FFFFFF"/>
   <rect x="1" y="35" width="958" height="18" fill="#FFFFFF"/>
@@ -15,7 +15,7 @@
 
     <rect x="330" y="88" width="270" height="108" rx="12" fill="#0369A1" fill-opacity=".05"/>
     <text x="354" y="146" font-size="36" fill="#16161A" font-weight="600">$62,400</text>
-    <text x="354" y="176" font-size="13" fill="#5C5C66">Held in escrow</text>
+    <text x="354" y="176" font-size="13" fill="#5C5C66">Released to collaborators</text>
 
     <rect x="620" y="88" width="300" height="108" rx="12" fill="#0369A1" fill-opacity=".05"/>
     <text x="644" y="150" font-size="44" fill="#16161A" font-weight="600">2</text>
@@ -32,7 +32,7 @@
     <g>
       <text x="64" y="302" fill="#16161A">Northwind Group</text><text x="380" y="302" fill="#5C5C66">Diagnostic</text><text x="580" y="302" fill="#5C5C66">$18,000</text><text x="740" y="302" fill="#0369A1">In review</text>
       <text x="64" y="340" fill="#16161A">Halden &amp; Co</text><text x="380" y="340" fill="#5C5C66">Proposal sent</text><text x="580" y="340" fill="#5C5C66">$26,500</text><text x="740" y="340" fill="#B45309">Awaiting</text>
-      <text x="64" y="378" fill="#16161A">Meridian Trust</text><text x="380" y="378" fill="#5C5C66">Milestone 2</text><text x="580" y="378" fill="#5C5C66">$14,200</text><text x="740" y="378" fill="#15803D">Funded</text>
+      <text x="64" y="378" fill="#16161A">Meridian Trust</text><text x="380" y="378" fill="#5C5C66">Milestone 2</text><text x="580" y="378" fill="#5C5C66">$14,200</text><text x="740" y="378" fill="#15803D">Released</text>
       <text x="64" y="416" fill="#16161A">Okonkwo Partners</text><text x="380" y="416" fill="#5C5C66">Milestone 3</text><text x="580" y="416" fill="#5C5C66">$22,000</text><text x="740" y="416" fill="#15803D">Approved</text>
       <text x="64" y="454" fill="#16161A">Fircroft</text><text x="380" y="454" fill="#5C5C66">Contract sent</text><text x="580" y="454" fill="#5C5C66">$9,800</text><text x="740" y="454" fill="#0369A1">In review</text>
     </g>

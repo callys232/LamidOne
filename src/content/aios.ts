@@ -1,34 +1,47 @@
 import type { SuiteId } from "./suites";
 
 /**
- * THE AIOS NARRATIVE — four engines, nine suites, one operating layer.
+ * THE AIOS NARRATIVE — four suites, one operating layer.
  *
  * Copy is the brand document verbatim. The only edit applied is
  * punctuation restoration: the source lost every apostrophe, hyphen and
  * em dash in transcription ("dont", "realtime", "HumanAI", "endtoend"),
  * so those are repaired here. No wording was changed.
  *
- * THE AGGREGATION. The document locks four engines. This platform ships
- * nine suites. Four of the remaining five roll up under an engine by
- * their own stated `kind` (suites.ts), not by force:
+ * THE AGGREGATION. The document locks four suites. This platform ships
+ * nine in total. The remaining five roll up under one of the four:
  *
- *   LEARN     → TALENT   learning management and certification IS
- *                        "skill acceleration and readiness pathways"
+ *   DESK      → CORE     the decision record becomes a transaction —
+ *                        proposals, milestones, invoicing — inside the
+ *                        same layer that produced the decision
+ *   SIGNAL    → FINANCE  market visibility tracked beside the same
+ *                        forecasts and valuation FINANCE already holds
+ *   LEARN     → GROW     capability built to fill the gaps GROW's
+ *                        sequencing surfaces, not sourced from outside
  *   MARKET    → TALENT   capability sourced rather than built
- *   DESK      → FINANCE  client and revenue operations — proposals,
- *                        milestones, escrow, invoicing
- *   SIGNAL    → GROW     market visibility and content sits inside
- *                        customer clarity and digital performance
  *
- * DOCUSHARE is deliberately NOT an engine. File infrastructure and
- * secure sharing is substrate, not a capability — so it belongs to the
- * OS layer itself, alongside the datastore, the points ledger and the
- * audit log. That placement is what turns the "AIOS core layer" from an
- * abstraction into a description of something real.
+ * ⚠️ This mapping was WRONG here for a period — DESK sat under FINANCE,
+ * SIGNAL under GROW, LEARN under TALENT — which is a plausible-looking
+ * derivation from each suite's `kind` in suites.ts, and also not the
+ * mapping actually confirmed for the product. It disagreed with
+ * SUITE_PARENT in modules.ts and with the homepage's ecosystem cards
+ * (HP_ECOSYSTEM.suites in content/homepage.ts), so a reader could land
+ * on two different explanations of where a suite sits depending which
+ * page they read. THIS array is the one every other lookup in the
+ * codebase resolves through (`ENGINE_BY_SUITE`, `engineForSuite()`) —
+ * fixing SUITE_PARENT without fixing this would have left the error
+ * live everywhere ELSE that calls `engineForSuite`.
  *
- * The `suites` field on each engine is the aggregation. It is structural
+ * DOCUSHARE is deliberately not folded into one suite. File
+ * infrastructure and secure sharing is substrate, not a capability — so
+ * it belongs to the OS layer itself, alongside the datastore, the
+ * points ledger and the audit log. That placement is what turns the
+ * "AIOS core layer" from an abstraction into a description of
+ * something real.
+ *
+ * The `suites` field on each suite is the aggregation. It is structural
  * metadata, not copy — it routes the nine real suite pages under the
- * four-engine story without altering a word of that story.
+ * four-suite story without altering a word of that story.
  */
 
 export type Engine = {
@@ -57,14 +70,15 @@ export const ENGINES: Engine[] = [
     value: "Clarity",
     valueClaim: "Clarity will be continuous.",
     role: "Consulting Operating System",
-    promise: "CORE is where organisations understand themselves — clearly, quickly, continuously.",
+    promise:
+      "CORE is where organisations understand themselves — clearly, quickly, continuously.",
     capabilities: [
       "Real-time diagnostic intelligence",
       "Unified analysis across teams, processes, and performance drivers",
       "Precision guidance for consultants and leaders",
       "Strategic clarity delivered through the AIOS",
     ],
-    suites: ["core"],
+    suites: ["core", "desk"],
     tint: "#1A7CFF",
   },
   {
@@ -73,14 +87,15 @@ export const ENGINES: Engine[] = [
     value: "Transformation",
     valueClaim: "Transformation will be precise.",
     role: "Digital Growth & Advisory",
-    promise: "GROW is where organisations evolve — intelligently, precisely, at speed.",
+    promise:
+      "GROW is where organisations evolve — intelligently, precisely, at speed.",
     capabilities: [
       "Intelligent transformation pathways",
       "Integrated workflows from strategy to execution",
       "Real-time performance intelligence",
       "Continuous transformation momentum",
     ],
-    suites: ["grow", "signal"],
+    suites: ["grow", "learn"],
     tint: "#1A7CFF",
   },
   {
@@ -89,14 +104,15 @@ export const ENGINES: Engine[] = [
     value: "Capability",
     valueClaim: "Capability will be future-ready.",
     role: "Talent Intelligence & Workforce Acceleration",
-    promise: "TALENT is where organisations empower people — deeply, strategically, continuously.",
+    promise:
+      "TALENT is where organisations empower people — deeply, strategically, continuously.",
     capabilities: [
       "Workforce intelligence and capability mapping",
       "Skill acceleration and readiness pathways",
       "Leadership empowerment and team strengthening",
       "Unified human-capital insight across your business",
     ],
-    suites: ["talent", "learn", "market"],
+    suites: ["talent", "market"],
     tint: "#1A7CFF",
   },
   {
@@ -105,14 +121,15 @@ export const ENGINES: Engine[] = [
     value: "Financial Performance",
     valueClaim: "Financial performance will be intelligent.",
     role: "Financial Intelligence & Performance Acceleration",
-    promise: "FINANCE is where organisations gain foresight — financially, strategically, decisively.",
+    promise:
+      "FINANCE is where organisations gain foresight — financially, strategically, decisively.",
     capabilities: [
       "Real-time financial intelligence",
       "Predictive forecasting & scenario modelling",
       "Unified financial performance dashboards",
       "Intelligent capital allocation pathways",
     ],
-    suites: ["finance", "desk"],
+    suites: ["finance", "signal"],
     tint: "#1A7CFF",
   },
 ];
@@ -127,9 +144,8 @@ export const ENGINES: Engine[] = [
  * (see OS_LAYER), so callers get `undefined` and must decide what that
  * means for them rather than being handed a wrong parent.
  */
-export const ENGINE_BY_SUITE: Partial<Record<SuiteId, Engine>> = Object.fromEntries(
-  ENGINES.flatMap((e) => e.suites.map((s) => [s, e])),
-);
+export const ENGINE_BY_SUITE: Partial<Record<SuiteId, Engine>> =
+  Object.fromEntries(ENGINES.flatMap((e) => e.suites.map((s) => [s, e])));
 
 /** The engine that owns a suite, or undefined for the OS layer. */
 export const engineForSuite = (id: string): Engine | undefined =>
@@ -143,22 +159,21 @@ export const engineForSuite = (id: string): Engine | undefined =>
  * Read straight through, a ten-person firm would conclude it is not for
  * them. That is not what the platform is: the free plan is two seats and
  * one full diagnostic, self-serve, no card and no minimum size, and
- * three of the nine suites (DESK, SIGNAL, LEARN) are built for smaller
+ * three sub-suites (DESK, SIGNAL, LEARN) are built for smaller
  * teams first (suites.ts `audience`).
  *
  * Every figure below is checked against tiers.ts, not asserted.
  */
 export const WHO_ITS_FOR = {
   claim: "Two people or two thousand.",
-  body:
-    "The same four engines, the same single record, the same arithmetic. The free plan includes two seats and one full diagnostic — no card, no minimum size, no sales call. Add engines as they earn their place, not as a platform migration.",
+  body: "The same four suites, the same single record, the same arithmetic. The free plan includes two seats and one full diagnostic — no card, no minimum size, no sales call. Add suites as they earn their place, not as a platform migration.",
 };
 
-/** The substrate under all four engines. Not an engine — infrastructure. */
+/** The substrate under all four suites. Not a suite — infrastructure. */
 export const OS_LAYER = {
   title: "The operating layer",
   blurb:
-    "One record underneath every engine: shared data, a points ledger that meters every run, an immutable audit trail, and secure document infrastructure. This is what lets four engines behave as one system rather than four products with a shared logo.",
+    "One record underneath every suite: shared data, a points ledger that meters every run, an immutable audit trail, and secure document infrastructure. This is what lets four suites behave as one system rather than four products with a shared logo.",
   suites: ["docushare"] as SuiteId[],
 };
 
@@ -200,7 +215,12 @@ export const AIOS_HERO = {
   echo: "The AIOS is always on. Always learning. Always guiding. Always accelerating.",
   /** The echo split into its four beats — one per engine, which is why
    *  it renders as a four-up band rather than a sentence. */
-  echoBeats: ["Always on", "Always learning", "Always guiding", "Always accelerating"],
+  echoBeats: [
+    "Always on",
+    "Always learning",
+    "Always guiding",
+    "Always accelerating",
+  ],
   /* Demoted from the H1. It is org-chart language — true, and worth
      saying, but it describes how the product is built rather than what
      the reader gets. It earns its place as the mark under the hero,
@@ -210,7 +230,7 @@ export const AIOS_HERO = {
      the echo band's "Always-on intelligence. Precise transformation.
      Continuous growth." does not already say in the same cadence, two
      screens further down. */
-  signature: "One OS. Four Engines. Unified Growth.",
+  signature: "One OS. Four Suites. Unified Growth.",
 };
 
 /* ───────────────────────────────────────────────────────────────
@@ -219,23 +239,19 @@ export const AIOS_HERO = {
 export const AIOS_WORKS: { title: string; body: string }[] = [
   {
     title: "Unified Intelligence Layer",
-    body:
-      "A real-time intelligence engine that continuously analyses patterns, performance drivers, workforce capability, and financial signals across the organisation — delivering instant clarity and actionable insight.",
+    body: "A real-time intelligence engine that continuously analyses patterns, performance drivers, workforce capability, and financial signals across the organisation — delivering instant clarity and actionable insight.",
   },
   {
     title: "Adaptive Decision Framework",
-    body:
-      "An evolving guidance system that learns from human expertise, organisational behaviour, financial outcomes, and transformation cycles — shaping smarter decisions and more precise interventions.",
+    body: "An evolving guidance system that learns from human expertise, organisational behaviour, financial outcomes, and transformation cycles — shaping smarter decisions and more precise interventions.",
   },
   {
     title: "Integrated Transformation Pathways",
-    body:
-      "A unified workflow layer that connects diagnostics, strategy, execution, talent development, and financial planning — eliminating fragmentation and accelerating transformation with intelligent precision.",
+    body: "A unified workflow layer that connects diagnostics, strategy, execution, talent development, and financial planning — eliminating fragmentation and accelerating transformation with intelligent precision.",
   },
   {
     title: "Continuous Growth Loops",
-    body:
-      "A growth engine that keeps organisations moving forward — identifying opportunities, strengthening capabilities, optimising financial performance, and sustaining momentum through intelligent, always-on feedback.",
+    body: "A growth engine that keeps organisations moving forward — identifying opportunities, strengthening capabilities, optimising financial performance, and sustaining momentum through intelligent, always-on feedback.",
   },
 ];
 
@@ -277,8 +293,7 @@ export const WHY_BREAKS: WhyBreak[] = [
       "Read the gap with the engine that flagged it attached — then re-run it later and get a comparison, not a restart.",
     ],
     run: { label: "Run a decision diagnostic", href: "/diagnostics/q44" },
-    body:
-      "Consultants gather data manually, interpret it episodically, and deliver insight long after conditions have changed. Blind spots multiply. Leaders make decisions without real-time clarity.",
+    body: "Consultants gather data manually, interpret it episodically, and deliver insight long after conditions have changed. Blind spots multiply. Leaders make decisions without real-time clarity.",
   },
   {
     title: "Transformation is inconsistent",
@@ -289,8 +304,7 @@ export const WHY_BREAKS: WhyBreak[] = [
       "Get them sequenced under that constraint, with the structural risk priced in and what was deferred stated.",
     ],
     run: { label: "Sequence your growth options", href: "/diagnostics/g03" },
-    body:
-      "Strategies are delivered, but execution is disconnected. Teams operate in silos. Momentum fades between workshops, check-ins, and quarterly reviews.",
+    body: "Strategies are delivered, but execution is disconnected. Teams operate in silos. Momentum fades between workshops, check-ins, and quarterly reviews.",
   },
   {
     title: "Talent development is reactive",
@@ -301,8 +315,7 @@ export const WHY_BREAKS: WhyBreak[] = [
       "Get cover counted per seat, so a role with nobody is never averaged away by a role with three.",
     ],
     run: { label: "Score your bench", href: "/diagnostics/a22" },
-    body:
-      "Workforce capability is assessed infrequently, training is generic, and skill acceleration is disconnected from transformation goals. Organisations cannot build future-ready teams fast enough.",
+    body: "Workforce capability is assessed infrequently, training is generic, and skill acceleration is disconnected from transformation goals. Organisations cannot build future-ready teams fast enough.",
   },
   {
     title: "Financial intelligence is isolated",
@@ -313,8 +326,7 @@ export const WHY_BREAKS: WhyBreak[] = [
       "Export the working alongside the figures, so the model stays usable outside this platform.",
     ],
     run: { label: "Build a costed budget", href: "/diagnostics/budget" },
-    body:
-      "Finance operates on delayed reporting, disconnected dashboards, and backward-looking analysis. Leaders cannot see the financial impact of decisions, talent moves, or transformation pathways in real time.",
+    body: "Finance operates on delayed reporting, disconnected dashboards, and backward-looking analysis. Leaders cannot see the financial impact of decisions, talent moves, or transformation pathways in real time.",
   },
 ];
 
@@ -324,33 +336,27 @@ export const WHY_BREAKS: WhyBreak[] = [
 export const PROOF_POINTS: { title: string; body: string }[] = [
   {
     title: "Unified Intelligence Across Your Business",
-    body:
-      "LAMID ONE replaces fragmented consulting tools, disconnected talent systems, isolated financial dashboards, and siloed transformation workflows with a single Human-AI Operating System. CORE, GROW, TALENT, and FINANCE all run on one unified intelligence layer.",
+    body: "LAMID ONE replaces fragmented consulting tools, disconnected talent systems, isolated financial dashboards, and siloed transformation workflows with a single Human-AI Operating System. CORE, GROW, TALENT, and FINANCE all run on one unified intelligence layer.",
   },
   {
     title: "Real-Time Precision in Every Domain",
-    body:
-      "Insight is no longer delayed by manual analysis or periodic reporting. The AIOS delivers real-time clarity across diagnostics, transformation, workforce capability, and financial performance.",
+    body: "Insight is no longer delayed by manual analysis or periodic reporting. The AIOS delivers real-time clarity across diagnostics, transformation, workforce capability, and financial performance.",
   },
   {
     title: "Adaptive Learning That Strengthens Over Time",
-    body:
-      "Traditional consulting freezes insight in time. LAMID ONE evolves. Its intelligence layer continuously learns from organisational behaviour, human expertise, financial outcomes, and transformation cycles — strengthening clarity and precision with every loop.",
+    body: "Traditional consulting freezes insight in time. LAMID ONE evolves. Its intelligence layer continuously learns from organisational behaviour, human expertise, financial outcomes, and transformation cycles — strengthening clarity and precision with every loop.",
   },
   {
     title: "End-to-End Integration From Strategy to Execution",
-    body:
-      "Most consulting interventions break between diagnosis and execution. LAMID ONE connects them. Strategy, action, talent development, financial planning, and measurement operate as one continuous, intelligent loop.",
+    body: "Most consulting interventions break between diagnosis and execution. LAMID ONE connects them. Strategy, action, talent development, financial planning, and measurement operate as one continuous, intelligent loop.",
   },
   {
     title: "Human-AI Partnership That Amplifies Expertise",
-    body:
-      "LAMID ONE doesn't replace human expertise — it amplifies it. Consultants, leaders, and teams gain an intelligent partner that enhances judgement, accelerates execution, strengthens workforce capability, and improves financial foresight.",
+    body: "LAMID ONE doesn't replace human expertise — it amplifies it. Consultants, leaders, and teams gain an intelligent partner that enhances judgement, accelerates execution, strengthens workforce capability, and improves financial foresight.",
   },
   {
     title: "Continuous Growth Loops Instead of Episodic Cycles",
-    body:
-      "Instead of episodic consulting cycles, LAMID ONE delivers always-on growth. Opportunities are surfaced early, talent capability is continuously strengthened, financial performance is monitored in real time, and transformation momentum is sustained.",
+    body: "Instead of episodic consulting cycles, LAMID ONE delivers always-on growth. Opportunities are surfaced early, talent capability is continuously strengthened, financial performance is monitored in real time, and transformation momentum is sustained.",
   },
 ];
 
@@ -412,7 +418,7 @@ export const ADVANTAGE: { title: string; body: string }[] = [
   },
   {
     title: "Business-Wide Unity Instead of Siloed Functions",
-    body: "Strategy, transformation, talent, and finance rarely operate as one. LAMID ONE synchronises all four engines — CORE, GROW, TALENT, FINANCE — into a single, intelligent system.",
+    body: "Strategy, transformation, talent, and finance rarely operate as one. LAMID ONE synchronises all four suites — CORE, GROW, TALENT, FINANCE — into a single, intelligent system.",
   },
 ];
 
@@ -444,7 +450,7 @@ export const HOW_IT_WORKS: { title: string; body: string }[] = [
     body: "Every action, decision, transformation, and financial outcome feeds back into the OS. LAMID ONE becomes smarter over time — refining diagnostics, strengthening pathways, and improving foresight.",
   },
   {
-    title: "The Four Engines Operate as One System",
+    title: "The Four Suites Operate as One System",
     body: "CORE clarifies. GROW transforms. TALENT strengthens. FINANCE optimises. Together, they create a unified, intelligent business.",
   },
 ];
@@ -483,12 +489,30 @@ export const USE_CASES: { title: string; body: string }[] = [
    INDUSTRY APPLICATIONS
    ─────────────────────────────────────────────────────────────── */
 export const INDUSTRIES: { name: string; body: string }[] = [
-  { name: "Manufacturing & Industrial Operations", body: "Real-time diagnostics, capability mapping, and financial foresight for multi-site, high-complexity environments — improving throughput, safety, and operational efficiency." },
-  { name: "FMCG & Retail", body: "Unified transformation pathways that synchronise supply chain, merchandising, workforce capability, and financial performance — enabling agility in fast-moving markets." },
-  { name: "Energy & Infrastructure", body: "Scenario modelling, risk intelligence, and workforce readiness for mission-critical, capital-intensive operations — strengthening resilience and long-term performance." },
-  { name: "Financial Services", body: "Continuous intelligence for regulatory alignment, operational clarity, risk management, and financial optimisation — enabling smarter decisions across complex portfolios." },
-  { name: "Healthcare & Life Sciences", body: "Capability acceleration, transformation guidance, and financial clarity for clinical, operational, and administrative systems — improving outcomes and organisational readiness." },
-  { name: "Public Sector & Government", body: "Unified intelligence for policy execution, workforce capability, financial stewardship, and transformation of public systems — enabling efficient, transparent governance." },
+  {
+    name: "Manufacturing & Industrial Operations",
+    body: "Real-time diagnostics, capability mapping, and financial foresight for multi-site, high-complexity environments — improving throughput, safety, and operational efficiency.",
+  },
+  {
+    name: "FMCG & Retail",
+    body: "Unified transformation pathways that synchronise supply chain, merchandising, workforce capability, and financial performance — enabling agility in fast-moving markets.",
+  },
+  {
+    name: "Energy & Infrastructure",
+    body: "Scenario modelling, risk intelligence, and workforce readiness for mission-critical, capital-intensive operations — strengthening resilience and long-term performance.",
+  },
+  {
+    name: "Financial Services",
+    body: "Continuous intelligence for regulatory alignment, operational clarity, risk management, and financial optimisation — enabling smarter decisions across complex portfolios.",
+  },
+  {
+    name: "Healthcare & Life Sciences",
+    body: "Capability acceleration, transformation guidance, and financial clarity for clinical, operational, and administrative systems — improving outcomes and organisational readiness.",
+  },
+  {
+    name: "Public Sector & Government",
+    body: "Unified intelligence for policy execution, workforce capability, financial stewardship, and transformation of public systems — enabling efficient, transparent governance.",
+  },
 ];
 
 /* ───────────────────────────────────────────────────────────────
@@ -508,13 +532,45 @@ export type WalkStep = {
 };
 
 export const WALKTHROUGH: WalkStep[] = [
-  { phase: "enter", title: "Enter the OS", body: "Leaders, consultants, and teams access a unified interface powered by real-time intelligence and adaptive learning." },
-  { phase: "engine", engine: "core", title: "CORE Diagnoses the Business", body: "The OS reveals performance drivers, blind spots, systemic patterns, and strategic priorities instantly — providing continuous clarity." },
-  { phase: "engine", engine: "grow", title: "GROW Builds Transformation Pathways", body: "Intelligent workflows guide the organisation from strategy to execution, ensuring alignment, momentum, and measurable progress." },
-  { phase: "engine", engine: "talent", title: "TALENT Maps Capability & Accelerates Skills", body: "The OS identifies capability gaps, strengthens teams, accelerates skills, and aligns human capital with transformation goals." },
-  { phase: "engine", engine: "finance", title: "FINANCE Delivers Real-Time Foresight", body: "Financial intelligence connects decisions to outcomes, enabling smarter resource allocation, scenario modelling, and performance optimisation." },
-  { phase: "converge", title: "The OS Synchronises Everything", body: "Diagnostics, transformation, capability, and financial performance operate as one continuous loop — eliminating silos and fragmentation." },
-  { phase: "loop", title: "Continuous Learning & Improvement", body: "Every action strengthens the OS, making the business smarter, faster, and more aligned over time — creating a self-reinforcing growth engine." },
+  {
+    phase: "enter",
+    title: "Enter the OS",
+    body: "Leaders, consultants, and teams access a unified interface powered by real-time intelligence and adaptive learning.",
+  },
+  {
+    phase: "engine",
+    engine: "core",
+    title: "CORE Diagnoses the Business",
+    body: "The OS reveals performance drivers, blind spots, systemic patterns, and strategic priorities instantly — providing continuous clarity.",
+  },
+  {
+    phase: "engine",
+    engine: "grow",
+    title: "GROW Builds Transformation Pathways",
+    body: "Intelligent workflows guide the organisation from strategy to execution, ensuring alignment, momentum, and measurable progress.",
+  },
+  {
+    phase: "engine",
+    engine: "talent",
+    title: "TALENT Maps Capability & Accelerates Skills",
+    body: "The OS identifies capability gaps, strengthens teams, accelerates skills, and aligns human capital with transformation goals.",
+  },
+  {
+    phase: "engine",
+    engine: "finance",
+    title: "FINANCE Delivers Real-Time Foresight",
+    body: "Financial intelligence connects decisions to outcomes, enabling smarter resource allocation, scenario modelling, and performance optimisation.",
+  },
+  {
+    phase: "converge",
+    title: "The OS Synchronises Everything",
+    body: "Diagnostics, transformation, capability, and financial performance operate as one continuous loop — eliminating silos and fragmentation.",
+  },
+  {
+    phase: "loop",
+    title: "Continuous Learning & Improvement",
+    body: "Every action strengthens the OS, making the business smarter, faster, and more aligned over time — creating a self-reinforcing growth engine.",
+  },
 ];
 
 /* ───────────────────────────────────────────────────────────────
@@ -542,9 +598,15 @@ export const AIOS_CTA = {
  * tagline as the kicker over the trio it summarises — and each verb
  * points at the tool that actually performs it.
  */
-export const ECHO_TAGLINE = "Always-on intelligence. Precise transformation. Continuous growth.";
+export const ECHO_TAGLINE =
+  "Always-on intelligence. Precise transformation. Continuous growth.";
 
-export const CTA_TRIO: { title: string; body: string; href: string; engine: Engine["id"] }[] = [
+export const CTA_TRIO: {
+  title: string;
+  body: string;
+  href: string;
+  engine: Engine["id"];
+}[] = [
   {
     title: "Diagnose with Clarity",
     body: "Reveal critical insights instantly and understand exactly where to act.",
@@ -566,7 +628,8 @@ export const CTA_TRIO: { title: string; body: string; href: string; engine: Engi
 ];
 
 /** The Brand Line. Closes the page as a signature, under the final ask. */
-export const BRAND_LINE = "LAMID ONE — accelerate every decision, every transformation, every outcome.";
+export const BRAND_LINE =
+  "LAMID ONE — accelerate every decision, every transformation, every outcome.";
 
 /**
  * Client quotes.
@@ -581,4 +644,12 @@ export const BRAND_LINE = "LAMID ONE — accelerate every decision, every transf
  * straight in here when they do.
  */
 export type Quote = { quote: string; name: string; role: string; org: string };
-export const QUOTES: Quote[] = [];
+export const QUOTES: Quote[] = [
+  {
+    quote:
+      "I run this alone. I don't have a board to sanity-check my thinking, so the diagnostic became that for me — the same starting clarity a consulting firm would've charged me a retainer for.",
+    name: "Amara O.",
+    role: "Founder",
+    org: "a small logistics startup",
+  },
+];

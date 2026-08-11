@@ -124,7 +124,12 @@ export const SOLUTIONS: Solution[] = [
       { title: "Enforce the authority matrix", body: "Decision authority and policy rules become live data with approval workflows behind them." },
       { title: "Run change with evidence", body: "Transformation and governance engines track drift, stability and compliance continuously." },
     ],
-    suites: ["core", "grow", "talent", "finance", "desk", "docushare"],
+    /* Was ["core", "grow", "talent", "finance", "desk", "docushare"] —
+       DOCUSHARE dropped: it isn't a `Suite` SuiteGrid can render a card
+       for anymore (see content/docushare.ts). The FAQ on this page
+       still names it directly ("across both the core platform and
+       DocuShare"), so the fact isn't lost, just no longer a grid card. */
+    suites: ["core", "grow", "talent", "finance", "desk"],
     recommendedTier: "enterprise",
     faq: [
       { q: "Are you SOC 2 certified?", a: "Not yet, and we say so plainly in the trust centre rather than in a procurement questionnaire. The underlying controls a SOC 2 audit examines — encryption, access control, audit logging, change management — are implemented and documented, and we will walk your security team through them." },

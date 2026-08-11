@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
 import { authHeaders } from "@/lib/useApi";
 import { TIERS, TIERS_BY_ID, type TierId } from "@/content/tiers";
+import { DOCUSHARE_INFO } from "@/content/docushare";
 
 export default function BillingPage() {
   const v = useDashboard();
@@ -71,6 +72,22 @@ export default function BillingPage() {
             Additional seat: <span className="font-semibold">${tier.extraSeat} / month</span>
           </p>
         )}
+
+        {/* DOCUSHARE — an optional, separately billed line, not part of
+            the seat price above. Rate intentionally unstated: no
+            confirmed number exists yet (same rule this codebase
+            already applies to case studies and testimonials — a real
+            figure when there is one, an honest gap until then). */}
+        <div className="mt-4 flex items-start gap-3 border-t pt-4" style={{ borderColor: "var(--line-soft)" }}>
+          <DOCUSHARE_INFO.Icon className="mt-0.5 h-4 w-4 shrink-0" style={{ color: DOCUSHARE_INFO.tint }} aria-hidden="true" />
+          <div>
+            <p className="text-sm font-semibold">{DOCUSHARE_INFO.name} <span className="faint font-normal">— optional add-on</span></p>
+            <p className="muted mt-1 text-xs leading-relaxed">
+              Billed per seat, added as you add seats — not bundled into the price above.{" "}
+              <Link href="/docushare" className="link-underline">See what it does</Link>.
+            </p>
+          </div>
+        </div>
       </div>
 
       {upgradable.length > 0 && (

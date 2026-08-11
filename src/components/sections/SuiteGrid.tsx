@@ -94,8 +94,13 @@ export function SuiteCard({ suite }: { suite: Suite }) {
  * Launch panel for externally hosted products (LEARN, DOCUSHARE).
  * Names the destination host explicitly so the jump is never a
  * surprise, and every control opens in a new tab.
+ *
+ * Takes the narrow shape rather than a full `Suite` so DOCUSHARE's own
+ * page can reuse it — DOCUSHARE isn't a `Suite` anymore (see
+ * content/docushare.ts), but it still has a `name` and an `external`,
+ * which is all this component ever actually read.
  */
-export function ExternalLaunch({ suite }: { suite: Suite }) {
+export function ExternalLaunch({ suite }: { suite: { name: string; external?: Suite["external"] } }) {
   if (!suite.external) return null;
   const { url, appName, label } = suite.external;
   const host = new URL(url).host;
@@ -104,8 +109,12 @@ export function ExternalLaunch({ suite }: { suite: Suite }) {
     <div className="card flex flex-col gap-5 p-7 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="font-display text-xl">{appName}</p>
+        {/* Was two flat sentences saying the same thing twice ("runs as
+            its own application" / "opens in a new tab") — combined into
+            one, since both clauses exist to make the same point: this
+            isn't embedded. */}
         <p className="muted mt-1 text-sm">
-          {suite.name} runs as its own application. It opens in a new tab at{" "}
+          {suite.name} opens in a new tab as its own application, at{" "}
           <span className="font-medium">{host}</span>.
         </p>
       </div>

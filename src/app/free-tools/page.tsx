@@ -67,9 +67,10 @@ export default function FreeToolsPage() {
               <Eyebrow>Free tools</Eyebrow>
               <h1 className="h-display mt-6">{FREE_TOOLS.length} tools. Fill in free, no account.</h1>
               <p className="lead mt-6">
-                Each one is a thin free tier over an engine that runs the paid platform — the same
-                arithmetic, a smaller input surface. Filling one in never asks who you are; seeing
-                the computed result does.
+                LAMID ONE is the operating system behind four suites — CORE, GROW, TALENT and
+                FINANCE — plus DESK, SIGNAL, LEARN and MARKET. Each tool below is a thin free tier
+                over an engine that runs the paid platform — the same arithmetic, a smaller input
+                surface. Filling one in never asks who you are; seeing the computed result does.
               </p>
             </div>
           </div>

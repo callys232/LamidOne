@@ -94,7 +94,9 @@ export default function AboutPage() {
           data to make the sort of percentage claims most software companies put on a homepage — so
           we have not made them. The stat tiles on this site refuse to render a figure we have not
           verified. That is a deliberate constraint in the code, not an oversight — the same
-          discipline the firm behind it has applied to client work for {years}+ years.
+          discipline the firm behind it has applied to client work for {years}+ years. What we can
+          show instead is the arithmetic itself: every figure LAMID FINANCE computes is shown
+          working, not modelled, so you can check it before you have to trust it.
         </p>
       </Prose>
     </SimplePage>

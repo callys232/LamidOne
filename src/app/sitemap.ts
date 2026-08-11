@@ -23,6 +23,10 @@ const STATIC_ROUTES = [
   "/support", "/integrations", "/developers", "/whats-new",
   "/why-lamid-one", "/about", "/careers", "/contact", "/contact-sales",
   "/concierge", "/demo", "/signin", "/signup",
+  /* DOCUSHARE's own bespoke page — was covered by the SUITES loop
+     below until it moved off the shared template; see
+     content/docushare.ts's header comment. */
+  "/docushare",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

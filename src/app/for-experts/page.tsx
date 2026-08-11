@@ -32,7 +32,10 @@ export default function ForExpertsPage() {
             <div className="max-w-3xl">
               <Eyebrow>{EXPERT_PROGRAM.eyebrow}</Eyebrow>
               <h1 className="h-display mt-6">{EXPERT_PROGRAM.title}</h1>
-              <p className="lead mt-6">{EXPERT_PROGRAM.blurb}</p>
+              <p className="lead mt-6">
+                LAMID MARKET is the sourcing and delivery suite inside LAMID ONE, the operating
+                system running CORE, GROW, TALENT and FINANCE alongside it. {EXPERT_PROGRAM.blurb}
+              </p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                 <Button href="/signup?role=expert" variant="primary">Create a profile</Button>
                 <Button href="/experts" variant="secondary">Browse the network</Button>

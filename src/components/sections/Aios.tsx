@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import { Section, SectionHeading, Eyebrow } from "@/components/ui/Section";
 import { SUITES_BY_ID } from "@/content/suites";
+import { DOCUSHARE_INFO } from "@/content/docushare";
 import { WalkthroughOrbit } from "@/components/sections/WalkthroughOrbit";
 import { WhyAccordion } from "@/components/sections/WhyAccordion";
 import { SYSTEM_FLOW } from "@/content/modules";
@@ -94,17 +95,19 @@ export function AiosEngines() {
       <div className="card mt-4 p-7" style={{ background: "var(--brand-soft)" }}>
         <h3 className="font-display text-lg">{OS_LAYER.title}</h3>
         <p className="muted mt-2 max-w-3xl text-sm leading-relaxed">{OS_LAYER.blurb}</p>
+        {/* Was `OS_LAYER.suites.map(id => SUITES_BY_ID[id].name)` — that
+            resolved through the suite registry, which DOCUSHARE (the
+            only thing OS_LAYER.suites has ever named) no longer belongs
+            to; see the header comment on content/docushare.ts. Linked
+            straight to its own bespoke page instead of the redirect. */}
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {OS_LAYER.suites.map((id) => (
-            <Link
-              key={id}
-              href={`/suites/${id}`}
-              className="faint rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors hover:text-brand"
-              style={{ border: "1px solid var(--line)" }}
-            >
-              {SUITES_BY_ID[id].name}
-            </Link>
-          ))}
+          <Link
+            href="/docushare"
+            className="faint rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors hover:text-brand"
+            style={{ border: "1px solid var(--line)" }}
+          >
+            {DOCUSHARE_INFO.name}
+          </Link>
         </div>
       </div>
     </Section>

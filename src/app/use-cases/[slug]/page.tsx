@@ -253,10 +253,12 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
             eyebrow="Where this applies"
             title={`${engine.name.replace("LAMID ", "")} adapts to every sector.`}
           />
+          {/* A compact chip row — no room for `body` here, so only the
+              sector name renders even where MODULE_PAGES carries one. */}
           <ul className="flex flex-wrap gap-2.5">
-            {modulePage.industries.map((name) => (
+            {modulePage.industries.map((ind) => (
               <li
-                key={name}
+                key={ind.name}
                 className="inline-flex items-center gap-2.5 rounded-full border px-4 py-2 text-sm"
                 style={{ borderColor: "var(--line)" }}
               >
@@ -265,7 +267,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
                   style={{ background: engine.tint }}
                   aria-hidden="true"
                 />
-                {name}
+                {ind.name}
               </li>
             ))}
           </ul>

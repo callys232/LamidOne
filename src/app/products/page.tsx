@@ -54,12 +54,14 @@ export default function ProductsPage() {
             <div className="max-w-3xl">
               <Eyebrow>Everything in the platform</Eyebrow>
               <h1 className="h-display mt-6">
-                Four engines. Nine suites. {publicCount} capabilities live today.
+                Four suites. {publicCount} capabilities live today.
               </h1>
               <p className="lead mt-6">
                 The navigation shows the shortlist. This page is the whole index — every capability,
                 grouped, with nothing hidden behind a sales call. Anything marked &ldquo;Not yet&rdquo;
-                is not live — named because omitting it would be the misleading choice.
+                is not live — named because omitting it would be the misleading choice. The value of
+                this list isn&apos;t its length: it&apos;s that every item on it reads and writes the
+                same shared record, so nothing here needs reconciling against anything else.
               </p>
             </div>
           </div>
@@ -207,7 +209,7 @@ export default function ProductsPage() {
               Pick the one thing that hurts most.
             </h2>
             <p className="mx-auto mt-6 max-w-xl" style={{ color: "var(--ink-faint)" }}>
-              You do not have to adopt all four engines. Start with one and add the rest when they earn it.
+              You do not have to adopt all four suites. Start with one and add the rest when they earn it.
             </p>
             <div className="mt-10 flex justify-center gap-3">
               <Button href={CTA.primary.href} variant="primary">{CTA.primary.label}</Button>

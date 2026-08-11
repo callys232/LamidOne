@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SUITES, type SuiteId } from "@/content/suites";
+import { DOCUSHARE_INFO } from "@/content/docushare";
 import { PointsEstimator } from "./PointsEstimator";
 import { AgentSpotlight } from "./AgentSpotlight";
 
@@ -28,6 +29,12 @@ import { AgentSpotlight } from "./AgentSpotlight";
  */
 export function BundleBuilder() {
   const [selected, setSelected] = useState<Set<SuiteId>>(new Set());
+  /* DOCUSHARE isn't a `Suite` (see content/docushare.ts) and isn't
+     included free the way the nine suites above are — it's billed per
+     seat, added on top. Tracked separately so toggling it can never
+     get swept into the "all included from Starter up" copy below,
+     which would misstate it as free. */
+  const [wantsDocuShare, setWantsDocuShare] = useState(false);
 
   function toggle(id: SuiteId) {
     setSelected((prev) => {
@@ -77,8 +84,47 @@ export function BundleBuilder() {
         <p className="muted mt-5 text-xs leading-relaxed">
           {selected.size === 0
             ? "Every suite is included on every paid tier — there is no per-suite upgrade. Pick a few to see typical points usage for just those agents."
-            : `${selected.size} of 9 suites selected, across four engines. All included from Starter up — seat price does not change for using more of them. Below is the points a working month in just these suites typically costs.`}
+            : /* Was a hardcoded "of 9 suites" — stale the moment DOCUSHARE
+                 moved off the `Suite` type and out of `SUITES` (see
+                 content/docushare.ts); now derives from the array it's
+                 actually counting. */
+              `${selected.size} of ${SUITES.length} suites selected, across four engines. All included from Starter up — seat price does not change for using more of them. Below is the points a working month in just these suites typically costs.`}
         </p>
+
+        {/* DOCUSHARE, separately — not one of the nine `SUITES` above,
+            and not free the way they are: it's billed per seat, added
+            on top of the account tier, not bundled in. Kept visually
+            distinct (dashed border, its own "optional add-on" label)
+            so it can never read as an included tenth suite. */}
+        <button
+          type="button"
+          onClick={() => setWantsDocuShare((v) => !v)}
+          aria-pressed={wantsDocuShare ? "true" : "false"}
+          className="mt-4 flex w-full items-start gap-3 rounded-xl p-4 text-left transition-colors"
+          style={{
+            border: `1.5px dashed ${wantsDocuShare ? "var(--brand)" : "var(--line)"}`,
+            background: wantsDocuShare ? "var(--brand-soft)" : "transparent",
+          }}
+        >
+          <span
+            className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+            style={{ border: `1.5px solid ${wantsDocuShare ? "var(--brand)" : "var(--line)"}`, background: wantsDocuShare ? "var(--brand)" : "transparent" }}
+          >
+            {wantsDocuShare && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} aria-hidden="true" />}
+          </span>
+          <span className="min-w-0">
+            <span className="flex items-center gap-2">
+              <DOCUSHARE_INFO.Icon className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+              <span className="truncate text-sm font-semibold">{DOCUSHARE_INFO.name}</span>
+              <span className="faint rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide" style={{ border: "1px solid var(--line)" }}>
+                Optional add-on
+              </span>
+            </span>
+            <span className="muted mt-1 block text-xs leading-relaxed">
+              Not bundled — billed per seat, added as you add seats. Current rates are on the pricing page.
+            </span>
+          </span>
+        </button>
       </div>
 
       <div className="lg:col-span-5">

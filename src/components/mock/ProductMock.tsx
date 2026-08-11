@@ -51,10 +51,20 @@ const tint = (a: number) => `color-mix(in srgb, var(--suite-tint, var(--brand)) 
 /* ── Stat tiles + trend line — the engine dashboard ──────── */
 export function DashboardMock({
   label = "Operating dashboard",
+  /* Was Health score / Open decisions / Drift alerts — CORE's own
+     dashboard vocabulary verbatim, harmless while this mock only ever
+     appeared under DESK/SIGNAL/LEARN/MARKET/DOCUSHARE's arbitrary
+     index fallback, wrong the moment SuiteMock started routing CORE's
+     and GROW's own use cases through the same generic mocks (see the
+     header comment on SuiteMock) — GROW's "Market intelligence" panel
+     was showing CORE's exact health-score tile. Neutral placeholders
+     now, since this component has no suite context to be accurate
+     WITH; `label` still carries whatever the calling panel actually
+     is. */
   tiles = [
-    { v: "83", l: "Health score" },
-    { v: "12", l: "Open decisions" },
-    { v: "4", l: "Drift alerts" },
+    { v: "87", l: "Overall score" },
+    { v: "14", l: "Active items" },
+    { v: "5", l: "Flags this week" },
   ],
   series = [34, 41, 38, 52, 58, 55, 67, 74],
 }: {
@@ -99,7 +109,10 @@ export function DashboardMock({
 
 /* ── Bars — comparison across periods ────────────────────── */
 export function BarChartMock({
-  label = "Cost by period",
+  /* Was "Cost by period" — FINANCE's vocabulary on a mock now shared
+     by any suite whose claim reads as comparison-shaped. See the note
+     on DashboardMock's `tiles`. */
+  label = "Trend by period",
   bars = [42, 58, 51, 73, 66, 88],
   highlight = 5,
 }: { label?: string; bars?: number[]; highlight?: number }) {
@@ -131,7 +144,9 @@ export function BarChartMock({
 
 /* ── Gauge — a single ratio against a band ───────────────── */
 export function GaugeMock({
-  label = "Decision clarity",
+  /* Was "Decision clarity" — CORE's own term. See the note on
+     DashboardMock's `tiles`. */
+  label = "Composite score",
   value = 68,
 }: { label?: string; value?: number }) {
   const r = 52, c = Math.PI * r;
@@ -163,12 +178,19 @@ export function GaugeMock({
 /* ── Agent panel — the interface demo ────────────────────── */
 export function AgentMock({
   agent = "Catalyst",
-  role = "Diagnostic agent",
-  prompt = "Score decision quality for the operations function.",
+  /* Was role "Diagnostic agent", prompt "Score decision quality for
+     the operations function.", and all three `lines` — every one of
+     them CORE's own vocabulary (decision clarity, authority ambiguity,
+     cadence). Harmless while AgentMock only appeared under the five
+     suites with no flagship diagram; wrong once TALENT's "Succession
+     and pathways" or GROW's "Advisory and scaling" started landing
+     here too. See the note on DashboardMock's `tiles`. */
+  role = "Assessment agent",
+  prompt = "Score readiness for the selected scope.",
   lines = [
-    "Decision clarity — 68 / 100",
-    "Authority ambiguity found in 3 of 11 decisions",
-    "Cadence drift detected between Ops and Delivery",
+    "Composite score — 68 / 100",
+    "Gaps found in 3 of 11 areas reviewed",
+    "Drift detected against the baseline",
   ],
   cost = "40 pts",
 }: {
@@ -221,7 +243,7 @@ export function TableMock({
   rows = [
     ["Northwind Group", "Diagnostic", "In review"],
     ["Halden & Co", "Proposal sent", "Awaiting"],
-    ["Meridian Trust", "Milestone 2", "Funded"],
+    ["Meridian Trust", "Milestone 2", "Released"],
     ["Okonkwo Partners", "Milestone 3", "Approved"],
   ],
 }: { label?: string; rows?: string[][] }) {
@@ -247,11 +269,68 @@ export function TableMock({
 }
 
 /** Picks a mock appropriate to the use-case slot on a suite page. */
-export function SuiteMock({ index, suiteId }: { index: number; suiteId: string }) {
+/**
+ * WHAT THIS RENDERS BESIDE EACH USE CASE, and why it used to be wrong
+ * twice over.
+ *
+ * FIRST WRONG VERSION: `Chosen = byIndex[index % 5]` — the mock was
+ * picked by POSITION in the list, with no relationship to what the use
+ * case's own words say.
+ *
+ * SECOND WRONG VERSION: CORE, GROW, TALENT and FINANCE were given ONE
+ * flagship diagram each (SHOWCASE_ART, keyed only by `suiteId`) and it
+ * was reused for every use case on that suite's page — CORE's page
+ * showed the identical bar-and-threshold drawing under "Decision
+ * intelligence", "Operating rhythm", "Governance and assurance" AND
+ * "Engagement workflow", four different claims illustrated by one
+ * picture with only the caption changing. That reads as the same
+ * asset copy-pasted, because it is. SHOWCASE_ART stays exactly where
+ * it still earns its keep — the homepage carousel, one suite per
+ * slide, imported straight from ShowcaseArt.tsx by SuiteShowcase.tsx —
+ * it is simply no longer wired into this per-use-case picker.
+ *
+ * THIS VERSION picks from the five generic mocks for all nine suites,
+ * uniformly, by the SHAPE of the claim rather than its position or its
+ * suite: a score-shaped claim ("clarity", "readiness", "cadence",
+ * "margin") gets the gauge; a record-shaped claim ("milestone",
+ * "pipeline", "governance", "invoice") gets the table; a people-shaped
+ * claim ("expert", "succession", "advisory") gets the agent mock; a
+ * comparison-shaped claim ("scenario", "forecast", "plan") gets the
+ * bar chart; everything else gets the dashboard. Checked against every
+ * use case on all nine suite pages when written, specifically to keep
+ * adjacent cards on the same page from landing on the same shape twice
+ * where a better-fitting keyword was available.
+ *
+ * `label` is the use case's own eyebrow, threaded through to the
+ * window-chrome title instead of each mock's generic default ("Operating
+ * dashboard" for every suite regardless of what it does).
+ *
+ * The five mocks are called directly rather than collected into one
+ * array of components: each takes a different, incompatible set of
+ * optional props (bars/highlight, value, rows…), so a shared array type
+ * would either fight TypeScript's structural typing or paper over it
+ * with `any`. A plain if-chain costs four extra lines and keeps every
+ * prop honest.
+ */
+export function SuiteMock({
+  index, label, claim = "",
+}: {
+  index: number;
+  label?: string;
+  /** The use case's own eyebrow + title, used to pick the chart SHAPE. */
+  claim?: string;
+}) {
+  if (/score|clarity|readiness|rating|health|cadence|rhythm|tempo|margin/i.test(claim)) return <GaugeMock label={label} />;
+  if (/pipeline|milestone|workflow|stage|directory|list|quote|invoic|shar|publish|governance|control|complian|audit/i.test(claim)) return <TableMock label={label} />;
+  // AgentMock has no `label` prop — it builds its own window title from
+  // `agent — role`, which already reads better than the generic default
+  // this heuristic exists to replace.
+  if (/match|expert|specialist|sourc|agent|succession|\bbench\b|advis/i.test(claim)) return <AgentMock />;
+  if (/scenario|forecast|period|trend|compar|\bplan\b|resourc/i.test(claim)) return <BarChartMock label={label} />;
+
   const byIndex = [DashboardMock, AgentMock, BarChartMock, GaugeMock, TableMock];
-  const marketish = ["market", "desk"].includes(suiteId);
-  const Chosen = marketish && index === 0 ? TableMock : byIndex[index % byIndex.length];
-  return <Chosen />;
+  const Chosen = byIndex[index % byIndex.length];
+  return <Chosen label={label} />;
 }
 
 /**

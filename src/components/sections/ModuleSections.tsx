@@ -10,28 +10,28 @@ import type { SuiteId } from "@/content/suites";
 
 /**
  * The brand document's module landing page, rendered under the four
- * engine suite pages (/suites/core, /grow, /talent, /finance).
+ * main suite pages (/suites/core, /grow, /talent, /finance).
  *
  * Returns null for the other five suites, so DESK, SIGNAL, LEARN,
  * MARKET and DOCUSHARE keep their existing page untouched — the
  * document only ever wrote these four.
  *
- * The engine's accent is used the same restrained way as everywhere
+ * The suite's own accent is used the same restrained way as everywhere
  * else: rules, numerals and flow nodes. Nothing is flooded with it.
  */
 /**
- * Where a suite sits in the four-engine structure.
+ * Where a suite sits among the four.
  *
- * Renders on the five suites that run inside an engine rather than
- * being one — DESK, SIGNAL, LEARN, MARKET — plus DOCUSHARE, which is
- * the layer underneath all four.
+ * Renders on the five suites folded into one of the four — DESK,
+ * SIGNAL, LEARN, MARKET — plus DOCUSHARE, which is the layer underneath
+ * all four rather than folded into any one.
  *
  * Written and styled as placement, not demotion: the band leads with
- * the division of labour ("FINANCE models the money. DESK collects
- * it."), carries the parent's accent rather than greying itself out,
- * and links both ways. A reader landing here from search learns how
- * this suite fits the story on the homepage instead of wondering why
- * it wasn't in it.
+ * the division of labour ("CORE decides. DESK delivers and bills it."),
+ * carries the parent's accent rather than greying itself out, and links
+ * both ways. A reader landing here from search learns how this suite
+ * fits the story on the homepage instead of wondering why it wasn't in
+ * it.
  */
 export function SuiteParentBand({ suiteId }: { suiteId: SuiteId }) {
   const parent = SUITE_PARENT[suiteId];
@@ -81,6 +81,31 @@ export function ModuleSections({ suiteId }: { suiteId: SuiteId }) {
 
   return (
     <>
+      {/* ── The gap ───────────────────────────────────────────
+          Optional — renders only where MODULE_PAGES sets `gap`. Same
+          job TheGap does on the homepage — name the problem before the
+          product — scoped to one suite. Text only: no chart, no score.
+          See the note on ModulePage.gap for why. */}
+      {mod.gap && (
+        <Section className="border-t">
+          <div className="grid items-start gap-10 md:grid-cols-12">
+            <div className="md:col-span-5">
+              <span
+                className="inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-[13px] font-semibold"
+                style={{ borderColor: "var(--line)" }}
+              >
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: tint }} aria-hidden="true" />
+                {mod.gap.badge}
+              </span>
+            </div>
+            <div className="md:col-span-6 md:col-start-7">
+              <h2 className="h-section">{mod.gap.title}</h2>
+              <p className="lead mt-5">{mod.gap.body}</p>
+            </div>
+          </div>
+        </Section>
+      )}
+
       {/* ── Purpose ─────────────────────────────────────────── */}
       <Section id="purpose" className="border-t">
         <div className="grid gap-10 md:grid-cols-12">
@@ -170,14 +195,62 @@ export function ModuleSections({ suiteId }: { suiteId: SuiteId }) {
           title={`${engine.name.replace("LAMID ", "")} adapts to every sector.`}
         />
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {mod.industries.map((name) => (
-            <li key={name} className="card card-interactive flex items-center gap-3 p-5 text-sm font-medium">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: tint }} aria-hidden="true" />
-              {name}
+          {mod.industries.map((ind) => (
+            <li key={ind.name} className="card card-interactive flex gap-3 p-5">
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: tint }} aria-hidden="true" />
+              {/* `body` is optional — a suite with no industry copy yet
+                  renders exactly as this list did before: name only,
+                  same size, same weight. Only when both are present does
+                  the sector name become a heading over its own
+                  sentence. */}
+              {ind.body ? (
+                <div>
+                  <p className="text-sm font-semibold">{ind.name}</p>
+                  <p className="muted mt-1 text-sm leading-snug">{ind.body}</p>
+                </div>
+              ) : (
+                <span className="text-sm font-medium">{ind.name}</span>
+              )}
             </li>
           ))}
         </ul>
       </Section>
+
+      {/* ── Who this is for ──────────────────────────────────
+          Optional — renders only where MODULE_PAGES sets `whoFor`.
+          Audience framing lived on the homepage's scale card and
+          nowhere on the suite's own page; a reader who arrived here
+          directly from search had no line telling them whether this
+          suite was built for something their size. */}
+      {mod.whoFor && (
+        <Section className="border-t">
+          <SectionHeading eyebrow="Who this is for" title={mod.whoFor} />
+        </Section>
+      )}
+
+      {/* ── Callout ───────────────────────────────────────────
+          Optional — a single tinted pull-quote, standing on its own
+          rather than inside a card. Same treatment as the ecosystem
+          section's closing line on the homepage (dark band, one
+          sentence), reused here rather than invented fresh.
+
+          `border: var(--line)` matters here specifically: `--depth`
+          and the page background sit only one step apart in dark mode
+          (`#060C1A` vs `#0A0F1F`), so a fill alone reads as a "dark
+          band" on the white light-mode page but nearly disappears into
+          the dark-mode page around it. The same hairline every `.card`
+          already carries gives the box an edge in both themes without
+          lightening the midnight fill itself. */}
+      {mod.callout && (
+        <Section className="border-t">
+          <p
+            className="mx-auto max-w-3xl rounded-xl border px-7 py-6 text-center text-[17px] leading-relaxed"
+            style={{ background: "var(--depth)", borderColor: "var(--line)", color: "rgba(255,255,255,0.9)" }}
+          >
+            {mod.callout}
+          </p>
+        </Section>
+      )}
 
       {/* ── Module CTA ──────────────────────────────────────── */}
       <Section id="activate" tone="tint" className="border-t">

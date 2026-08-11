@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     template: `%s | ${BRAND.name}`,
   },
   description:
-    "The Unified Human-AI Operating System for clarity, transformation, capability and financial performance. Four engines — CORE, GROW, TALENT, FINANCE — running nine suites on one record, with the arithmetic shown.",
+    "The Unified Human-AI Operating System for clarity, transformation, capability and financial performance. Four suites — CORE, GROW, TALENT, FINANCE — on one shared record, with the arithmetic shown.",
   metadataBase: new URL(`https://${BRAND.domain}`),
 };
 

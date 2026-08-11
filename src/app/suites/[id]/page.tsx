@@ -12,6 +12,7 @@ import { PricingCards } from "@/components/sections/PricingCards";
 import { Faq } from "@/components/sections/Faq";
 import { ExternalLaunch } from "@/components/sections/SuiteGrid";
 import { SuiteMock } from "@/components/mock/ProductMock";
+import { SuiteMore } from "@/components/sections/SuiteMore";
 import { MilestoneWalkthrough } from "@/components/suites/MilestoneWalkthrough";
 import { ModuleSections, SuiteParentBand } from "@/components/sections/ModuleSections";
 import { MODULE_BY_ENGINE } from "@/content/modules";
@@ -63,7 +64,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  *  diagnostics — a scored assessment of where you stand. FINANCE (F02)
  *  is a calculator, not an assessment, so it never says "diagnostic". */
 const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, { label: string; href: string; external?: boolean }>> = {
-  core: { label: "Book a diagnostic", href: "/diagnostics/q44" },
+  /* Was { label: "Book a diagnostic", href: "/diagnostics/q44" } — the
+     reference design's hero CTA reads "Book a Demo", and `/demo` is a
+     real page whose own copy is exactly that: "A working session, not
+     a slide deck... we run a diagnostic against it live." Pointing the
+     button at it rather than straight at Q44 makes the label true
+     without inventing a route — the direct-to-Q44 path is still one
+     click away via "Also live" style entry points elsewhere on the
+     page (the hero capability strip's first card). */
+  core: { label: "Book a Demo", href: "/demo" },
   /* Neither of these is a diagnostic. TALENT recommends a route from
      where someone is to a target role; GROW names the growth paths open
      to the business. Both suites previously fell back to diagnostic
@@ -97,8 +106,31 @@ const SUITE_DIAGNOSTIC: Partial<Record<SuiteId, { label: string; href: string; e
 const HERO_CAPABILITIES: Partial<Record<SuiteId, { label: string; detail: string; href: string }[]>> = {
   desk: [
     { label: "Draft the proposal", detail: "Scribe scopes and costs it from diagnostic output, not a blank page.", href: "/agents" },
-    { label: "Run milestones through escrow", detail: "Cadence breaks scope into releases; funds move only on approval.", href: "/dashboard/engagements" },
+    { label: "Track milestones through to release", detail: "Cadence breaks scope into stages; each one releases to the collaborator on your approval.", href: "/dashboard/engagements" },
     { label: "Invoice from approved work", detail: "Raise an invoice straight from approved milestones, references carried through.", href: "/dashboard/invoices" },
+  ],
+  /* From the reference design's four hub-cards. Two of the four had a
+     natural real destination — the diagnostic itself, and the cadence
+     engine "coherence checks" names directly. The other two ("early
+     warning", "structured frameworks") describe things CORE does
+     across several use cases rather than one named tool, so they point
+     at the use-cases section rather than a specific diagnostic route I
+     could not confirm is live — a real anchor beats a guessed one. */
+  /* Details rewritten so you're the one doing the running, checking
+     and skipping — the labels already were, the details had drifted
+     into passive, subject-less phrasing ("checked against each
+     other", "not consultant-calendar speed" has no verb at all).
+     Second pass: #1 now echoes the subhead's own "not last quarter"
+     line instead of the generic "as things change"; #2 opens on "Line
+     up" instead of repeating "Check" from its own label a word later;
+     #4 borrows "live" from the governance use-case's own bullet
+     ("Hold your decision authority matrix as live data") rather than
+     inventing separate vocabulary for the same idea. */
+  core: [
+    { label: "Run a continuous diagnostic", detail: "Run it once, or run it every week — CORE always reads what's happening right now, not last quarter.", href: "/diagnostics/q44" },
+    { label: "Check strategy against execution", detail: "Line up strategy, execution and leadership decisions against each other — any time, not just at the annual offsite.", href: "/diagnostics/r01" },
+    { label: "Catch drift early", detail: "See strategy drifting from plan before it shows up in the quarterly numbers.", href: "/suites/core#use-cases" },
+    { label: "Skip the 12-week wait", detail: "Get governance frameworks live at software speed, not on a consultant's calendar.", href: "/suites/core#use-cases" },
   ],
 };
 
@@ -134,45 +166,113 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
       ? SUITE_DIAGNOSTIC[suite.id]!
       : CTA.primary;
   const secondaryCta = suite.external ? CTA.secondary : CTA.secondary;
+  /* CORE's hero drops the secondary button — "Start free" beside "Book
+     a Demo" offered two competing next steps where the reference design
+     wants one clear ask. Scoped to the HERO only: the closing band
+     further down the page still shows its own secondary CTA, since
+     that was not part of this change and removing it too would be a
+     second, unrequested edit.
+
+     FINANCE swaps the generic "Start free" for the invoice generator
+     instead — a real, built tool (lib/invoices.ts, /dashboard/invoices)
+     rather than a second signup door beside the one "Build a budget"
+     already offers. Invoicing is documented as DESK's own feature
+     ("the third leg of the DESK promise" — see lib/invoices.ts's header
+     comment), not FINANCE's; this is a cross-sell CTA, not a claim that
+     FINANCE built it. Gated like the rest of /dashboard/*, so a
+     logged-out visitor hits sign-in first, same as clicking through to
+     any other dashboard tool from a marketing page. */
+  const heroSecondaryCta =
+    suite.id === "core" ? undefined
+    : suite.id === "finance" ? { label: "Generate an invoice", href: "/dashboard/invoices" }
+    : secondaryCta;
   const heroCapabilities = HERO_CAPABILITIES[suite.id];
-  /* The brand document wrote a full landing page for the four engines.
+  /* The brand document wrote a full landing page for the four suites.
      Where one exists its hero supersedes suites.ts, and its sections
      render below the use cases. The other five suites are untouched. */
   const modulePage = MODULE_BY_ENGINE[suite.id];
+  /* Dark radial-gradient hero, reserved for the four suites with a
+     module page — see the header comment on the hero `<section>`. */
+  const darkHero = !!modulePage;
+  const centered = studio || darkHero;
 
   return (
     <>
-      <Header />
-      <main id="main">
+      <Header ctaSet="suite" />
+      {/* `--suite-tint` set ONCE, here, rather than re-declared on each
+         section that needs it. `.card-interactive` and `.feature-card`
+         already resolve their hover colour from `var(--suite-tint,
+         var(--brand))` — that was written for the homepage's ecosystem
+         cards, which set the variable locally on each card. On this
+         page every `card-interactive` (hero capability strip, agent
+         tiles) sat OUTSIDE the two places the variable was set (the
+         use-case mock and the features grid), so they hovered in flat
+         brand red on every suite page regardless of which suite it was.
+         Scoping it to `<main>` means the whole page — not just the
+         sections that remembered to ask for it — answers in the
+         suite's own colour, the same rationed way the homepage spends
+         it: never on rest-state body text, only on the interaction. */}
+      <main id="main" style={{ ["--suite-tint" as string]: suite.tint }}>
 
-        {/* ── Hero ── */}
+        {/* ── Hero ──
+            `darkHero` — true only for CORE/GROW/TALENT/FINANCE, the
+            four with a module page — swaps the plain white hero for
+            the reference design's dark radial-gradient band, and the
+            preview section right below continues the SAME flat colour
+            the gradient ends on, so the dashboard screenshot reads as
+            this hero's second beat rather than a separate section that
+            happens to follow it. Colours below are hardcoded rather
+            than pulled from theme tokens (`--ink`, `--line`…) because
+            this band is dark regardless of which site theme is active
+            — same reasoning as EcosystemMap.tsx's "white, not a
+            token". `studio`'s tinted-white treatment and the other
+            five suites are untouched. */}
         <section
-          className="border-b"
+          className={darkHero ? "" : "border-b"}
           style={{
             borderColor: "var(--line-soft)",
-            background: studio ? `${suite.tint}0F` : undefined,
+            background: darkHero
+              ? "radial-gradient(ellipse 120% 90% at 50% 0%, #16294f 0%, #0d1730 45%, #0A0F1F 100%)"
+              : studio ? `${suite.tint}0F` : undefined,
           }}
         >
-          <div className="shell py-8">
-            <nav aria-label="Breadcrumb" className="faint text-sm">
-              <Link href="/" className="hover:text-brand">Home</Link>
-              <span className="mx-2" aria-hidden="true">/</span>
-              <Link href="/products" className="hover:text-brand">Products</Link>
-              <span className="mx-2" aria-hidden="true">/</span>
-              <span>{suite.name}</span>
-            </nav>
-          </div>
+          {/* `pt-16 sm:pt-20` replaces the breadcrumb's old `py-8` wrapper
+              — removing the breadcrumb (per an earlier request) dropped
+              the hero flush against the top of the section with it.
+              Applies to all nine suite pages; only `darkHero`'s dark
+              band makes the gap actually visible as room to breathe
+              rather than just white-on-white. */}
+          <div className={`shell pb-20 pt-16 sm:pt-20 ${centered ? "text-center" : ""}`}>
+            <div className={centered ? "mx-auto max-w-3xl" : "max-w-4xl"}>
+              {/* The kicker. Optional — only renders where MODULE_PAGES
+                  sets one (CORE, for now). Sits above the identity chip
+                  rather than replacing it: "Consulting, Reimagined" is
+                  the CATEGORY claim, the chip below it is still what
+                  says which suite this is. Tinted to the suite's own
+                  colour, same rationing rule as everywhere else on the
+                  site — one accent, spent on the one line meant to be
+                  read first. `--accent-glow` on the dark hero rather
+                  than `suite.tint`: the codebase already reserves that
+                  token for accents on dark surfaces (see its comment in
+                  globals.css), so this is the same convention, not a
+                  new one. */}
+              {modulePage?.eyebrow && (
+                <p
+                  className={`text-[13px] font-bold uppercase tracking-[0.14em] ${centered ? "text-center" : ""}`}
+                  style={{ color: darkHero ? "var(--accent-glow)" : suite.tint }}
+                >
+                  {modulePage.eyebrow}
+                </p>
+              )}
 
-          <div className={`shell pb-20 ${studio ? "text-center" : ""}`}>
-            <div className={studio ? "mx-auto max-w-3xl" : "max-w-4xl"}>
-              <div className={`flex items-center gap-2.5 ${studio ? "justify-center" : ""}`}>
+              <div className={`flex items-center gap-2.5 ${modulePage?.eyebrow ? "mt-3" : ""} ${centered ? "justify-center" : ""}`}>
                 <span
                   className="flex h-9 w-9 items-center justify-center rounded-lg"
-                  style={{ background: `${suite.tint}1A`, color: suite.tint }}
+                  style={{ background: darkHero ? "rgba(255,255,255,0.12)" : `${suite.tint}1A`, color: darkHero ? "var(--accent-glow)" : suite.tint }}
                 >
                   <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
                 </span>
-                <span className="font-display text-lg">{suite.name}</span>
+                <span className="font-display text-lg" style={{ color: darkHero ? "#FFFFFF" : undefined }}>{suite.name}</span>
                 {suite.external && (
                   <span className="faint rounded px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
                         style={{ border: "1px solid var(--line)" }}>
@@ -181,15 +281,49 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
                 )}
               </div>
 
-              <h1 className="h-display mt-7">{modulePage?.headline ?? suite.headline}</h1>
-              <p className={`lead mt-6 ${studio ? "mx-auto max-w-2xl" : "max-w-2xl"}`}>{highlightBrand(modulePage?.subhead ?? suite.subhead)}</p>
+              <h1 className="h-display mt-7" style={{ color: darkHero ? "#FFFFFF" : undefined }}>{modulePage?.headline ?? suite.headline}</h1>
 
-              <div className={studio ? "mt-10 flex justify-center" : "mt-10"}>
-                <CtaPair primary={primaryCta} secondary={secondaryCta} />
+              {/* The tagline. Sits between the H1 and the lead
+                  paragraph, and the two are deliberately different
+                  JOBS: the headline states what the suite IS ("The
+                  Diagnostic Intelligence Suite..."), the tagline states
+                  the CLAIM ("Strategy That Never Goes Stale"), and the
+                  lead paragraph below it says the mechanism that makes
+                  the claim true. Three sentences, three different
+                  questions answered, none of them repeating another. */}
+              {modulePage?.tagline && (
+                <p
+                  className={`font-display mt-4 text-2xl font-semibold ${centered ? "mx-auto" : ""}`}
+                  style={{ color: darkHero ? "var(--accent-glow)" : suite.tint }}
+                >
+                  {modulePage.tagline}
+                </p>
+              )}
+              <p
+                className={`lead mt-6 ${centered ? "mx-auto max-w-2xl" : "max-w-2xl"}`}
+                style={{ color: darkHero ? "rgba(255,255,255,0.78)" : undefined }}
+              >
+                {highlightBrand(modulePage?.subhead ?? suite.subhead)}
+              </p>
+
+              <div className={centered ? "mt-10 flex justify-center" : "mt-10"}>
+                <CtaPair primary={primaryCta} secondary={heroSecondaryCta} />
               </div>
 
-              {heroCapabilities && (
-                <ol className="mt-12 grid gap-4 sm:grid-cols-3">
+              {/* `darkHero` suites render their strip in its own
+                  section after the preview instead — white cards
+                  floating directly on the gradient read fine, but the
+                  request was to keep the hero itself to headline, CTA
+                  and nothing else. DESK (light hero, no `darkHero`)
+                  keeps the strip right here, unchanged. */}
+              {heroCapabilities && !darkHero && (
+                /* `lg:grid-cols-4` rather than a fixed 3 — CORE's strip
+                   carries four cards where DESK's carries three. Three
+                   items in a four-column grid leaves one gap at the
+                   far right rather than an awkward orphaned row, which
+                   is the safer failure mode for a count that varies by
+                   suite. */
+                <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {heroCapabilities.map((c, i) => (
                     <li key={c.label}>
                       <Link href={c.href} className="card card-interactive block h-full p-5">
@@ -201,20 +335,9 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
                   ))}
                 </ol>
               )}
-
-              <p className="faint mt-5 text-sm">
-                {suite.engineCount} engines · included from{" "}
-                {suite.tiers.includes("free") ? "the free plan" : "Starter"}
-              </p>
             </div>
           </div>
         </section>
-
-        <SubNav
-          title={suite.name}
-          icon={<Icon className="h-4 w-4" style={{ color: suite.tint }} aria-hidden="true" />}
-          items={subNavItems}
-        />
 
         {suite.external && (
           <div className="shell pt-12">
@@ -228,54 +351,133 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
         <SuiteParentBand suiteId={suite.id} />
 
         {/* ── Dashboard preview ──────────────────────────────
-            Illustrative, not a live capture — said so in the alt text
-            and the caption, never implied otherwise. MARKET gets a
-            step-by-step walkthrough of the real milestone form/status
-            lifecycle instead of a static screenshot — see
-            MilestoneWalkthrough's own header comment for what it does
-            and does not claim. */}
-        <Section id="preview" className={suite.external ? "pt-4" : ""}>
-          {suite.id === "market" ? (
-            <div className="mx-auto max-w-4xl">
-              <MilestoneWalkthrough />
-            </div>
-          ) : (
-            <figure className="mx-auto max-w-4xl">
-              <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid var(--line)", boxShadow: "0 24px 60px -30px rgba(0,0,0,.35)" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={suite.dashboardScreenshot}
-                  alt={`Illustrative preview of the ${suite.name} dashboard — not a live product capture`}
-                  className="w-full"
-                  loading="lazy"
-                  width={960}
-                  height={600}
-                />
-              </div>
-              <figcaption className="faint mt-3 text-center text-xs">
-                Illustrative preview of the {suite.name} dashboard.
-              </figcaption>
-            </figure>
-          )}
-        </Section>
+            Moved above the sub-nav (was below it): the nav is chrome
+            for navigating the deep-dive content, not something that
+            belongs wedged between a hero and the screenshot that is
+            its own second beat. Illustrative, not a live capture —
+            said so in the alt text and the caption, never implied
+            otherwise. MARKET gets a step-by-step walkthrough of the
+            real milestone form/status lifecycle instead of a static
+            screenshot — see MilestoneWalkthrough's own header comment
+            for what it does and does not claim. (MARKET is never
+            `darkHero` — it has no module page — so the two branches
+            below never overlap.)
 
-        {/* ── Use cases: stats travel with the claim ── */}
+            `darkHero` suites skip `Section` and hand-roll a flat
+            `#0A0F1F` background instead — the exact colour the hero's
+            gradient ends on — so the screenshot reads as the hero's
+            own second beat, not a new section that happens to follow
+            a dark one. */}
+        {darkHero ? (
+          <section id="preview" className="pb-20 sm:pb-28" style={{ background: "#0A0F1F" }}>
+            <div className="shell">
+              <figure className="mx-auto max-w-4xl">
+                <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 24px 60px -30px rgba(0,0,0,.5)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={suite.dashboardScreenshot}
+                    alt={`Illustrative preview of the ${suite.name} dashboard — not a live product capture`}
+                    className="w-full"
+                    loading="lazy"
+                    width={960}
+                    height={600}
+                  />
+                </div>
+                <figcaption className="mt-3 text-center text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  Illustrative preview of the {suite.name} dashboard.
+                </figcaption>
+              </figure>
+            </div>
+          </section>
+        ) : (
+          <Section id="preview" className={suite.external ? "pt-4" : ""}>
+            {suite.id === "market" ? (
+              <div className="mx-auto max-w-4xl">
+                <MilestoneWalkthrough />
+              </div>
+            ) : (
+              <figure className="mx-auto max-w-4xl">
+                <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid var(--line)", boxShadow: "0 24px 60px -30px rgba(0,0,0,.35)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={suite.dashboardScreenshot}
+                    alt={`Illustrative preview of the ${suite.name} dashboard — not a live product capture`}
+                    className="w-full"
+                    loading="lazy"
+                    width={960}
+                    height={600}
+                  />
+                </div>
+                <figcaption className="faint mt-3 text-center text-xs">
+                  Illustrative preview of the {suite.name} dashboard.
+                </figcaption>
+              </figure>
+            )}
+          </Section>
+        )}
+
+        <SubNav
+          title={suite.name}
+          icon={<Icon className="h-4 w-4" style={{ color: suite.tint }} aria-hidden="true" />}
+          items={subNavItems}
+        />
+
+        {/* ── Capability strip, relocated ──────────────────────
+            Was inside the dark hero (see HERO_CAPABILITIES's header
+            comment); moved here so the hero stays headline, tagline
+            and one CTA — nothing else — and the strip gets a plain
+            section of its own instead of floating on the gradient.
+            DESK's strip stays in its own light hero, untouched — this
+            only ever fires for `darkHero` suites (currently CORE). */}
+        {heroCapabilities && darkHero && (
+          <Section className="border-t">
+            <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {heroCapabilities.map((c, i) => (
+                <li key={c.label}>
+                  <Link href={c.href} className="card card-interactive block h-full p-5">
+                    <span className="faint text-xs font-semibold tabular-nums">0{i + 1}</span>
+                    <p className="mt-2 font-semibold">{c.label}</p>
+                    <p className="muted mt-1.5 text-sm leading-relaxed">{c.detail}</p>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </Section>
+        )}
+
+        {/* ── Use cases: stats travel with the claim ──
+            PROGRESSIVE DISCLOSURE, matching the homepage's ecosystem
+            cards. A use case here ran eyebrow + title + lead + up to
+            five bullets, three or four times per suite before the
+            module sections even started — the densest reading on the
+            page, and none of it had the "Read more" pattern the
+            homepage learned to lean on. The first two bullets stay
+            visible (enough to judge the claim); the rest sit behind
+            SuiteMore, the same pull-down component EcosystemHub's cards
+            use, reused rather than rebuilt. */}
         <Section id="use-cases">
           <div className="space-y-24">
-            {suite.useCases.map((uc, i) => (
+            {suite.useCases.map((uc, i) => {
+              const [leadBullets, moreBullets] = [uc.bullets.slice(0, 2), uc.bullets.slice(2)];
+              return (
               <div key={uc.title} className="grid gap-10 lg:grid-cols-12 lg:items-center">
                 <div className={`lg:col-span-6 ${i % 2 ? "lg:order-2" : ""}`}>
                   <Eyebrow>{uc.eyebrow}</Eyebrow>
                   <h2 className="h-section mt-5">{uc.title}</h2>
                   <p className="lead mt-5">{uc.body}</p>
                   <ul className="mt-7 space-y-3">
-                    {uc.bullets.map((b) => (
+                    {leadBullets.map((b) => (
                       <li key={b} className="flex gap-3 text-[15px] font-medium">
-                        <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand" aria-hidden="true" />
+                        <span
+                          className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full"
+                          style={{ background: suite.tint }}
+                          aria-hidden="true"
+                        />
                         {b}
                       </li>
                     ))}
                   </ul>
+                  {moreBullets.length > 0 && <SuiteMore items={moreBullets} tint={suite.tint} />}
                   {uc.learnMore && (
                     <Link href={uc.learnMore.href} className="link-underline mt-7 inline-flex text-sm">
                       {uc.learnMore.label}
@@ -287,11 +489,30 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
                   className={`lg:col-span-5 ${i % 2 ? "lg:order-1 lg:col-start-1" : "lg:col-start-8"}`}
                   style={{ ["--suite-tint" as string]: suite.tint }}
                 >
-                  <SuiteMock index={i} suiteId={suite.id} />
+                  {/* Chooses the mechanism, not the position — see the
+                      header comment on SuiteMock. `claim` feeds the
+                      chart-shape heuristic every suite now uses;
+                      `label` replaces the generic window-chrome title
+                      with what this panel actually is. */}
+                  <SuiteMock
+                    index={i}
+                    label={uc.eyebrow}
+                    claim={`${uc.eyebrow} ${uc.title}`}
+                  />
                   <StatRow stats={uc.stats} className="mt-8" />
+                  {/* `StatRow` (strict) silently drops any unverified
+                      stat rather than rendering a fabricated number —
+                      which can leave the claim above with nothing
+                      behind it. Where that's the case, show the
+                      mechanism instead: why the process should produce
+                      the result, with no number attached to it yet. */}
+                  {uc.mechanism && uc.stats.some((s) => !s.verified) && (
+                    <p className="muted mt-6 text-sm leading-relaxed">{uc.mechanism}</p>
+                  )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </Section>
 

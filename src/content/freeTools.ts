@@ -141,7 +141,7 @@ export const FREE_TOOLS: FreeTool[] = [
     engineCode: "budget",
   },
   {
-    /* GROW was the only engine suite with no tool listed here, despite
+    /* GROW was the only suite with no tool listed here, despite
        having the most substantial engine on the platform. G03 has been
        live at /diagnostics/g03 with a full runner since the port — it
        was simply reachable from nowhere except the GROW suite page. */

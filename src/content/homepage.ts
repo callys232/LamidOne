@@ -217,7 +217,7 @@ export const HP_ECOSYSTEM = {
      product to buy; described as a layer it reads as what it is —
      something present wherever you are typing. This also stops the page
      needing a separate "AI" section to explain a capability that has no
-     separate place in the structure. */
+     separate place in the structure.
 
      NO RHETORICAL FLOURISHES. This opened "Three levels, and only
      three" — the "and only three" carried no information the "three"
@@ -358,11 +358,23 @@ export const HP_SHOWCASE = {
      the G03 engine; TALENT scoring people against a brief is
      lib/matching.ts and A22; FINANCE costing it is F02. Nothing here
      describes a flow that is not built. */
+  /* Each slide carries its own CTA. The section is a reader's closest
+     look at an individual suite, and until now the only way out of it
+     was to scroll back up to the ecosystem grid — a reader convinced by
+     the TALENT slide had to leave the argument to act on it.
+
+     `cta.label` names the suite rather than saying "learn more", so
+     four slides do not present four identical links, and so the link
+     still says where it goes when it is read on its own by a screen
+     reader running through the page's links. */
   slides: [
-    { id: "core", tint: "#1A7CFF", wash: "#E8EEFB", title: "CORE finds it.", body: "Diagnostics and coherence checks establish the baseline — what is actually true about the business right now. The other three suites measure against it, and re-runs come back as comparisons rather than fresh starts." },
-    { id: "grow", tint: "#1A7CFF", wash: "#E8EEFB", title: "GROW sequences it.", body: "Takes what CORE found and orders it against the capacity you actually have — which options you can resource, in what order, and what gets deferred and why. The certification pathways that build the capability sit in the same suite." },
-    { id: "talent", tint: "#1A7CFF", wash: "#E8EEFB", title: "TALENT staffs it.", body: "The pathway GROW sequenced needs people. Capability scores say who you already have, and MARKET scores outside specialists against the brief on discipline, rating, reliability and verification." },
-    { id: "finance", tint: "#1A7CFF", wash: "#E8EEFB", title: "FINANCE prices it.", body: "Costs the sequence, models the scenarios, and tracks what it does to enterprise value — then writes the result back to the same record CORE reads from." },
+    { id: "core", tint: "#1A7CFF", wash: "#E8EEFB", title: "CORE finds it.", body: "Diagnostics and coherence checks establish the baseline — what is actually true about the business right now. The other three suites measure against it, and re-runs come back as comparisons rather than fresh starts.", cta: { label: "Explore CORE", href: "/suites/core" } },
+    { id: "grow", tint: "#1A7CFF", wash: "#E8EEFB", title: "GROW sequences it.", body: "Takes what CORE found and orders it against the capacity you actually have — which options you can resource, in what order, and what gets deferred and why. The certification pathways that build the capability sit in the same suite.", cta: { label: "Explore GROW", href: "/suites/grow" } },
+    /* "MARKET scores outside specialists" named a sub-suite the
+       homepage deliberately does not name — the capability is TALENT's
+       here, as it is on the ecosystem card. */
+    { id: "talent", tint: "#1A7CFF", wash: "#E8EEFB", title: "TALENT staffs it.", body: "The pathway GROW sequenced needs people. Capability scores say who you already have, and the expert marketplace scores outside specialists against the brief on discipline, rating, reliability and verification.", cta: { label: "Explore TALENT", href: "/suites/talent" } },
+    { id: "finance", tint: "#1A7CFF", wash: "#E8EEFB", title: "FINANCE prices it.", body: "Costs the sequence, models the scenarios, and tracks what it does to enterprise value — then writes the result back to the same record CORE reads from.", cta: { label: "Explore FINANCE", href: "/suites/finance" } },
   ],
 };
 
@@ -380,12 +392,32 @@ export const HP_HOW = {
      nothing in particular. Four is now the four routes in
      AFTER_THE_ANSWER, and five is the re-run comparison, which is the
      one thing here a consulting engagement structurally cannot do. */
+  /* TWO PHASES, because five equally weighted steps understate both
+     halves of what this section is claiming.
+
+     Steps 1–3 all happen in ONE SITTING — a reader who sees five
+     numbered steps assumes an onboarding project, when the first result
+     is minutes away. Steps 4–5 are what RECURS, and lumping them in
+     with the setup hides the only structural difference between this
+     and a consulting engagement: it does not end.
+
+     The `meta` on each phase is a fact rather than a duration. "About
+     ten minutes" for phase one would be a guess — the three-minute
+     figure belongs to the diagnostic and already sits in step 1's body,
+     and account creation is not something to put a stopwatch on. */
+  phases: [
+    { id: "first", label: "In one sitting", meta: "No account needed to start" },
+    { id: "ongoing", label: "From then on", meta: "Every quarter" },
+  ],
+  /* `phase` is the id above, so the grouping lives on the step and the
+     order of the list stays the only thing that sets the sequence —
+     add a step, give it a phase, and the rail regroups itself. */
   steps: [
-    { n: "1", label: "Diagnose", body: "Run a diagnostic on figures you already have. The shortest is five questions about a single decision, and takes three minutes." },
-    { n: "2", label: "Reveal", body: "The engine scores it and names the weakest link. No language model writes the number, and the working comes back with the result." },
-    { n: "3", label: "Unlock", body: "Create a free account to open the full breakdown. A new account is granted exactly enough points for your first run." },
-    { n: "4", label: "Act", body: "Take it from there yourself, hand it to a vetted specialist, or put a delivery manager on it." },
-    { n: "5", label: "Grow", body: "Re-run it once you have changed something. The next result comes back as a comparison, because the reasoning stayed on your record." },
+    { n: "1", phase: "first", label: "Diagnose", body: "Run a diagnostic on figures you already have. The shortest is five questions about a single decision, and takes three minutes." },
+    { n: "2", phase: "first", label: "Reveal", body: "The engine scores it and names the weakest link. No language model writes the number, and the working comes back with the result." },
+    { n: "3", phase: "first", label: "Unlock", body: "Create a free account to open the full breakdown. A new account is granted exactly enough points for your first run." },
+    { n: "4", phase: "ongoing", label: "Act", body: "Take it from there yourself, hand it to a vetted specialist, or put a delivery manager on it." },
+    { n: "5", phase: "ongoing", label: "Grow", body: "Re-run it once you have changed something. The next result comes back as a comparison, because the reasoning stayed on your record." },
   ],
 };
 
@@ -489,6 +521,30 @@ export const HP_WHY = {
     },
   ],
   footline: "Built in Africa. Built to operate anywhere.",
+};
+
+/**
+ * THE FAQ, and the two ways out of it.
+ *
+ * The questions themselves are HOME_FAQ in content/home.ts — eight
+ * already written in the searcher's voice and sequenced generic →
+ * branded → competitive. They were orphaned by the homepage rebuild
+ * (the old page rendered them; the new one did not), so this section is
+ * a rehoming rather than new copy.
+ *
+ * TWO DESTINATIONS, because a reader who has read this far has one of
+ * two unanswered questions and they are not the same question:
+ *   · "how would this actually work in my situation" → the playbooks,
+ *     which are the method behind each suite
+ *   · "you did not answer mine"                      → the full FAQ
+ *
+ * Sending both to one page would make one of the two groups hunt.
+ */
+export const HP_FAQ = {
+  eyebrow: "Questions",
+  title: "The ones we get asked most.",
+  primary: { label: "Read the playbooks", href: "/playbooks" },
+  secondary: { label: "See all questions", href: "/faqs" },
 };
 
 export const HP_CTA = {

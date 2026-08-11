@@ -109,6 +109,7 @@ body {
   .arrow-card:focus-within .arrow-circle,
   .route-tab:not([data-on]):hover,
   .route-tab:not([data-on]):focus-visible,
+  .group\/step:hover .step-node,
   .card-interactive:hover .engine-in,
   .card-interactive:focus-within .engine-in,
   .card-interactive:hover .engine-core,
@@ -418,6 +419,29 @@ body {
   /* Straightens to true square whatever this slide dealt it, so the
      diagram on the front panel becomes properly readable on hover. */
   .deck:hover .deck-front { --rot-hover: calc(-1 * var(--rot)); --dx: 8px; }
+
+  /* ── Step node — the numbered rail in "How it works" ────
+     Sits on the spine at rest and fills with the accent when its row is
+     hovered. The hover lives on the ROW, not the node, so the whole
+     step is the target — a 42px circle is a small thing to ask a reader
+     to aim at, and there is nothing to click here anyway.
+
+     It grows very slightly rather than lifting: the node is threaded on
+     a line, and anything that moved off that line would break the one
+     thing the rail is drawing. */
+  .step-node {
+    background: var(--raised);
+    border: 1px solid var(--line);
+    color: var(--brand);
+    transition: background-color 200ms ease-out, border-color 200ms ease-out,
+                color 200ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .group\/step:hover .step-node {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
+    transform: scale(1.08);
+  }
 
   /* ── Route tab — the numbered steps in AfterTheAnswer ───
      A tablist styled as four cards. `data-on` marks the selected one,

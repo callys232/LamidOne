@@ -27,7 +27,7 @@ export type UseCase = {
   headline: string;
   subhead: string;
   /**
-   * Which of the four engines owns this use case.
+   * Which of the four suites owns this use case.
    *
    * Structural, not copy. It resolves the value shown in the hero
    * (ENGINES[].value) and the module content the page pulls — so these

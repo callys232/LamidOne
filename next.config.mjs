@@ -19,6 +19,17 @@ const nextConfig = {
       "./node_modules/pdfjs-dist/standard_fonts/**/*",
     ],
   },
+  /* DOCUSHARE moved off the shared /suites/[id] template to its own
+     bespoke page — see content/docushare.ts's header comment for why.
+     "docushare" is no longer in SUITES, so generateStaticParams no
+     longer builds /suites/docushare and it would otherwise 404 for
+     anyone with the old URL bookmarked or indexed. Permanent (308) —
+     the move is deliberate and not coming back. */
+  async redirects() {
+    return [
+      { source: "/suites/docushare", destination: "/docushare", permanent: true },
+    ];
+  },
 };
 
 /* Config-gated the same way as the runtime SDK: without SENTRY_ORG

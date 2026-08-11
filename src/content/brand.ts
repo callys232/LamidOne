@@ -33,7 +33,7 @@ export const BRAND = {
    * the same one that closes the homepage hero, which keeps the tab
    * title and the first thing on the page saying the same thing.
    */
-  tagline: "One OS. Four Engines. Unified Growth.",
+  tagline: "One OS. Four Suites. Unified Growth.",
   domain: "lamidone.com",
   accent: "#C12129",
   /** LAMID Consulting mark, carried over from ProdLamid's public folder. */
@@ -69,7 +69,7 @@ export const REACH: Countable[] = [
   { value: "30+", label: "industries covered by the expert network", verified: false },
   { value: "5",   label: "plans, from free to concierge",             verified: true  },
   { value: String(AGENT_COUNT), label: "AI agents running across the platform", verified: true },
-  { value: "4",   label: "engines running nine suites on one record", verified: true  },
+  { value: "4",   label: "suites, running on one shared record", verified: true  },
 ];
 
 /** Outcome claims. All unverified until a real engagement is measured. */
@@ -101,6 +101,7 @@ export const CTA: {
     marketing: { label: string; href: string; variant: "primary" | "secondary" }[];
     pricing: { label: string; href: string; variant: "primary" | "secondary" }[];
     neutral: { label: string; href: string; variant: "primary" | "secondary" }[];
+    suite: { label: string; href: string; variant: "primary" | "secondary" }[];
   };
 } = {
   primary: { label: "Book a diagnostic", href: "/demo" },
@@ -109,6 +110,18 @@ export const CTA: {
   header: {
     marketing: [
       { label: "Book a diagnostic", href: "/demo", variant: "primary" as const },
+      { label: "Start free", href: "/signup", variant: "secondary" as const },
+    ],
+    /* Same two destinations as `marketing` (/demo, /signup) — only the
+       primary label changes. A reader already on a suite page has
+       picked a suite; "Book A Diagnostic" reads as a step backward
+       toward the generic pitch they've already moved past, where "Get
+       a demo" names the actual next step without implying they need
+       to go choose one first. Scoped to the eight suite pages only
+       (`/suites/[id]/page.tsx`) — DOCUSHARE isn't a suite (see
+       content/docushare.ts) and keeps the default `marketing` set. */
+    suite: [
+      { label: "Get a demo", href: "/demo", variant: "primary" as const },
       { label: "Start free", href: "/signup", variant: "secondary" as const },
     ],
     pricing: [{ label: "Get started", href: "/signup", variant: "primary" as const }],

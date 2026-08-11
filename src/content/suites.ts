@@ -19,7 +19,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Network, TrendingUp, GraduationCap, Landmark,
-  Inbox, Radar, BookOpen, Store, FolderLock,
+  Inbox, Radar, BookOpen, Store,
 } from "lucide-react";
 
 export type SuiteId =
@@ -38,6 +38,14 @@ export type UseCaseBlock = {
   /** Stats travel WITH the claim they support (teardown §7.9 #3) —
    *  not collected into one band at the foot of the page. */
   stats: Stat[];
+  /**
+   * Why the process should produce the claim above, stated without a
+   * number — same voice as `methods.ts`'s `whyNotAverage`. Rendered
+   * only where `stats` carries an unverified entry, so an unverified
+   * claim is never left with nothing behind it while we wait for a
+   * real figure to verify it with (see brand.ts's placeholder policy).
+   */
+  mechanism?: string;
   image?: string;
   learnMore?: { label: string; href: string };
 };
@@ -123,31 +131,32 @@ export const CORE: Suite = {
       eyebrow: "Decision intelligence",
       title: "Make the decision, then show your working.",
       body:
-        "Map the decision, weigh the options against the factors that actually apply, and keep the rationale attached to the outcome. When someone asks in six months why you chose this, the answer is in the record rather than in somebody's memory.",
+        "Map the decision, weigh it against the factors that apply, and keep the rationale attached to the outcome. Six months later, you pull the record — you don't have to trust someone's memory.",
       bullets: [
         "Map options, factors and weightings before you commit",
-        "See where a decision is stalling and who it is waiting on",
-        "Keep the rationale attached to the decision permanently",
+        "See where a decision is stalling, and who it's waiting on",
+        "Keep the rationale attached to the decision, permanently",
         "Detect decisions you keep remaking under a different name",
-        "Ground every recommendation in quantitative rigor — the math, statistics, probability and financial logic a board would check",
+        "Ground it in the math, statistics and financial logic a board would check",
       ],
       stats: [
         { value: "100", label: "decision engines in the suite", verified: true },
         { value: "—", label: "faster to a signed-off decision", verified: false },
       ],
+      mechanism: "A decision usually stalls because nobody can see where it's stuck, not because the analysis is slow. Making the stall visible — who it's waiting on, and why — is what closes the gap, whatever the eventual number turns out to be.",
       learnMore: { label: "Learn more about decision intelligence", href: "/suites/core#decision" },
     },
     {
       eyebrow: "Operating rhythm",
       title: "Find the cadence your organisation actually runs at.",
       body:
-        "Most plans do not fail on strategy, they fail on tempo. Cadence mapping shows the real rhythm of delivery across teams, flags drift before it compounds, and tells you which teams are out of sync with the rest.",
+        "Most plans fail on tempo, not strategy. Cadence mapping shows the real rhythm of delivery, flags drift before it compounds, and names the team that's out of sync.",
       bullets: [
-        "See your real delivery pace, not the one in the plan",
-        "Get alerted when a team's cadence drifts from the others",
+        "See your real delivery pace — not the one in the plan",
+        "Get alerted the moment a team's cadence drifts",
         "Track workload balance across every unit",
-        "Run real-time coherence checks between strategy, execution and leadership decisions",
-        "Send drift straight to FINANCE, so a schedule problem shows up as a forecast problem before it's a crisis",
+        "Run coherence checks between strategy, execution and leadership",
+        "Send drift straight to FINANCE, before it's a forecast problem",
       ],
       stats: [
         { value: "30", label: "cadence engines from mapping to governance", verified: true },
@@ -158,13 +167,13 @@ export const CORE: Suite = {
       eyebrow: "Governance and assurance",
       title: "Prove the controls without stopping the work.",
       body:
-        "Authority matrices, policy rules, compliance status and continuity posture kept live rather than assembled the week before an audit.",
+        "Keep authority, policy and compliance status live — don't assemble it the week before an audit.",
       bullets: [
         "Hold your decision authority matrix as live data",
         "Track policy and compliance rules against real activity",
-        "Evidence continuity and resilience posture on demand",
-        "Get structured frameworks at software speed, not a 12-week wait for a slide deck",
-        "Turn chaotic, stress-laden tasks into organised, trackable, efficient systems",
+        "Prove continuity and resilience posture on demand",
+        "Get structured governance frameworks at software speed — not a 12-week wait",
+        "Turn chaotic tasks into organised, trackable systems",
       ],
       stats: [{ value: "7", label: "governance and assurance engines", verified: true }],
     },
@@ -172,13 +181,13 @@ export const CORE: Suite = {
       eyebrow: "Engagement workflow",
       title: "One flow from first conversation to final invoice.",
       body:
-        "Onboarding, discovery, strategy, delivery and closure run as one connected sequence rather than five disconnected tools — the diagnostic that opened the conversation is still attached when the milestone is approved and the invoice goes out. The result is the same standard of service every time, less redundant admin, scheduling and progress updates handled automatically, and human judgement kept exactly where it belongs — on the decision, not the paperwork.",
+        "Onboarding, discovery, strategy, delivery and closure run as one sequence, not five disconnected tools — the diagnostic that opened the conversation is still attached when the invoice goes out. Judgement stays on the decision. The paperwork runs itself.",
       bullets: [
-        "Onboarding — post and bid the initial brief, sign the contract and collect the retainer in LAMID DESK, workspace set up automatically",
-        "Discovery — interview stakeholders, map current operations and identify the bottlenecks with CORE's diagnostics",
-        "Strategy — process what you've found and commit to a recommendation, with the rationale attached",
-        "Implementation — track milestones and deliverables as the client executes, through LAMID DESK",
-        "Closure — final report, review meeting and invoice, requested from the same record",
+        "Onboarding — post the brief, sign the contract, collect the retainer in DESK",
+        "Discovery — interview stakeholders and map the bottlenecks with CORE's diagnostics",
+        "Strategy — commit to a recommendation, with the rationale attached",
+        "Implementation — track milestones and deliverables through DESK",
+        "Closure — report, review and invoice, from the same record",
       ],
       stats: [{ value: "5", label: "connected stages, one record throughout", verified: true }],
     },
@@ -211,7 +220,21 @@ export const CORE: Suite = {
     ],
   },
   tiers: ["free", "starter", "growth", "enterprise", "concierge"],
-  closing: { title: "Put your strategy back in one direction.", body: "Start with a diagnostic and see where the drift is." },
+  /* Was "Put your strategy back in one direction." / "Start with a
+     diagnostic and see where the drift is." — replaced with the
+     reference design's framing, then adjusted a second time when the
+     button this band opens changed from Q44 (a 3-minute self-serve
+     tool) to /demo (a live working session — see the note on
+     SUITE_DIAGNOSTIC.core in the suite page template). "Takes three
+     minutes" was true of Q44 and would not be true of a working
+     session, so the body now describes what /demo itself promises
+     rather than a duration that no longer applies to what the button
+     opens. Did not borrow the reference design's "Strategic Readiness
+     Score" name either — the thing Q44 actually computes is the
+     Decision Clarity Score, and naming the wrong score would be the
+     same overclaim already corrected on the homepage's own closing
+     band. */
+  closing: { title: "See where your strategy actually stands.", body: "A working session on your own numbers. No slide deck, no commitment." },
 };
 
 export const GROW: Suite = {
@@ -232,40 +255,41 @@ export const GROW: Suite = {
       eyebrow: "Market intelligence",
       title: "Know where the opportunity is before the quarter tells you.",
       body:
-        "Opportunity signals, market and customer-timing intelligence, and digital maturity assessed continuously across acquisition, retention and brand resonance — so you know when demand is building, not just that it did, and you are reacting to the market rather than to your own reporting lag. Built on advisory experience across African and emerging markets, not a template written for somewhere else.",
+        "Opportunity signals, market timing and digital maturity, assessed continuously — so you know demand is building, not just that it already did. Built on advisory experience across African and emerging markets, not a template written for somewhere else.",
       bullets: [
         "Track opportunity signals across your markets",
         "Assess digital maturity against where you need to be",
-        "See which growth pathways are actually open to you",
-        "Read competitive positioning as it updates, not once a quarter",
-        "Read against the same decision record CORE already holds — no separate market deck to reconcile",
+        "See which growth pathways are open to you",
+        "Read competitive positioning as it updates — not once a quarter",
+        "Check it against CORE's own decision record — no deck to reconcile",
       ],
       stats: [{ value: "—", label: "faster to identify a market shift", verified: false }],
+      mechanism: "A quarterly report can only describe a shift that already happened. Reading the same signals continuously, instead of on a commissioning cycle, is what makes 'faster' structurally true rather than a hoped-for outcome.",
     },
     {
       eyebrow: "Growth planning",
-      title: "Plan growth you can actually resource.",
+      title: "Plan growth you can resource.",
       body:
-        "The growth planner ties ambition to capacity — so the plan you sign off is one your people, your cash and your operating rhythm can carry, not a manual process dressed up as a strategy.",
+        "The growth planner ties ambition to capacity, so the plan you sign off is one your people, cash and operating rhythm can genuinely sustain.",
       bullets: [
         "Build a growth plan against real capacity",
         "Model modernisation paths and what each requires",
         "Report progress to the board without rebuilding the deck",
-        "Replace manual processes with modern, automated structures",
-        "Carry the KPIs FINANCE tracks to revenue, so the plan and the forecast never disagree",
+        "Replace manual processes with automated structures",
+        "Carry FINANCE's KPIs through to revenue — plan and forecast never disagree",
       ],
       stats: [{ value: "—", label: "of growth plans delivered on schedule", verified: false }],
     },
     {
       eyebrow: "Advisory and scaling",
-      title: "Structures that hold as you get bigger, not after.",
+      title: "Build structures that hold as you get bigger, not after.",
       body:
-        "Modernisation frameworks and expert advisory turn ambition into a structure that can actually carry growth — restructuring, business modelling and market-expansion guidance aimed at a business that grows predictably and stays lean, not one that scales into its own weight.",
+        "Turn ambition into a structure that can carry growth — restructuring, business modelling and market-expansion guidance from modernisation frameworks and expert advisory, for a business that grows predictably and stays lean.",
       bullets: [
-        "Modernisation frameworks tied to your actual operating model",
-        "Advisory for restructuring, business modelling and market expansion",
-        "Innovation enablement using hybrid intelligence, not headcount alone",
-        "Build a business that grows predictably and stays lean",
+        "Tie modernisation frameworks to your actual operating model",
+        "Get advisory on restructuring, business modelling and market expansion",
+        "Drive innovation with hybrid intelligence, not headcount alone",
+        "Grow predictably. Stay lean.",
       ],
       stats: [{ value: "8", label: "features from market intelligence to transformation tracking", verified: true }],
     },
@@ -313,27 +337,28 @@ export const TALENT: Suite = {
       eyebrow: "Capability and risk",
       title: "Know which teams are strong, stretched, or at risk.",
       body:
-        "Talent risk, capability uplift and bench strength scored continuously against the roles you actually need filled — not against last year's org chart.",
+        "Talent risk, capability uplift and bench strength — scored against the roles you need filled now, not last year's org chart.",
       bullets: [
         "Score capability against the roles you need now",
         "See which teams are carrying unsustainable load",
         "Identify flight risk before the resignation",
         "Map bench strength for every critical role",
-        "Feed capability and risk straight into FINANCE's cost and productivity lines",
+        "Feed capability and risk straight into FINANCE's cost lines",
       ],
       stats: [
         { value: "40+", label: "signals used in capability matching", verified: false },
         { value: "33",  label: "talent engines in the suite", verified: true },
       ],
+      mechanism: "A single manager's read on a team is one signal. Scoring against many named signals, rather than one person's impression, is what keeps a capability read from collapsing into whoever spoke last in the room.",
     },
     {
       eyebrow: "Succession and pathways",
       title: "Build the bench before you need it.",
       body:
-        "Succession pipelines, career pathing and leadership uplift run as a system rather than a spreadsheet that gets rebuilt each cycle.",
+        "Succession pipelines, career pathing and leadership uplift, run as a system — not a spreadsheet rebuilt every cycle.",
       bullets: [
         "Hold live succession pipelines for critical roles",
-        "Give people a visible path and track movement along it",
+        "Give people a visible path, and track movement along it",
         "Target leadership development where the gap actually is",
       ],
       stats: [{ value: "—", label: "of critical roles with a ready successor", verified: false }],
@@ -388,7 +413,7 @@ export const FINANCE: Suite = {
       eyebrow: "Budgeting and forecasting",
       title: "Build a costed budget in minutes and watch it recalculate.",
       body:
-        "Enter your figures and the engine does the arithmetic in front of you. Overhead, contingency and tax recalculate as you edit, and every line tracks against what you actually spent. Nothing is estimated by a model.",
+        "Enter your figures; the engine does the arithmetic in front of you. Overhead, contingency and tax recalculate as you edit — nothing here is estimated by a model.",
       bullets: [
         "Build a costed budget for any project in minutes",
         "Watch overhead, contingency and tax recalculate live",
@@ -399,6 +424,7 @@ export const FINANCE: Suite = {
         { value: "0", label: "figures generated by a model — all arithmetic is shown", verified: true },
         { value: "—", label: "faster to a board-ready budget", verified: false },
       ],
+      mechanism: "A board pack is usually slow because someone is re-deriving numbers that already exist elsewhere. Recalculating live from figures you enter once, instead of rebuilding a deck from several sources, is what removes that step.",
       learnMore: { label: "Learn more about budgeting and forecasting", href: "/suites/finance#budget" },
     },
     {
@@ -421,7 +447,7 @@ export const FINANCE: Suite = {
       bullets: [
         "Track enterprise value as the numbers move",
         "Hold financial KPIs against target continuously",
-        "Evidence financial governance on demand",
+        "Prove financial governance on demand",
         "Link CORE's decisions, GROW's growth signals and TALENT's workforce metrics to one financial outcome — not four decks that disagree",
       ],
       stats: [{ value: "9", label: "finance engines from visibility to CFO transformation", verified: true }],
@@ -483,15 +509,22 @@ export const DESK: Suite = {
         "Know which engagements are stalling and why",
       ],
       stats: [{ value: "—", label: "less time spent on engagement admin", verified: false }],
+      mechanism: "Admin time usually goes into re-entering the same fact into four separate systems. Keeping one pipeline record removes the re-entry — it doesn't make the underlying work faster, just singular.",
     },
     {
       eyebrow: "Quote to cash",
       title: "Quote, sign, and get paid without leaving the platform.",
       body:
-        "Build the scope from the diagnostic, send it for signature, run the milestones through escrow, and release payment on approval. The contract record and the delivery record are the same record.",
+        /* "run the milestones through escrow, and release payment on
+           approval" claimed client funds are held pending approval —
+           they are not (see the ⚠️ note in lib/milestones.ts). Approval
+           releases the amount to the expert's withdrawable balance;
+           nothing is captured up front. Rewritten to say what actually
+           happens. */
+        "Build the scope from the diagnostic, send it for signature, and track milestones through to invoice. The contract record and the delivery record are the same record.",
       bullets: [
         "Generate scoped proposals from diagnostic output",
-        "Milestone-based escrow with approval-gated release",
+        "Milestones you approve, one at a time, before payment releases",
         "Invoices and payment status current in one view",
         "Full contract history for renewal and dispute",
       ],
@@ -515,7 +548,7 @@ export const DESK: Suite = {
     { name: "Engagement pipeline", description: "Track opportunities from first contact to signature." },
     { name: "Proposal builder", description: "Scoped proposals generated from diagnostic output.", routePrefix: "premium/proposal-drafter" },
     { name: "Quotes and e-signature", description: "Send, track and countersign without a third tool." },
-    { name: "Milestone escrow", description: "Funds held and released on approved deliverables.", routePrefix: "escrow" },
+    { name: "Milestone tracking", description: "Released to the collaborator the moment you approve each deliverable.", routePrefix: "escrow" },
     { name: "Invoicing", description: "Invoices that reflect the real contract and its changes." },
     { name: "Payments", description: "Card, transfer and local rails with live status." },
     { name: "Shared inbox", description: "Team-wide client communication in one thread." },
@@ -532,7 +565,7 @@ export const DESK: Suite = {
     rows: [
       { capability: "Connected engagement to contract to payment", values: [true, false, false] },
       { capability: "Diagnostic context available on the client record", values: [true, false, false] },
-      { capability: "Escrow with approval-gated release", values: [true, "partial", false] },
+      { capability: "Milestones with approval-gated release", values: [true, "partial", false] },
       { capability: "One record for delivery and commercials", values: [true, false, "partial"] },
       { capability: "Works without a systems integrator", values: [true, "partial", true] },
     ],
@@ -559,13 +592,14 @@ export const SIGNAL: Suite = {
       eyebrow: "Answer visibility",
       title: "Track how you show up in AI answers.",
       body:
-        "Monitor whether your firm appears when buyers ask assistants about your sector, your competitors and your services — and see which sources those answers are drawn from.",
+        "See whether your firm appears when buyers ask an assistant about your sector — and which sources the answer is drawn from.",
       bullets: [
         "Track visibility across major AI assistants",
         "See which sources answers cite about your sector",
         "Find the questions you should be the answer to",
       ],
       stats: [{ value: "—", label: "more enquiries originating from AI referral", verified: false }],
+      mechanism: "You can't act on a visibility gap you can't see. Naming which sources an assistant actually cites is what turns 'we should probably publish more' into a specific page to write.",
     },
     {
       eyebrow: "Publishing",
@@ -639,6 +673,7 @@ export const LEARN: Suite = {
         "Track capability uplift against the TALENT baseline",
       ],
       stats: [{ value: "—", label: "of learners assessed as competent within one quarter", verified: false }],
+      mechanism: "A quiz can be passed without the underlying skill transferring. Assessing against real work inside the platform is what keeps 'competent' checkable rather than self-reported.",
     },
     {
       eyebrow: "Certification",
@@ -682,96 +717,13 @@ export const LEARN: Suite = {
   closing: { title: "Keep the capability in the building.", body: "Start a path free — the first one costs nothing." },
 };
 
-export const DOCUSHARE: Suite = {
-  id: "docushare",
-  dashboardScreenshot: "/screenshots/docushare-dashboard.svg",
-  name: "LAMID DOCUSHARE",
-  kind: "File infrastructure and secure sharing platform",
-  audience: "both",
-  tint: "#1A7CFF",
-  Icon: FolderLock,
-  treatment: "studio",
-  external: {
-    url: "https://fileshare-six-phi.vercel.app/",
-    appName: "HybridShare",
-    label: "Open DocuShare",
-  },
-  headline: "Every file, every version, every share — accounted for.",
-  subhead:
-    "Workspaces, connectors and controlled sharing with password-protected links, expiry dates and view analytics. The document layer underneath every engagement.",
-  rollsUp: ["docushare", "escrow", "workspace"],
-  engineCount: 8,
-  useCases: [
-    {
-      eyebrow: "Storage and workspaces",
-      title: "Give every team, project and department its own room.",
-      body:
-        "Upload, organise and version-control files inside workspaces with fine-grained member permissions — so the right people have the right access without anyone maintaining a folder tree by hand.",
-      bullets: [
-        "Team, project and department workspaces",
-        "Version control on every file",
-        "Fine-grained permissions per member",
-        "Roles: Owner, Admin, Editor, Viewer",
-      ],
-      stats: [
-        { value: "5 GB", label: "included free, before any add-on", verified: true },
-        { value: "10 TB", label: "maximum cloud add-on capacity", verified: true },
-      ],
-    },
-    {
-      eyebrow: "Controlled sharing",
-      title: "Share outside the organisation without losing the file.",
-      body:
-        "Password-protected links with expiry dates and download limits, plus view analytics showing who opened what, from where, on which device.",
-      bullets: [
-        "Password-protected share links",
-        "Expiry dates and download limits",
-        "View analytics with geography and device",
-        "Revoke access without recalling an email",
-      ],
-      stats: [{ value: "—", label: "of shared documents accessed by the intended recipient only", verified: false }],
-    },
-    {
-      eyebrow: "Connectors and compliance",
-      title: "Bring in what already lives somewhere else.",
-      body:
-        "Sync from Google Drive, OneDrive, Dropbox, databases and REST APIs, with audit logs, 2FA, access control lists and data classification over the top.",
-      bullets: [
-        "Connectors for Drive, OneDrive, Dropbox, databases and REST",
-        "Audit logs and access reporting",
-        "Data classification and ACLs",
-        "SAML 2.0, SCIM and custom domain on Enterprise",
-      ],
-      stats: [{ value: "8", label: "capability areas from storage to enterprise SSO", verified: true }],
-    },
-  ],
-  features: [
-    { name: "File storage", description: "Upload, organise and version-control every file." },
-    { name: "Workspaces", description: "Team, project and department spaces with member permissions." },
-    { name: "Connectors", description: "Sync from Drive, OneDrive, Dropbox, databases and REST APIs." },
-    { name: "Secure sharing", description: "Password links, expiry, download limits and view analytics." },
-    { name: "Security and compliance", description: "Audit logs, 2FA, ACLs, classification and RBAC." },
-    { name: "Analytics", description: "Storage usage, access reports and activity dashboards." },
-    { name: "API and developer tools", description: "REST API, webhooks and SDKs over your file layer." },
-    { name: "Enterprise SSO", description: "SAML 2.0, SCIM provisioning, custom domain, white-labelling." },
-  ],
-  comparison: {
-    headline: "Consumer drives store files. DOCUSHARE governs them.",
-    blurb:
-      "A shared drive tells you a file exists. It does not tell you who opened the proposal, when the link expired, or whether the version the client has is the version you signed.",
-    columns: ["LAMID DOCUSHARE", "Consumer cloud drives", "Email attachments"],
-    rows: [
-      { capability: "Password, expiry and download limits on shares", values: [true, "partial", false] },
-      { capability: "View analytics by geography and device", values: [true, false, false] },
-      { capability: "Attached to the engagement record", values: [true, false, false] },
-      { capability: "Audit log and data classification", values: [true, "partial", false] },
-      { capability: "Connectors to existing storage", values: [true, "partial", false] },
-      { capability: "Works without migrating everything first", values: [true, true, true] },
-    ],
-  },
-  tiers: ["free", "starter", "growth", "enterprise", "concierge"],
-  closing: { title: "Put the document layer under every engagement.", body: "Start with 5 GB free — no card required." },
-};
+/* DOCUSHARE used to live here as a `Suite`. It doesn't anymore — see
+   the header comment on content/docushare.ts for why, and
+   content/docushare.ts / app/docushare/page.tsx for where its content
+   and page actually live now. "docushare" stays a valid `SuiteId`
+   (other content still tags things with it — platform.ts's feature
+   list, aios.ts's OS_LAYER), it just no longer resolves through
+   SUITES / SUITES_BY_ID / getSuite. */
 
 export const MARKET: Suite = {
   id: "market",
@@ -783,7 +735,7 @@ export const MARKET: Suite = {
   Icon: Store,
   headline: "Source the expert, run the engagement, release the payment.",
   subhead:
-    "A vetted expert network with matching, milestone escrow and delivery tracking — so sourcing specialist capability does not mean starting a procurement process.",
+    "A vetted expert network with matching, milestone-gated delivery and payout tracking — so sourcing specialist capability does not mean starting a procurement process.",
   rollsUp: ["consultant", "for-experts", "postjobs", "escrow", "concierge", "editConsultant"],
   engineCount: 14,
   useCases: [
@@ -801,18 +753,25 @@ export const MARKET: Suite = {
         { value: "—", label: "experts across the network", verified: false },
         { value: "—", label: "median time to a matched shortlist", verified: false },
       ],
+      mechanism: "A directory ranks on keywords typed into a search box. Matching on industry, challenge type, budget, timeline and working style together is what a shortlist needs to be usable rather than just long.",
     },
     {
       eyebrow: "Delivery and payment",
-      title: "Hold the money until the work is approved.",
+      /* Title, body and stat label all claimed client funds are HELD
+         pending approval — they are not. See the ⚠️ note in
+         lib/milestones.ts: approval credits the expert's withdrawable
+         balance and pays out through Paystack; nothing is captured
+         from the client up front. Rewritten to claim exactly what the
+         product does — milestones gate the release, not a fund hold. */
+      title: "Pay only for milestones you've approved.",
       body:
-        "Every engagement runs on milestones with funds held in escrow and released only on your approval — with a dispute path that does not require a lawyer.",
+        "Every engagement runs on milestones you approve one at a time, released to the expert the moment you sign off — with a dispute path that does not require a lawyer.",
       bullets: [
-        "Milestone-based escrow on every engagement",
-        "Release only on approved deliverables",
+        "Milestone-based delivery on every engagement",
+        "Released only on approved deliverables",
         "Structured dispute resolution with evidence attached",
       ],
-      stats: [{ value: "—", label: "value managed through escrow", verified: false }],
+      stats: [{ value: "—", label: "value delivered through milestone-tracked engagements", verified: false }],
     },
   ],
   features: [
@@ -821,7 +780,7 @@ export const MARKET: Suite = {
     { name: "Verified credentials", description: "Checkable credentials, selectively awarded." },
     { name: "Project posting", description: "Post a brief and receive matched bids.", routePrefix: "postjobs" },
     { name: "Bidding and boost", description: "Experts bid; boosted bids get double visibility." },
-    { name: "Milestone escrow", description: "Funds held, released on approval.", routePrefix: "escrow" },
+    { name: "Milestone payouts", description: "Released to the expert on approval.", routePrefix: "escrow" },
     { name: "Dispute resolution", description: "Structured path with evidence attached.", routePrefix: "api/ai/dispute-check" },
     { name: "Deliverable review", description: "Automated completeness check before approval.", routePrefix: "api/ai/deliverable-check" },
     { name: "Engagement workspace", description: "Messaging, files and milestones per engagement.", routePrefix: "workspace" },
@@ -836,7 +795,7 @@ export const MARKET: Suite = {
     columns: ["LAMID MARKET", "Freelance marketplaces", "Consulting firms"],
     rows: [
       { capability: "Matched on discipline, not keyword search", values: [true, "partial", true] },
-      { capability: "Milestone escrow with approval-gated release", values: [true, "partial", false] },
+      { capability: "Milestone-gated release, paid out to the expert", values: [true, "partial", false] },
       { capability: "Engagement context from your own diagnostics", values: [true, false, "partial"] },
       { capability: "Engagement counts published even when low", values: [true, false, false] },
       { capability: "Priced per engagement, not per partner day", values: [true, true, false] },
@@ -848,7 +807,7 @@ export const MARKET: Suite = {
 
 /* ─────────────────────────────────────────────────────────── */
 
-export const SUITES: Suite[] = [CORE, GROW, TALENT, FINANCE, DESK, SIGNAL, LEARN, MARKET, DOCUSHARE];
+export const SUITES: Suite[] = [CORE, GROW, TALENT, FINANCE, DESK, SIGNAL, LEARN, MARKET];
 
 /** Externally hosted products. Their CTAs open in a new tab. */
 export const EXTERNAL_SUITES = SUITES.filter((s) => s.external);

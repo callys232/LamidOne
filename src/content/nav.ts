@@ -8,7 +8,7 @@
  * in here and it stops being navigation and becomes a sitemap.
  *
  * THE NOUN/VERB SPLIT (teardown §2)
- *   Products  = what it IS      → the nine suites
+ *   Products  = what it IS      → the four suites
  *   Solutions = what you're DOING → objectives, team size, why us
  * The same software appears twice. Buyers who know the category use
  * Products; buyers who only know their problem use Solutions.
@@ -65,7 +65,7 @@ const suiteLink = (id: string): NavLink => {
 export const PRODUCTS_MENU = {
   header: {
     title: "The LAMID ONE ecosystem",
-    blurb: "Four engines — CORE, GROW, TALENT and FINANCE — running nine suites on one record. Clarity, transformation, capability and financial performance in a single operating system.",
+    blurb: "Four suites — CORE, GROW, TALENT and FINANCE — on one shared record. Clarity, transformation, capability and financial performance in a single operating system.",
     ctas: [
       { label: "Free tools", href: "/free-tools" },
       { label: "All products and features", href: "/products" },
@@ -89,9 +89,13 @@ export const PRODUCTS_MENU = {
       links: [suiteLink("learn"), suiteLink("market")],
     },
   ] as NavColumn[],
-  /** Demoted below a rule — present, but ranked under the suites. */
+  /** Demoted below a rule — present, but ranked under the suites.
+   *  DOCUSHARE was `suiteLink("docushare")`; it isn't a `Suite` to look
+   *  up anymore (see content/docushare.ts), so it's a direct link now —
+   *  same shape as its three neighbours here, which were never suites
+   *  either. */
   secondary: [
-    suiteLink("docushare"),
+    { label: "LAMID DOCUSHARE", href: "/docushare", description: "File infrastructure and secure sharing" },
     { label: "LAMID Agents", href: "/agents", description: `The ${numberWord(AGENT_COUNT, true)} AI agents and what each costs` },
     { label: "LAMID Points", href: "/points", description: "Pay per completed outcome" },
     { label: "Integrations", href: "/integrations", description: "Everything it connects to" },
@@ -176,7 +180,7 @@ export const RESOURCES_MENU = {
       title: "Learn",
       links: [
         { label: "LAMID Learning", href: "https://learn-by-lamid.vercel.app/", description: "Courses, programmes and certification", external: true },
-        { label: "Playbooks", href: "/playbooks", description: "The method behind each engine family" },
+        { label: "Playbooks", href: "/playbooks", description: "The method behind each suite" },
         { label: "Templates", href: "/templates", description: "Budgets, decision records and reviews" },
       ],
     },

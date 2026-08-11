@@ -156,7 +156,7 @@ function SolutionsPanel() {
   );
 }
 
-export function Header({ ctaSet = "marketing" }: { ctaSet?: "marketing" | "pricing" | "neutral" }) {
+export function Header({ ctaSet = "marketing" }: { ctaSet?: "marketing" | "pricing" | "neutral" | "suite" }) {
   const [open, setOpen] = useState<MenuKey>(null);
   const [mobile, setMobile] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);

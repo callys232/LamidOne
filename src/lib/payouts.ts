@@ -16,6 +16,17 @@ import { resolveAccount, createTransfer, type Bank } from "./paystack";
  * returned to the client again.
  */
 
+/**
+ * The one currency payouts move in.
+ *
+ * Exported because the earnings balance has to filter to it: milestones
+ * carry their own currency, and summing a USD milestone into an NGN
+ * payout balance would invent an exchange rate this codebase does not
+ * hold. Anything not in this currency is excluded from the balance
+ * rather than converted.
+ */
+export const PAYOUT_CURRENCY = "NGN";
+
 export type PayoutAccount = {
   userId: string;
   bankCode: string;
@@ -124,7 +135,7 @@ export async function requestWithdrawal(
   if (!account) throw new PayoutError("Add a verified payout account first.");
 
   const withdrawal: Withdrawal = {
-    id: id(), userId, amount, currency: "NGN", status: "pending", createdAt: Date.now(),
+    id: id(), userId, amount, currency: PAYOUT_CURRENCY, status: "pending", createdAt: Date.now(),
   };
 
   try {

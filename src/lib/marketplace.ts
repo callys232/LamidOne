@@ -139,15 +139,21 @@ export async function createProject(clientId: string, input: Record<string, unkn
 }
 
 export async function listProjects(filter: {
-  clientId?: string; status?: ProjectStatus; skill?: string; take?: number;
+  clientId?: string; awardedExpertId?: string; status?: ProjectStatus; skill?: string; take?: number;
 } = {}): Promise<Project[]> {
-  const take = Math.min(filter.take ?? 25, 100);
+  /* `awardedExpertId` exists for the earnings balance: approved
+     milestones are the expert's earned money, and finding them means
+     finding the projects awarded to them first. The 500 ceiling is
+     higher than the 100 used elsewhere because truncating a LIST costs
+     a reader a row, while truncating a BALANCE costs someone money. */
+  const take = Math.min(filter.take ?? 25, 500);
 
   if (persistenceEnabled()) {
     const col = await collection<Project>("projects");
     if (col) {
       const q: Record<string, unknown> = {};
       if (filter.clientId) q.clientId = filter.clientId;
+      if (filter.awardedExpertId) q.awardedExpertId = filter.awardedExpertId;
       if (filter.status) q.status = filter.status;
       if (filter.skill) q.skills = filter.skill;
       return col.find(q).sort({ createdAt: -1 }).limit(take).toArray();
@@ -156,6 +162,7 @@ export async function listProjects(filter: {
 
   return [...projects.values()]
     .filter((p) => (!filter.clientId || p.clientId === filter.clientId)
+      && (!filter.awardedExpertId || p.awardedExpertId === filter.awardedExpertId)
       && (!filter.status || p.status === filter.status)
       && (!filter.skill || p.skills.includes(filter.skill)))
     .sort((a, b) => b.createdAt - a.createdAt)

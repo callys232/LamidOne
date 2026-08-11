@@ -39,7 +39,8 @@ export default function SolutionsIndex() {
               <h1 className="h-display mt-6">The right starting point for where you are.</h1>
               <p className="lead mt-6">
                 <span className="text-brand">LAMID ONE</span> adapts to your size, your role and your objective —
-                rather than expecting you to adapt to it.
+                rather than expecting you to adapt to it. Every path below opens onto the same shared
+                record, so switching starting points later never means starting over.
               </p>
             </div>
           </div>

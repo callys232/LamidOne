@@ -367,3 +367,115 @@ export async function invoiceFromMilestones(
     })),
   });
 }
+
+export interface BulkInvoiceResult {
+  invoices: Invoice[];
+  skipped: { projectId: string; reason: string }[];
+}
+
+/**
+ * Raises every outstanding invoice a user is owed, in one call — the
+ * "auto-pull all my financial activity" entry point. Every real
+ * project run through `listProjects({ awardedExpertId })`, every
+ * approved milestone on it not already invoiced, one invoice per
+ * project (an invoice has one client; mixing projects would mix
+ * clients on it).
+ *
+ * Deliberately a thin orchestrator around `invoiceFromMilestones`
+ * rather than a parallel code path: reusing it means a bulk-generated
+ * invoice gets the exact same guarantees a manual one does (approved-
+ * only enforcement, milestone-id provenance) with nothing to drift out
+ * of sync between the two.
+ *
+ * NEVER "escrow" language here — see the ⚠️ note at the top of
+ * milestones.ts. Nothing is held; approval already released the
+ * payout balance before this ever runs. This function only decides
+ * what to bill for work already signed off.
+ */
+export async function generateOutstandingInvoices(
+  issuerId: string,
+  orgId: string | null,
+  opts: { taxPct?: number; paymentTermDays?: number } = {},
+): Promise<BulkInvoiceResult> {
+  const { listProjects } = await import("./marketplace");
+  const { listMilestones } = await import("./milestones");
+  const { findUserById } = await import("./users");
+  const { record } = await import("./audit");
+
+  const projects = await listProjects({ awardedExpertId: issuerId, take: 500 });
+  if (projects.length === 0) return { invoices: [], skipped: [] };
+
+  /* Built ONCE, before the per-project loop: every milestone id already
+     claimed by a live invoice (draft/sent/paid) is off-limits. A
+     `void`ed invoice's ids are simply absent from this set, so that
+     work becomes billable again on the very next run — no separate
+     "was this voided" query needed. */
+  const existingInvoices = await listInvoices({ issuerId, take: 500 });
+  const alreadyInvoiced = new Set(
+    existingInvoices
+      .filter((inv) => inv.status !== "void")
+      .flatMap((inv) => inv.milestoneIds ?? []),
+  );
+
+  const me = await findUserById(issuerId);
+  const issuerParty: InvoiceParty = { name: me?.name ?? me?.email ?? "", email: me?.email };
+
+  const results = await Promise.all(projects.map(async (project): Promise<
+    { invoice: Invoice } | { skipped: { projectId: string; reason: string } }
+  > => {
+    const milestones = await listMilestones(project.id);
+    const eligible = milestones.filter((m) => m.status === "approved" && !alreadyInvoiced.has(m.id));
+
+    if (eligible.length === 0) {
+      return { skipped: { projectId: project.id, reason: "No approved milestones awaiting invoicing." } };
+    }
+
+    const client = await findUserById(project.clientId);
+    if (!client) {
+      return { skipped: { projectId: project.id, reason: "Client record could not be resolved." } };
+    }
+
+    try {
+      const invoice = await invoiceFromMilestones(
+        issuerId, orgId, project.id,
+        eligible.map((m) => m.id),
+        { name: client.name || client.email, email: client.email },
+        { paymentTermDays: opts.paymentTermDays, taxPct: opts.taxPct, issuer: issuerParty },
+      );
+
+      /* One audit row per invoice — matches how milestones.ts logs one
+         row per milestone action, and keeps each row traceable to a
+         single invoice id rather than one row summarising a whole
+         batch. First call site of `record()` in this file; existing
+         single-invoice actions (createInvoice, invoiceFromMilestones
+         called directly, transitionInvoice) are NOT retrofitted here —
+         that is a separate, broader gap worth closing on its own. */
+      await record({
+        orgId,
+        actorId: issuerId,
+        actorRole: "expert",
+        action: "invoice_generated_bulk",
+        target: invoice.id,
+        detail: `${invoice.currency} ${invoice.totals.total} — ${eligible.length} milestone${eligible.length === 1 ? "" : "s"}, project ${project.id}`,
+      });
+
+      return { invoice };
+    } catch (e) {
+      /* A milestone's status can change between the filter above and
+         `invoiceFromMilestones`'s own fresh re-check (it re-reads
+         milestones rather than trusting this function's snapshot) —
+         race, not a bug. One project's race must not abort the batch. */
+      const reason = e instanceof InvoiceError ? e.message : "Could not raise this invoice.";
+      return { skipped: { projectId: project.id, reason } };
+    }
+  }));
+
+  const invoices: Invoice[] = [];
+  const skipped: { projectId: string; reason: string }[] = [];
+  for (const r of results) {
+    if ("invoice" in r) invoices.push(r.invoice);
+    else skipped.push(r.skipped);
+  }
+
+  return { invoices, skipped };
+}

@@ -55,7 +55,7 @@ export default function PricingPage() {
               <Eyebrow>Pricing</Eyebrow>
               <h1 className="h-display mt-6">Start free. Add suites, not invoices.</h1>
               <p className="lead mt-6">
-                One ladder across all four engines. Seat price follows your account tier rather than
+                One ladder across all four suites. Seat price follows your account tier rather than
                 the number of suites you use — so the second suite costs nothing extra per seat, and
                 the ninth costs nothing extra either.
               </p>
@@ -79,7 +79,11 @@ export default function PricingPage() {
           <SectionHeading
             eyebrow="Create a bundle"
             title="Pick your suites. See the points."
-            blurb="There is no per-suite tier to choose — every paid plan already includes all nine. This scopes the estimate to what you'll actually use."
+            /* Was "already includes all nine" — stale since DOCUSHARE
+               moved off the `Suite` type to its own optional, per-seat
+               billed page (content/docushare.ts). Eight suites are
+               bundled free; DocuShare isn't one of them. */
+            blurb="There is no per-suite tier to choose — every paid plan already includes all eight. This scopes the estimate to what you'll actually use."
           />
           <BundleBuilder />
         </Section>
@@ -90,7 +94,7 @@ export default function PricingPage() {
           <SectionHeading
             eyebrow="Every function"
             title="The complete comparison."
-            blurb="Ten groups covering access, points, all four engines, the agent layer, marketplace, delivery and payments, analytics, learning, documents, security and support."
+            blurb="Ten groups covering access, points, all four suites, the agent layer, marketplace, delivery and payments, analytics, learning, documents, security and support."
           />
           <FeatureMatrix />
         </Section>

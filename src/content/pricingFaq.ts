@@ -17,11 +17,19 @@ export const PRICING_FAQ: FaqItem[] = [
   },
   {
     q: "What exactly am I buying — the suites, or the marketplace?",
-    a: "Both, on one plan. The suites are software your team runs. LAMID MARKET is where you source a vetted expert when you need capability you do not have, with milestone escrow so payment only releases on approved work. Your plan covers access to both; expert fees are separate and agreed per engagement.",
+    /* Was "milestone escrow so payment only releases on approved
+       work" — the exact confusion lib/milestones.ts's ⚠️ note warns
+       against: nothing is held, approval releases straight to the
+       expert's payout balance. Rewritten to claim what actually
+       happens. */
+    a: "Both, on one plan. The suites are software your team runs. LAMID MARKET is where you source a vetted expert when you need capability you do not have, with milestones you approve one at a time before payment releases. Your plan covers access to both; expert fees are separate and agreed per engagement.",
   },
   {
     q: "How does seat pricing work if we use several suites?",
-    a: "Seat price follows your account tier, not the number of suites. If your account is on Growth, every seat is a Growth seat whether that person opens one suite or all nine. Moving up a tier re-prices every seat, which is a deliberate decision — but adding a suite at the same tier costs nothing extra per seat. That is why the bundle costs less than buying suites separately: it removes duplicate seat charges rather than discounting features.",
+    /* Was "all nine" — stale since DOCUSHARE moved to its own
+       optional, per-seat billed page (content/docushare.ts) and isn't
+       one of the bundled suites this line is describing. */
+    a: "Seat price follows your account tier, not the number of suites. If your account is on Growth, every seat is a Growth seat whether that person opens one suite or all eight. Moving up a tier re-prices every seat, which is a deliberate decision — but adding a suite at the same tier costs nothing extra per seat. That is why the bundle costs less than buying suites separately: it removes duplicate seat charges rather than discounting features.",
   },
   {
     q: "What are LAMID Points and what happens if I run out?",

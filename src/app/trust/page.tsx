@@ -76,7 +76,9 @@ export default function TrustPage() {
               <Eyebrow>Trust centre</Eyebrow>
               <h1 className="h-display mt-6">What we protect, and what we have not certified yet.</h1>
               <p className="lead mt-6">
-                We publish what is implemented today and what is still in progress. If a
+                LAMID ONE is the operating system behind CORE, GROW, TALENT and FINANCE — plus DESK,
+                SIGNAL, LEARN and MARKET — on one shared record. This page covers what protects that
+                record: we publish what is implemented today and what is still in progress. If a
                 certification is not listed under &ldquo;implemented&rdquo;, we do not hold it —
                 and we would rather tell you that here than in a procurement questionnaire.
               </p>

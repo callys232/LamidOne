@@ -54,8 +54,11 @@ export default function IntegrationsPage() {
               <Eyebrow>Integrations</Eyebrow>
               <h1 className="h-display mt-6">What&apos;s live, and what&apos;s next.</h1>
               <p className="lead mt-6">
-                Real payments, a real model layer, real data, and real connections to LAMID&apos;s own
-                ecosystem apps — named plainly, not folded into one confident-sounding number.
+                LAMID ONE is the operating system running four suites — CORE, GROW, TALENT and
+                FINANCE — plus DESK, SIGNAL, LEARN and MARKET, on one shared record. This page is
+                what connects that record to the rest of your stack: real payments, a real model
+                layer, real data, and real connections to LAMID&apos;s own ecosystem apps — named
+                plainly, not folded into one confident-sounding number.
               </p>
             </div>
           </div>

@@ -43,7 +43,17 @@ export const HOME_FAQ: FaqItem[] = [
   /* branded */
   {
     q: "What is the difference between the suites and the marketplace?",
-    a: "The suites are software you run yourself — CORE, GROW, TALENT, FINANCE, DESK, SIGNAL, LEARN and DOCUSHARE. LAMID MARKET is where you source a vetted expert when you need capability you do not have, with milestone escrow so payment is only released on work you have approved. The two share one record: a diagnostic you run in CORE can become the brief that sources an expert in MARKET.",
+    /* Two corrections, both now much more visible — this answer renders
+       on the homepage and on /faqs as well as wherever it sat before.
+
+       1. It listed eight suites. There are FOUR; the rest are
+          sub-suites folded under them.
+       2. "Milestone escrow so payment is only released on work you have
+          approved" is exactly the payment-protection claim the warning
+          at the foot of this file says not to make. Milestone STATUS is
+          real and enforced; no balance is held or released against it.
+          Approval gates the work, not the money. */
+    a: "The four suites are software you run yourself — CORE, GROW, TALENT and FINANCE. The expert marketplace is where you source a vetted specialist when you need capability you do not have, with milestones you approve before the work moves on — approval releases that amount to the specialist, paid out by bank transfer. The two share one record: a diagnostic you run in CORE can become the brief that sources the specialist.",
   },
   {
     q: "Do I have to buy every suite?",
@@ -91,7 +101,7 @@ export const AFTER_THE_ANSWER = {
   eyebrow: "After the answer",
   title: "The engines stop at the recommendation. You decide who acts on it.",
   blurb:
-    "A consulting engagement ends when the consultant leaves, and the reasoning leaves with them. Here the reasoning stays on your record — and acting on it is your call, not a renewal conversation.",
+    "A consulting engagement ends when the consultant leaves, and the reasoning leaves with them. Here the reasoning stays on your record, and you decide what happens next.",
   /* `id` selects the artwork in components/graphics/RouteArt.tsx;
      `tint` is the accent that artwork and the slide are drawn in.
      Route 1 takes the brand blue because doing it yourself is the

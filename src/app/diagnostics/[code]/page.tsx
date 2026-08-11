@@ -131,7 +131,7 @@ export default function PublicDiagnosticPage() {
      state, and the sentence shown when a run fails. Resolved from the
      suite the module rolls up into, so CORE modules speak as CORE and
      FINANCE modules as FINANCE without any per-module wiring.
-     Null for anything outside the four engines; every use falls back to
+     Null for anything outside the four suites; every use falls back to
      the neutral string rather than borrowing another engine's voice. */
   const mc = microcopyForEngine(engineForSuite(spec?.suite ?? "")?.id);
 
