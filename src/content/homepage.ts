@@ -76,7 +76,10 @@ export const HP_HERO = {
 
      Naming what the link actually opens. Building the cross-suite
      diagnostic the mock sold is a product decision, not a copy fix. */
-  primary: { label: "Run your first diagnostic — free", href: "/diagnostics/q44" },
+  primary: {
+    label: "Run your first diagnostic — free",
+    href: "/diagnostics/q44",
+  },
   secondary: { label: "Explore the Ecosystem", href: "#ecosystem" },
   /* ⚠️ CONFLICT — the mock reads "30+ years of consulting leadership".
      LAMID Consulting was founded in 1988, which brand.ts computes to
@@ -156,8 +159,7 @@ export const HP_PROMISE = [
 export const HP_GAP = {
   eyebrow: "The Gap",
   title: "Most enterprises are flying blind.",
-  lead:
-    "The same fragments show up everywhere — Africa, emerging markets, global enterprises alike.",
+  lead: "The same fragments show up everywhere — Africa, emerging markets, global enterprises alike.",
   /* `watchedBy` is the suite id, so the tint and the label both come
      from one place and cannot drift from the ecosystem section. */
   fragments: [
@@ -226,8 +228,7 @@ export const HP_ECOSYSTEM = {
      "that is what closes the loop", "not a renewal conversation": all
      removed from this page. If a clause would survive being deleted
      with the meaning intact, it was decoration. */
-  lead:
-    "Three levels. The ecosystem is one continuous record of your business. A suite is a domain that reads and writes it — strategy, growth, people, money. A tool is the driver's seat, where you operate from: put your figures in, get a scored answer back with the working attached. AI runs underneath all three, embedded in every input field.",
+  lead: "Four levels. The ecosystem is one continuous record of your business. The suite is the domain that reads and writes it — strategy, growth, people, money. A tool is the driver's seat, where you operate from: put your figures in, get a scored answer back with the working attached. AI runs underneath all four, embedded in every input field.",
   /* The section-level CTA. Points at /products — "All products and
      features", the complete directory — because that is the only page
      that substantiates the third level this heading claims. The four
@@ -264,7 +265,10 @@ export const HP_ECOSYSTEM = {
      list is the longest thing on it. */
   suites: [
     {
-      id: "core", name: "Core", tint: "#1A7CFF", href: "/suites/core",
+      id: "core",
+      name: "Core",
+      tint: "#1A7CFF",
+      href: "/suites/core",
       checks: [
         "Strategy aligned to what is happening now",
         "Early warning before drift hits the numbers",
@@ -272,7 +276,10 @@ export const HP_ECOSYSTEM = {
       ],
     },
     {
-      id: "grow", name: "Grow", tint: "#1A7CFF", href: "/suites/grow",
+      id: "grow",
+      name: "Grow",
+      tint: "#1A7CFF",
+      href: "/suites/grow",
       checks: [
         "Demand shifts and competitor moves, as they happen",
         "Built for African and emerging markets",
@@ -280,7 +287,10 @@ export const HP_ECOSYSTEM = {
       ],
     },
     {
-      id: "talent", name: "Talent", tint: "#1A7CFF", href: "/suites/talent",
+      id: "talent",
+      name: "Talent",
+      tint: "#1A7CFF",
+      href: "/suites/talent",
       checks: [
         "Matched on 40+ signals",
         "Measurably fewer mismatched hires",
@@ -288,7 +298,10 @@ export const HP_ECOSYSTEM = {
       ],
     },
     {
-      id: "finance", name: "Finance", tint: "#1A7CFF", href: "/suites/finance",
+      id: "finance",
+      name: "Finance",
+      tint: "#1A7CFF",
+      href: "/suites/finance",
       checks: [
         "Real-time visibility across every unit",
         "CFO-grade forecasting and value tracking",
@@ -368,13 +381,41 @@ export const HP_SHOWCASE = {
      still says where it goes when it is read on its own by a screen
      reader running through the page's links. */
   slides: [
-    { id: "core", tint: "#1A7CFF", wash: "#E8EEFB", title: "CORE finds it.", body: "Diagnostics and coherence checks establish the baseline — what is actually true about the business right now. The other three suites measure against it, and re-runs come back as comparisons rather than fresh starts.", cta: { label: "Explore CORE", href: "/suites/core" } },
-    { id: "grow", tint: "#1A7CFF", wash: "#E8EEFB", title: "GROW sequences it.", body: "Takes what CORE found and orders it against the capacity you actually have — which options you can resource, in what order, and what gets deferred and why. The certification pathways that build the capability sit in the same suite.", cta: { label: "Explore GROW", href: "/suites/grow" } },
+    {
+      id: "core",
+      tint: "#1A7CFF",
+      wash: "#E8EEFB",
+      title: "CORE finds it.",
+      body: "Diagnostics and coherence checks establish the baseline — what is actually true about the business right now. The other three suites measure against it, and re-runs come back as comparisons rather than fresh starts.",
+      cta: { label: "Explore CORE", href: "/suites/core" },
+    },
+    {
+      id: "grow",
+      tint: "#1A7CFF",
+      wash: "#E8EEFB",
+      title: "GROW sequences it.",
+      body: "Takes what CORE found and orders it against the capacity you actually have — which options you can resource, in what order, and what gets deferred and why. The certification pathways that build the capability sit in the same suite.",
+      cta: { label: "Explore GROW", href: "/suites/grow" },
+    },
     /* "MARKET scores outside specialists" named a sub-suite the
        homepage deliberately does not name — the capability is TALENT's
        here, as it is on the ecosystem card. */
-    { id: "talent", tint: "#1A7CFF", wash: "#E8EEFB", title: "TALENT staffs it.", body: "The pathway GROW sequenced needs people. Capability scores say who you already have, and the expert marketplace scores outside specialists against the brief on discipline, rating, reliability and verification.", cta: { label: "Explore TALENT", href: "/suites/talent" } },
-    { id: "finance", tint: "#1A7CFF", wash: "#E8EEFB", title: "FINANCE prices it.", body: "Costs the sequence, models the scenarios, and tracks what it does to enterprise value — then writes the result back to the same record CORE reads from.", cta: { label: "Explore FINANCE", href: "/suites/finance" } },
+    {
+      id: "talent",
+      tint: "#1A7CFF",
+      wash: "#E8EEFB",
+      title: "TALENT staffs it.",
+      body: "The pathway GROW sequenced needs people. Capability scores say who you already have, and the expert marketplace scores outside specialists against the brief on discipline, rating, reliability and verification.",
+      cta: { label: "Explore TALENT", href: "/suites/talent" },
+    },
+    {
+      id: "finance",
+      tint: "#1A7CFF",
+      wash: "#E8EEFB",
+      title: "FINANCE prices it.",
+      body: "Costs the sequence, models the scenarios, and tracks what it does to enterprise value — then writes the result back to the same record CORE reads from.",
+      cta: { label: "Explore FINANCE", href: "/suites/finance" },
+    },
   ],
 };
 
@@ -406,18 +447,47 @@ export const HP_HOW = {
      figure belongs to the diagnostic and already sits in step 1's body,
      and account creation is not something to put a stopwatch on. */
   phases: [
-    { id: "first", label: "In one sitting", meta: "No account needed to start" },
+    {
+      id: "first",
+      label: "In one sitting",
+      meta: "No account needed to start",
+    },
     { id: "ongoing", label: "From then on", meta: "Every quarter" },
   ],
   /* `phase` is the id above, so the grouping lives on the step and the
      order of the list stays the only thing that sets the sequence —
      add a step, give it a phase, and the rail regroups itself. */
   steps: [
-    { n: "1", phase: "first", label: "Diagnose", body: "Run a diagnostic on figures you already have. The shortest is five questions about a single decision, and takes three minutes." },
-    { n: "2", phase: "first", label: "Reveal", body: "The engine scores it and names the weakest link. No language model writes the number, and the working comes back with the result." },
-    { n: "3", phase: "first", label: "Unlock", body: "Create a free account to open the full breakdown. A new account is granted exactly enough points for your first run." },
-    { n: "4", phase: "ongoing", label: "Act", body: "Take it from there yourself, hand it to a vetted specialist, or put a delivery manager on it." },
-    { n: "5", phase: "ongoing", label: "Grow", body: "Re-run it once you have changed something. The next result comes back as a comparison, because the reasoning stayed on your record." },
+    {
+      n: "1",
+      phase: "first",
+      label: "Diagnose",
+      body: "Run a diagnostic on figures you already have. The shortest is five questions about a single decision, and takes three minutes.",
+    },
+    {
+      n: "2",
+      phase: "first",
+      label: "Reveal",
+      body: "The engine scores it and names the weakest link. No language model writes the number, and the working comes back with the result.",
+    },
+    {
+      n: "3",
+      phase: "first",
+      label: "Unlock",
+      body: "Create a free account to open the full breakdown. A new account is granted exactly enough points for your first run.",
+    },
+    {
+      n: "4",
+      phase: "ongoing",
+      label: "Act",
+      body: "Take it from there yourself, hand it to a vetted specialist, or put a delivery manager on it.",
+    },
+    {
+      n: "5",
+      phase: "ongoing",
+      label: "Grow",
+      body: "Re-run it once you have changed something. The next result comes back as a comparison, because the reasoning stayed on your record.",
+    },
   ],
 };
 
