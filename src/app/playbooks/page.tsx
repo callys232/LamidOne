@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { StatRow } from "@/components/ui/Stat";
 import { CORE, FINANCE, TALENT, type Suite, type UseCaseBlock } from "@/content/suites";
 import { METHODS } from "@/content/methods";
+import { STRATEGY_LEVELS, type StrategyLevel } from "@/content/strategyLevels";
 
 export const metadata: Metadata = {
   title: "Playbooks",
@@ -20,16 +21,21 @@ export const metadata: Metadata = {
  * no new claims, just a dedicated view of real use-case copy that
  * previously only lived on each suite's own page.
  */
-type Playbook = { suite: Suite; useCase: UseCaseBlock; whyNotAverage?: string };
+/**
+ * `level` is the altitude THIS specific playbook operates at — not the
+ * suite's full strategyLevel list. CORE spans corporate and operational
+ * across its two use cases here; each card names the one that applies.
+ */
+type Playbook = { suite: Suite; useCase: UseCaseBlock; level: StrategyLevel; whyNotAverage?: string };
 
 const chainLimited = METHODS.find((m) => m.name === "Chain-limited scoring")!.whyNotAverage;
 const perSeatCoverage = METHODS.find((m) => m.name === "Per-seat coverage")!.whyNotAverage;
 
 const PLAYBOOKS: Playbook[] = [
-  { suite: CORE, useCase: CORE.useCases[0], whyNotAverage: chainLimited },
-  { suite: CORE, useCase: CORE.useCases[1] },
-  { suite: FINANCE, useCase: FINANCE.useCases[0] },
-  { suite: TALENT, useCase: TALENT.useCases[0], whyNotAverage: perSeatCoverage },
+  { suite: CORE, useCase: CORE.useCases[0], level: "corporate", whyNotAverage: chainLimited },
+  { suite: CORE, useCase: CORE.useCases[1], level: "operational" },
+  { suite: FINANCE, useCase: FINANCE.useCases[0], level: "functional" },
+  { suite: TALENT, useCase: TALENT.useCases[0], level: "functional", whyNotAverage: perSeatCoverage },
 ];
 
 function PlaybookCard({ playbook, index }: { playbook: Playbook; index: number }) {
@@ -48,6 +54,12 @@ function PlaybookCard({ playbook, index }: { playbook: Playbook; index: number }
           <p className="faint text-xs font-semibold tabular-nums">Playbook 0{index + 1}</p>
           <p className="text-sm font-semibold" style={{ color: suite.tint }}>{suite.name}</p>
         </div>
+        <span
+          className="ml-auto rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide"
+          style={{ color: suite.tint, border: `1px solid ${suite.tint}` }}
+        >
+          {STRATEGY_LEVELS[playbook.level].label} strategy
+        </span>
       </div>
 
       <h2 className="font-display mt-6 text-2xl">{useCase.title}</h2>

@@ -64,10 +64,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen" style={{ background: "var(--page)" }}>
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 border-r lg:block" style={{ borderColor: "var(--line-soft)" }}>
-        <div className="flex h-16 items-center gap-2 border-b px-5" style={{ borderColor: "var(--line-soft)" }}>
+        <Link
+          href="/"
+          className="flex h-16 items-center gap-2 border-b px-5 transition-opacity hover:opacity-80"
+          style={{ borderColor: "var(--line-soft)" }}
+          aria-label="LAMID ONE home"
+        >
           <Mark className="h-6 w-6 text-brand" />
           <span className="font-display text-base">Dashboard</span>
-        </div>
+        </Link>
 
         <div className="p-4">
           <RoleBadge role={view.role} tierName={view.tierName} />

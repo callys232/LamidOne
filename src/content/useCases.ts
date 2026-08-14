@@ -18,7 +18,7 @@
 
 import type { FaqItem } from "@/components/sections/Faq";
 import type { SuiteId } from "./suites";
-import type { Engine } from "./aios";
+import type { PrimarySuite } from "./aios";
 
 export type UseCase = {
   slug: string;
@@ -27,18 +27,18 @@ export type UseCase = {
   headline: string;
   subhead: string;
   /**
-   * Which of the four suites owns this use case.
+   * Which of the four primary suites owns this use case.
    *
    * Structural, not copy. It resolves the value shown in the hero
-   * (ENGINES[].value) and the module content the page pulls — so these
-   * pages state the same four-engine structure as the homepage instead
-   * of flattening `suites` back into a list of peers.
+   * (PRIMARY_SUITES[].value) and the module content the page pulls — so
+   * these pages state the same four-suite structure as the homepage
+   * instead of flattening `suites` back into a list of peers.
    *
    * `suites` still records every suite the work actually touches, which
-   * is frequently more than one engine's worth. The engine named here
-   * is the one that owns the outcome.
+   * is frequently more than one primary suite's worth. The suite named
+   * here is the one that owns the outcome.
    */
-  engine: Engine["id"];
+  suite: PrimarySuite["id"];
   /**
    * Title of the matching entry in the brand document's USE_CASES, when
    * there is one. Five of the nine have a document equivalent; the rest
@@ -56,7 +56,7 @@ export type UseCase = {
 export const USE_CASES: UseCase[] = [
   {
     slug: "diagnose",
-    engine: "core",
+    suite: "core",
     docUseCase: "Leadership Decision Intelligence",
     nav: "Diagnose the organisation",
     headline: "Turn a vague sense that something is wrong into a specific answer.",
@@ -102,7 +102,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "align-strategy",
-    engine: "core",
+    suite: "core",
     nav: "Align strategy and execution",
     headline: "Turn a strategy nobody follows into one the work actually reflects.",
     subhead:
@@ -147,7 +147,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "fix-cadence",
-    engine: "core",
+    suite: "core",
     docUseCase: "Operational Performance Improvement",
     nav: "Fix the execution cadence",
     headline: "Turn inconsistent delivery into a rhythm you can plan against.",
@@ -193,7 +193,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "model-financials",
-    engine: "finance",
+    suite: "finance",
     docUseCase: "Financial Foresight & Performance Optimisation",
     nav: "Model the financials",
     headline: "Turn a spreadsheet nobody trusts into numbers you can defend.",
@@ -239,7 +239,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "find-growth",
-    engine: "grow",
+    suite: "grow",
     docUseCase: "Transformation Acceleration",
     nav: "Find where growth is leaking",
     headline: "Turn a growth plan built on hope into one built on signal.",
@@ -285,7 +285,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "get-paid",
-    engine: "finance",
+    suite: "finance",
     nav: "Get paid faster",
     headline: "Turn a proposal, a contract and an invoice into one record.",
     subhead:
@@ -330,7 +330,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "build-bench",
-    engine: "talent",
+    suite: "talent",
     docUseCase: "Workforce Capability Mapping & Skill Acceleration",
     nav: "Build the talent bench",
     headline: "Turn a succession plan in a spreadsheet into cover you can rely on.",
@@ -376,7 +376,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "source-experts",
-    engine: "talent",
+    suite: "talent",
     nav: "Source specialist expertise",
     headline: "Turn a six-week procurement into a shortlist this week.",
     subhead:
@@ -421,7 +421,7 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: "certify-teams",
-    engine: "talent",
+    suite: "talent",
     nav: "Certify your teams",
     headline: "Turn a dependency on consultants into capability you own.",
     subhead:

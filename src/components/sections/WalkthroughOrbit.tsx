@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Pause, Play, RotateCw } from "lucide-react";
-import { ENGINES, WALKTHROUGH } from "@/content/aios";
+import { PRIMARY_SUITES, WALKTHROUGH } from "@/content/aios";
 
 /**
  * The product walkthrough, arranged as an orbit rather than a list.
@@ -47,10 +47,10 @@ export function WalkthroughOrbit() {
   }, [playing]);
 
   const step = WALKTHROUGH[active];
-  const activeEngineIndex = step.engine ? ENGINES.findIndex((e) => e.id === step.engine) : -1;
+  const activeSuiteIndex = step.suite ? PRIMARY_SUITES.findIndex((e) => e.id === step.suite) : -1;
   /* Entry, convergence and the loop are all "the whole system", so the
      core lights for those three and the ring dims to neutral. */
-  const coreLit = step.phase !== "engine";
+  const coreLit = step.phase !== "suite";
 
   const select = (i: number) => { setActive(i); setPlaying(false); };
 
@@ -59,8 +59,8 @@ export function WalkthroughOrbit() {
       {/* ── Steps ─────────────────────────────────────────── */}
       <ol className="order-2 lg:order-1">
         {WALKTHROUGH.map((w, i) => {
-          const engine = w.engine ? ENGINES.find((e) => e.id === w.engine) : null;
-          const tint = engine?.tint ?? "var(--brand)";
+          const suite = w.suite ? PRIMARY_SUITES.find((e) => e.id === w.suite) : null;
+          const tint = suite?.tint ?? "var(--brand)";
           const on = i === active;
           return (
             <li key={w.title}>
@@ -82,12 +82,12 @@ export function WalkthroughOrbit() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="min-w-0">
-                  {engine && (
+                  {suite && (
                     <span
                       className="mb-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-opacity duration-300"
                       style={{ background: `${tint}1A`, color: tint, opacity: on ? 1 : 0.55 }}
                     >
-                      {engine.name}
+                      {suite.name}
                     </span>
                   )}
                   <span className={`block leading-snug ${on ? "font-semibold" : "font-medium"}`}>{w.title}</span>
@@ -129,12 +129,12 @@ export function WalkthroughOrbit() {
           <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" aria-hidden="true">
             {/* Spokes — the active engine's spoke carries its colour. */}
             {SPOKES.map((s, i) => {
-              const on = i === activeEngineIndex;
+              const on = i === activeSuiteIndex;
               return (
                 <line
                   key={i}
                   x1="50" y1="50" x2={s.x} y2={s.y}
-                  stroke={on ? ENGINES[i].tint : "var(--line)"}
+                  stroke={on ? PRIMARY_SUITES[i].tint : "var(--line)"}
                   strokeWidth={on ? 0.8 : 0.4}
                   className="transition-all duration-500"
                 />
@@ -170,8 +170,8 @@ export function WalkthroughOrbit() {
           </div>
 
           {/* Engines at the compass points */}
-          {ENGINES.map((e, i) => {
-            const on = i === activeEngineIndex;
+          {PRIMARY_SUITES.map((e, i) => {
+            const on = i === activeSuiteIndex;
             /* On convergence every engine reads as live — that step's
                whole claim is that all four operate at once. */
             const lit = on || step.phase === "converge";

@@ -7,8 +7,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { authHeaders } from "@/lib/useApi";
 import type { Delta } from "@/lib/engineExport";
-import { engineForSuite } from "@/content/aios";
-import { microcopyForEngine } from "@/content/microcopy";
+import { primarySuiteForSuite } from "@/content/aios";
+import { microcopyForSuite } from "@/content/microcopy";
 import { DecisionQualityRunner } from "@/components/diagnostics/DecisionQualityRunner";
 import { GrowthPathwaysRunner } from "@/components/diagnostics/GrowthPathwaysRunner";
 import { RunRecord } from "@/components/diagnostics/RunRecord";
@@ -127,13 +127,13 @@ export default function PublicDiagnosticPage() {
      same exclusion the dashboard engine page applies. */
   const isF02 = spec?.code === "F02";
 
-  /* The engine's own voice for this module — its run label, its empty
-     state, and the sentence shown when a run fails. Resolved from the
-     suite the module rolls up into, so CORE modules speak as CORE and
+  /* The primary suite's own voice for this module — its run label, its
+     empty state, and the sentence shown when a run fails. Resolved from
+     the suite the module rolls up into, so CORE modules speak as CORE and
      FINANCE modules as FINANCE without any per-module wiring.
      Null for anything outside the four suites; every use falls back to
-     the neutral string rather than borrowing another engine's voice. */
-  const mc = microcopyForEngine(engineForSuite(spec?.suite ?? "")?.id);
+     the neutral string rather than borrowing another suite's voice. */
+  const mc = microcopyForSuite(primarySuiteForSuite(spec?.suite ?? "")?.id);
 
   /* Which structured runner this module uses, if any. Keeps the render
      branch to one condition instead of eight near-identical blocks. */

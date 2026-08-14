@@ -184,8 +184,9 @@ export const HP_ECOSYSTEM = {
   /* THE THREE LEVELS, stated in the heading rather than left to be
      inferred. CORE, GROW, TALENT and FINANCE are the four SUITES;
      engines are the TOOLS inside them — Q44, R01, F04, A22 — not a
-     layer above. (`ENGINES` in aios.ts is a misleading name for the
-     suite grouping; do not read the taxonomy off it.)
+     layer above. (aios.ts's `PRIMARY_SUITES` export, renamed from the
+     misleading `ENGINES`, is the suite grouping; do not read the
+     taxonomy off the word "engine".)
      The page previously named the ecosystem and the suites and never
      the tools, which left "ecosystem" and "suite" reading as two words
      for the same thing. */
@@ -228,7 +229,7 @@ export const HP_ECOSYSTEM = {
      "that is what closes the loop", "not a renewal conversation": all
      removed from this page. If a clause would survive being deleted
      with the meaning intact, it was decoration. */
-  lead: "Four levels. The ecosystem is one continuous record of your business. The suite is the domain that reads and writes it — strategy, growth, people, money. A tool is the driver's seat, where you operate from: put your figures in, get a scored answer back with the working attached. AI runs underneath all four, embedded in every input field.",
+  lead: "Four levels. The ecosystem is one continuous record of your business. The suite is the domain that reads and writes it — strategy, growth, people, money. A tool is the driver's seat, where you operate from: put your figures in, get a scored answer back with the working attached — computed from what you entered, never guessed. AI runs underneath all four, embedded in every input field, not in place of the number.",
   /* The section-level CTA. Points at /products — "All products and
      features", the complete directory — because that is the only page
      that substantiates the third level this heading claims. The four
@@ -282,7 +283,7 @@ export const HP_ECOSYSTEM = {
       href: "/suites/grow",
       checks: [
         "Demand shifts and competitor moves, as they happen",
-        "Built for African and emerging markets",
+        "Built for African, emerging and global markets",
         "Certification pathways that build capability",
       ],
     },

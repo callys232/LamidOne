@@ -12,7 +12,7 @@ import {
 } from "@/content/agents";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
 import { CTA } from "@/content/brand";
-import { ENGINES, engineForSuite } from "@/content/aios";
+import { PRIMARY_SUITES, primarySuiteForSuite } from "@/content/aios";
 import { AgentMock } from "@/components/mock/ProductMock";
 
 export const metadata: Metadata = {
@@ -50,15 +50,16 @@ export default function AgentsPage() {
                 fails costs you nothing.
               </p>
 
-              {/* Which engine each agent serves, counted from the data
-                  rather than asserted. This is the human-AI partnership
-                  the four-engine story rests on, made countable: the
-                  agents are not a separate product bolted alongside the
-                  engines, they are how each engine does its work. */}
+              {/* Which primary suite each agent serves, counted from the
+                  data rather than asserted. This is the human-AI
+                  partnership the four-suite story rests on, made
+                  countable: the agents are not a separate product bolted
+                  alongside the suites, they are how each suite does its
+                  work. */}
               <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
-                {ENGINES.map((e) => {
+                {PRIMARY_SUITES.map((e) => {
                   const count = PLATFORM_AGENTS.filter(
-                    (a) => engineForSuite(a.suite)?.id === e.id,
+                    (a) => primarySuiteForSuite(a.suite)?.id === e.id,
                   ).length;
                   /* GROW currently has none. Reported rather than
                      hidden — the same discipline as the trust centre,
@@ -150,7 +151,7 @@ export default function AgentsPage() {
               <tbody>
                 {PLATFORM_AGENTS.map((a) => {
                   const suite = SUITES_BY_ID[a.suite as SuiteId];
-                  const engine = engineForSuite(a.suite);
+                  const primarySuite = primarySuiteForSuite(a.suite);
                   return (
                     <tr key={a.id} className="border-b" style={{ borderColor: "var(--line-soft)" }}>
                       <th scope="row" className="px-5 py-4 font-normal">
@@ -164,14 +165,14 @@ export default function AgentsPage() {
                         </span>
                       </th>
                       <td className="px-5 py-4">
-                        {engine && (
+                        {primarySuite && (
                           <span className="flex items-center gap-2 text-xs">
                             <span
                               className="h-1.5 w-1.5 shrink-0 rounded-full"
-                              style={{ background: engine.tint }}
+                              style={{ background: primarySuite.tint }}
                               aria-hidden="true"
                             />
-                            <span className="font-semibold">{engine.value}</span>
+                            <span className="font-semibold">{primarySuite.value}</span>
                           </span>
                         )}
                       </td>

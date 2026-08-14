@@ -61,7 +61,9 @@ export default function ProductsPage() {
                 grouped, with nothing hidden behind a sales call. Anything marked &ldquo;Not yet&rdquo;
                 is not live — named because omitting it would be the misleading choice. The value of
                 this list isn&apos;t its length: it&apos;s that every item on it reads and writes the
-                same shared record, so nothing here needs reconciling against anything else.
+                same shared record, so nothing here needs reconciling against anything else. And each
+                capability sits at a specific altitude — corporate, business, functional or
+                operational — not one undifferentiated pile called &ldquo;strategy tools&rdquo;.
               </p>
             </div>
           </div>

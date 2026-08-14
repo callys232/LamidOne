@@ -15,8 +15,13 @@ import { SuiteMock } from "@/components/mock/ProductMock";
 import { SuiteMore } from "@/components/sections/SuiteMore";
 import { MilestoneWalkthrough } from "@/components/suites/MilestoneWalkthrough";
 import { ModuleSections, SuiteParentBand } from "@/components/sections/ModuleSections";
-import { MODULE_BY_ENGINE } from "@/content/modules";
+import { EngineExample } from "@/components/sections/EngineExample";
+import { IndustryContext } from "@/components/sections/IndustryContext";
+import { MODULE_BY_SUITE } from "@/content/modules";
+import { featuredToolForSuite } from "@/content/freeTools";
+import { industryResearchForSuite } from "@/content/industryResearch";
 import { SUITES, getSuite, type SuiteId } from "@/content/suites";
+import { altitudeLabel } from "@/content/strategyLevels";
 import { PLATFORM_AGENTS } from "@/content/agents";
 import { CTA } from "@/content/brand";
 import { suiteFaq } from "@/content/suiteFaq";
@@ -143,11 +148,12 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
   const studio = suite.treatment === "studio";
   const agents = PLATFORM_AGENTS.filter((a) => a.suite === suite.id);
   const faq = suiteFaq(suite);
+  const featuredTool = featuredToolForSuite(suite.id);
 
   const subNavItems = [
     { id: "preview", label: "Preview" },
     { id: "use-cases", label: "Use cases" },
-    ...(MODULE_BY_ENGINE[suite.id]
+    ...(MODULE_BY_SUITE[suite.id]
       ? [{ id: "how-it-works", label: "How it works" }, { id: "capabilities", label: "Capabilities" }]
       : []),
     ...(agents.length ? [{ id: "agents", label: "Agents" }] : []),
@@ -190,7 +196,7 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
   /* The brand document wrote a full landing page for the four suites.
      Where one exists its hero supersedes suites.ts, and its sections
      render below the use cases. The other five suites are untouched. */
-  const modulePage = MODULE_BY_ENGINE[suite.id];
+  const modulePage = MODULE_BY_SUITE[suite.id];
   /* Dark radial-gradient hero, reserved for the four suites with a
      module page — see the header comment on the hero `<section>`. */
   const darkHero = !!modulePage;
@@ -273,6 +279,15 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
                   <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
                 </span>
                 <span className="font-display text-lg" style={{ color: darkHero ? "#FFFFFF" : undefined }}>{suite.name}</span>
+                <span
+                  className="rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                  style={{
+                    color: darkHero ? "var(--accent-glow)" : suite.tint,
+                    border: `1px solid ${darkHero ? "rgba(255,255,255,0.25)" : suite.tint}`,
+                  }}
+                >
+                  {altitudeLabel(suite.strategyLevel)} strategy
+                </span>
                 {suite.external && (
                   <span className="faint rounded px-2 py-1 text-[10px] font-medium uppercase tracking-wide"
                         style={{ border: "1px solid var(--line)" }}>
@@ -456,6 +471,23 @@ export default async function SuitePage({ params }: { params: Promise<{ id: stri
             SuiteMore, the same pull-down component EcosystemHub's cards
             use, reused rather than rebuilt. */}
         <Section id="use-cases">
+          {/* One concrete run before the narrative use cases below it —
+              see EngineExample's header comment. Only renders where a
+              suite has a real, live tool to point at (featuredTool is
+              undefined for DESK and SIGNAL today), so this never links
+              to something that isn't actually built.
+
+              IndustryContext is independent of EngineExample on
+              purpose: SIGNAL has a real, checked citation (Gartner) but
+              no wired free tool yet, and gating the citation behind the
+              tool would have hidden it for exactly the suite it exists
+              for. Each renders (or not) on its own evidence. */}
+          {(featuredTool || industryResearchForSuite(suite.id).length > 0) && (
+            <div className="mb-16" style={{ ["--suite-tint" as string]: suite.tint }}>
+              {featuredTool && <EngineExample tool={featuredTool} suiteId={suite.id} tint={suite.tint} />}
+              <IndustryContext suiteId={suite.id} tint={suite.tint} />
+            </div>
+          )}
           <div className="space-y-24">
             {suite.useCases.map((uc, i) => {
               const [leadBullets, moreBullets] = [uc.bullets.slice(0, 2), uc.bullets.slice(2)];

@@ -8,7 +8,7 @@ import { WhyAccordion } from "@/components/sections/WhyAccordion";
 import { SYSTEM_FLOW } from "@/content/modules";
 import { USE_CASES as USE_CASE_PAGES } from "@/content/useCases";
 import {
-  ENGINES, OS_LAYER, WHO_ITS_FOR, AIOS_WORKS, PROOF_POINTS, PROMISE,
+  PRIMARY_SUITES, OS_LAYER, WHO_ITS_FOR, AIOS_WORKS, PROOF_POINTS, PROMISE,
   ADVANTAGE, HOW_IT_WORKS, USE_CASES, INDUSTRIES, QUOTES,
   ECHO_TAGLINE, CTA_TRIO,
 } from "@/content/aios";
@@ -36,7 +36,7 @@ export function AiosEngines() {
         blurb="LAMID ONE replaces fragmented tools, episodic consulting cycles, and siloed decision-making with a unified Human-AI Operating System."
       />
       <div className="grid items-start gap-4 sm:grid-cols-2">
-        {ENGINES.map((e) => (
+        {PRIMARY_SUITES.map((e) => (
           <div key={e.id} className="card p-7" style={{ borderTop: `3px solid ${e.tint}` }}>
             {/* The value leads, the engine name follows. The four values
                 are the promise made in the hero subhead; naming them
@@ -155,7 +155,7 @@ export function AiosTriad() {
       </div>
       <div className="mt-12 grid gap-4 lg:grid-cols-3">
         {CTA_TRIO.map((c, i) => {
-          const tint = ENGINES.find((e) => e.id === c.engine)?.tint ?? "var(--brand)";
+          const tint = PRIMARY_SUITES.find((e) => e.id === c.suite)?.tint ?? "var(--brand)";
           return (
             <Link
               key={c.title}
@@ -223,7 +223,7 @@ export function AiosArchitecture() {
           The OS architecture
         </p>
         <h2 className="h-section mx-auto mt-4 max-w-2xl" style={{ color: "var(--page)" }}>
-          Four engines. One core. A loop that closes.
+          Four suites. One core. A loop that closes.
         </h2>
       </div>
 
@@ -241,7 +241,7 @@ export function AiosArchitecture() {
         <p className="py-3 text-center text-lg tracking-[0.6em]" style={{ color: "var(--page)", opacity: 0.35 }} aria-hidden="true">↓↓↓↓</p>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {ENGINES.map((e) => (
+          {PRIMARY_SUITES.map((e) => (
             <div
               key={e.id}
               className="rounded-xl p-4 text-center"
@@ -345,14 +345,14 @@ export function AiosProof() {
       <div className="mt-16">
         <SectionHeading
           eyebrow="The promise"
-          title="One system. One intelligence. Four engines working as one."
+          title="One system. One intelligence. Four suites working as one."
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PROMISE.map((p) => {
-            const engine = ENGINES.find((e) => e.name.endsWith(p.engine));
+            const suite = PRIMARY_SUITES.find((e) => e.name.endsWith(p.suite));
             return (
-              <div key={p.engine} className="card p-6" style={{ borderTop: `3px solid ${engine?.tint ?? "var(--brand)"}` }}>
-                <p className="faint text-xs font-semibold uppercase tracking-wide">{p.engine}</p>
+              <div key={p.suite} className="card p-6" style={{ borderTop: `3px solid ${suite?.tint ?? "var(--brand)"}` }}>
+                <p className="faint text-xs font-semibold uppercase tracking-wide">{p.suite}</p>
                 <h3 className="mt-2 font-semibold leading-snug">{p.claim}</h3>
                 <p className="muted mt-2 text-sm leading-relaxed">{p.body}</p>
               </div>

@@ -19,6 +19,27 @@ const nextConfig = {
       "./node_modules/pdfjs-dist/standard_fonts/**/*",
     ],
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+    ];
+  },
   /* DOCUSHARE moved off the shared /suites/[id] template to its own
      bespoke page — see content/docushare.ts's header comment for why.
      "docushare" is no longer in SUITES, so generateStaticParams no
@@ -27,7 +48,11 @@ const nextConfig = {
      the move is deliberate and not coming back. */
   async redirects() {
     return [
-      { source: "/suites/docushare", destination: "/docushare", permanent: true },
+      {
+        source: "/suites/docushare",
+        destination: "/docushare",
+        permanent: true,
+      },
     ];
   },
 };

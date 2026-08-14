@@ -8,7 +8,7 @@
 import type { FaqItem } from "@/components/sections/Faq";
 import type { SuiteId } from "./suites";
 import type { TierId } from "./tiers";
-import type { Engine } from "./aios";
+import type { PrimarySuite } from "./aios";
 
 export type Solution = {
   slug: string;
@@ -18,7 +18,7 @@ export type Solution = {
   headline: string;
   subhead: string;
   /**
-   * The engine whose value this buyer is actually shopping for.
+   * The primary suite whose value this buyer is actually shopping for.
    *
    * Set on the four ROLE pages, where the mapping is exact — a CFO is
    * buying Financial Performance, a CPO is buying Capability. It drives
@@ -27,11 +27,11 @@ export type Solution = {
    *
    * Deliberately absent on the three SIZE pages. A founder is not
    * shopping for one of the four values; they are shopping for all of
-   * them at a size that fits. Forcing an engine onto those pages would
-   * narrow the offer rather than clarify it — so they get the full
-   * four-value line instead.
+   * them at a size that fits. Forcing a primary suite onto those pages
+   * would narrow the offer rather than clarify it — so they get the
+   * full four-value line instead.
    */
-  engine?: Engine["id"];
+  suite?: PrimarySuite["id"];
   /** What this buyer is actually trying to avoid. */
   pains: string[];
   /** Ordered starting path — not a feature list. */
@@ -144,7 +144,7 @@ export const SOLUTIONS: Solution[] = [
   /* ── By role ──────────────────────────────────────────── */
   {
     slug: "ceo",
-    engine: "core",
+    suite: "core",
     kind: "role",
     nav: "Chief executive",
     eyebrow: "For chief executives",
@@ -171,7 +171,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "cfo",
-    engine: "finance",
+    suite: "finance",
     kind: "role",
     nav: "Chief financial officer",
     eyebrow: "For chief financial officers",
@@ -203,7 +203,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "cpo",
-    engine: "talent",
+    suite: "talent",
     kind: "role",
     nav: "Chief people officer",
     eyebrow: "For chief people officers",
@@ -230,7 +230,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "strategy",
-    engine: "grow",
+    suite: "grow",
     kind: "role",
     nav: "Strategy and transformation",
     eyebrow: "For strategy and transformation leaders",

@@ -21,6 +21,7 @@ import {
   Network, TrendingUp, GraduationCap, Landmark,
   Inbox, Radar, BookOpen, Store,
 } from "lucide-react";
+import type { StrategyLevel } from "./strategyLevels";
 
 export type SuiteId =
   | "core" | "grow" | "talent" | "finance"
@@ -65,6 +66,13 @@ export type Suite = {
   name: string;
   /** Plain-words category, always present under the name. */
   kind: string;
+  /**
+   * Which altitude of strategic decision this suite actually answers —
+   * see strategyLevels.ts. Most suites carry one; CORE carries two
+   * because it is the only suite that ties a board-level decision to
+   * the team-level cadence that carries it out.
+   */
+  strategyLevel: StrategyLevel[];
   audience: "enterprise" | "smb" | "both";
   tint: string;
   Icon: LucideIcon;
@@ -118,6 +126,7 @@ export const CORE: Suite = {
   dashboardScreenshot: "/screenshots/core-dashboard.svg",
   name: "LAMID CORE",
   kind: "Strategy and execution software",
+  strategyLevel: ["corporate", "operational"],
   audience: "both",
   tint: "#1A7CFF",
   Icon: Network,
@@ -143,7 +152,7 @@ export const CORE: Suite = {
         { value: "100", label: "decision engines in the suite", verified: true },
         { value: "—", label: "faster to a signed-off decision", verified: false },
       ],
-      mechanism: "A decision usually stalls because nobody can see where it's stuck, not because the analysis is slow. Making the stall visible — who it's waiting on, and why — is what closes the gap, whatever the eventual number turns out to be.",
+      mechanism: "A decision usually stalls because nobody can see where it's stuck, not because the analysis is slow. With 100 engines scoring one dimension each instead of one number averaging all of them, the stall traces to the specific engine that flagged it — who it's waiting on, and why — not a score you have to interpret.",
       learnMore: { label: "Learn more about decision intelligence", href: "/suites/core#decision" },
     },
     {
@@ -181,7 +190,7 @@ export const CORE: Suite = {
       eyebrow: "Engagement workflow",
       title: "One flow from first conversation to final invoice.",
       body:
-        "Onboarding, discovery, strategy, delivery and closure run as one sequence, not five disconnected tools — the diagnostic that opened the conversation is still attached when the invoice goes out. Judgement stays on the decision. The paperwork runs itself.",
+        "Onboarding, discovery, strategy, implementation and closure run as one sequence, not five disconnected tools — the diagnostic that opened the conversation is still attached when the invoice goes out. Judgement stays on the decision. The paperwork runs itself.",
       bullets: [
         "Onboarding — post the brief, sign the contract, collect the retainer in DESK",
         "Discovery — interview stakeholders and map the bottlenecks with CORE's diagnostics",
@@ -242,6 +251,7 @@ export const GROW: Suite = {
   dashboardScreenshot: "/screenshots/grow-dashboard.svg",
   name: "LAMID GROW",
   kind: "Digital Growth & Advisory",
+  strategyLevel: ["business"],
   audience: "both",
   tint: "#1A7CFF",
   Icon: TrendingUp,
@@ -324,6 +334,7 @@ export const TALENT: Suite = {
   dashboardScreenshot: "/screenshots/talent-dashboard.svg",
   name: "LAMID TALENT",
   kind: "Human-AI Talent Intelligence & Workforce Acceleration",
+  strategyLevel: ["functional"],
   audience: "both",
   tint: "#1A7CFF",
   Icon: GraduationCap,
@@ -400,6 +411,7 @@ export const FINANCE: Suite = {
   dashboardScreenshot: "/screenshots/finance-dashboard.svg",
   name: "LAMID FINANCE",
   kind: "Financial clarity software",
+  strategyLevel: ["functional", "corporate"],
   audience: "both",
   tint: "#1A7CFF",
   Icon: Landmark,
@@ -489,6 +501,7 @@ export const DESK: Suite = {
   dashboardScreenshot: "/screenshots/desk-dashboard.svg",
   name: "LAMID DESK",
   kind: "Client and revenue operations software",
+  strategyLevel: ["operational"],
   audience: "smb",
   tint: "#1A7CFF",
   Icon: Inbox,
@@ -579,6 +592,7 @@ export const SIGNAL: Suite = {
   dashboardScreenshot: "/screenshots/signal-dashboard.svg",
   name: "LAMID SIGNAL",
   kind: "Market visibility and content software",
+  strategyLevel: ["functional"],
   audience: "smb",
   tint: "#1A7CFF",
   Icon: Radar,
@@ -647,6 +661,7 @@ export const LEARN: Suite = {
   dashboardScreenshot: "/screenshots/learn-dashboard.svg",
   name: "LAMID LEARN",
   kind: "Learning management and certification platform",
+  strategyLevel: ["functional"],
   audience: "smb",
   tint: "#1A7CFF",
   Icon: BookOpen,
@@ -730,6 +745,7 @@ export const MARKET: Suite = {
   dashboardScreenshot: "/screenshots/market-dashboard.svg",
   name: "LAMID MARKET",
   kind: "Expert marketplace and sourcing software",
+  strategyLevel: ["functional"],
   audience: "both",
   tint: "#1A7CFF",
   Icon: Store,

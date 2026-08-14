@@ -11,9 +11,9 @@ import { SuiteGrid } from "@/components/sections/SuiteGrid";
 import { USE_CASES, getUseCase } from "@/content/useCases";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
 import { CTA } from "@/content/brand";
-import { ENGINES, PROOF_POINTS, USE_CASES as AIOS_USE_CASES } from "@/content/aios";
+import { PRIMARY_SUITES, PROOF_POINTS, USE_CASES as AIOS_USE_CASES } from "@/content/aios";
 import { MODULE_PAGES, SUITE_PARENT } from "@/content/modules";
-import { microcopyForEngine } from "@/content/microcopy";
+import { microcopyForSuite } from "@/content/microcopy";
 
 /**
  * USE CASE TEMPLATE — one file, nine pages.
@@ -46,17 +46,17 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
   const suites = uc.suites.map((id) => SUITES_BY_ID[id as SuiteId]).filter(Boolean);
   const siblings = USE_CASES.filter((u) => u.slug !== uc.slug).slice(0, 6);
 
-  /* The four-engine structure, resolved from uc.engine. Every one of
+  /* The four-suite structure, resolved from uc.suite. Every one of
      these is derived rather than written per page, so a use case can
-     never disagree with the homepage about which engine owns it or what
-     value that engine delivers. */
-  const engine = ENGINES.find((e) => e.id === uc.engine)!;
-  const modulePage = MODULE_PAGES.find((m) => m.engine === uc.engine)!;
+     never disagree with the homepage about which primary suite owns it or what
+     value that primary suite delivers. */
+  const primarySuite = PRIMARY_SUITES.find((e) => e.id === uc.suite)!;
+  const modulePage = MODULE_PAGES.find((m) => m.suite === uc.suite)!;
   const docCase = uc.docUseCase
     ? AIOS_USE_CASES.find((d) => d.title === uc.docUseCase)
     : undefined;
 
-  /* Suites this use case touches that run INSIDE an engine rather than
+  /* Suites this use case touches that run INSIDE a primary suite rather than
      being one. These get the division-of-labour line, which is what
      stops the section reading as a flat list of peers. */
   const inner = uc.suites
@@ -68,11 +68,11 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
      swap this band for a different argument. */
   const continuous = PROOF_POINTS.find((p) => p.title.startsWith("Continuous Growth Loops"));
 
-  /* The engine's own glossary. Attached to the flow stages below, which
+  /* The primary suite's own glossary. Attached to the flow stages below, which
      is what these tooltips were written to explain — "Insight streams
      show how patterns emerge across the organisation" is a definition of
      a stage in CORE's flow, not a general marketing line. */
-  const glossary = microcopyForEngine(uc.engine);
+  const glossary = microcopyForSuite(uc.suite);
 
   return (
     <>
@@ -81,19 +81,19 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
         <section className="border-b" style={{ borderColor: "var(--line-soft)" }}>
           <div className="shell py-20">
             <div className="max-w-4xl">
-              {/* The value first, in its engine's tint. The homepage
+              {/* The value first, in its primary suite's tint. The homepage
                   promises four values; this is the page where one of
                   them gets argued, so it says which one before it says
                   anything else. Written out rather than using <Eyebrow>
                   because that component's dot is hard-wired to the brand
-                  red, and here the dot has to carry the engine. */}
+                  red, and here the dot has to carry the primary suite. */}
               <p className="inline-flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.16em]">
                 <span
                   className="h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ background: engine.tint }}
+                  style={{ background: primarySuite.tint }}
                   aria-hidden="true"
                 />
-                <span style={{ color: "var(--ink-muted)" }}>{engine.value}</span>
+                <span style={{ color: "var(--ink-muted)" }}>{primarySuite.value}</span>
                 <span className="faint font-normal normal-case tracking-normal">
                   · Use case
                 </span>
@@ -168,26 +168,26 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
             cannot be left one click away. */}
         {continuous && (
           <Section id="continuous" className="border-t">
-            <div className="border-l-4 pl-8 sm:pl-10" style={{ borderColor: engine.tint }}>
+            <div className="border-l-4 pl-8 sm:pl-10" style={{ borderColor: primarySuite.tint }}>
               <h2 className="h-section max-w-3xl">{continuous.title}</h2>
               <p className="lead mt-6 max-w-3xl">{continuous.body}</p>
             </div>
           </Section>
         )}
 
-        {/* ── Which engine owns this ──────────────────────────
+        {/* ── Which primary suite owns this ──────────────────────────
             The section that used to say "2 suites, one record" and
-            render them as peers. It now names the engine, its promise,
-            and the division of labour between the engine and the
+            render them as peers. It now names the primary suite, its promise,
+            and the division of labour between the primary suite and the
             suites that run inside it. */}
-        <Section id="engine" tone="tint" className="border-t">
+        <Section id="primary-suite" tone="tint" className="border-t">
           <SectionHeading
-            eyebrow={`Inside ${engine.name}`}
-            title={`${engine.value} runs on ${engine.name}.`}
-            blurb={docCase?.body ?? engine.promise}
+            eyebrow={`Inside ${primarySuite.name}`}
+            title={`${primarySuite.value} runs on ${primarySuite.name}.`}
+            blurb={docCase?.body ?? primarySuite.promise}
           />
 
-          {/* The intelligence flow, showing what feeds this engine and
+          {/* The intelligence flow, showing what feeds this primary suite and
               what it feeds — the reason "one OS" is a claim this page
               demonstrates rather than asserts. */}
           <ol className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
@@ -197,7 +197,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
                   className="card flex-1 px-4 py-3.5 text-center text-sm font-semibold"
                   style={
                     i === modulePage.flow.length - 1
-                      ? { borderColor: engine.tint, color: engine.tint }
+                      ? { borderColor: primarySuite.tint, color: primarySuite.tint }
                       : undefined
                   }
                   /* A native title rather than a custom tooltip: these
@@ -209,7 +209,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
                   {stage}
                 </span>
                 {i < modulePage.flow.length - 1 && (
-                  <span className="shrink-0 text-lg" style={{ color: engine.tint }} aria-hidden="true">
+                  <span className="shrink-0 text-lg" style={{ color: primarySuite.tint }} aria-hidden="true">
                     →
                   </span>
                 )}
@@ -217,14 +217,14 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
             ))}
           </ol>
 
-          {/* Division of labour for the suites that run inside an
-              engine. Placement, not demotion — each line says what the
-              engine does and what the suite does, as a pair. */}
+          {/* Division of labour for the suites that run inside a
+              primary suite. Placement, not demotion — each line says what the
+              primary suite does and what the suite does, as a pair. */}
           {inner.length > 0 && (
             <dl className="mt-12 grid gap-x-10 gap-y-6 sm:grid-cols-2">
               {inner.map(({ id, parent }) => (
                 <div key={id}>
-                  <dt className="font-display text-lg leading-snug" style={{ color: engine.tint }}>
+                  <dt className="font-display text-lg leading-snug" style={{ color: primarySuite.tint }}>
                     {parent.split}
                   </dt>
                   <dd className="muted mt-2 text-sm leading-relaxed">{parent.body}</dd>
@@ -244,14 +244,14 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
         </Section>
 
         {/* ── Sectors ─────────────────────────────────────────
-            The engine's industry applications, kept as a compact chip
+            The primary suite's industry applications, kept as a compact chip
             row rather than a card grid. There is no sector-specific
             data behind these, so they are positioned as where the
-            engine is applied — not as proof it has been. */}
+            primary suite is applied — not as proof it has been. */}
         <Section id="industries" className="border-t">
           <SectionHeading
             eyebrow="Where this applies"
-            title={`${engine.name.replace("LAMID ", "")} adapts to every sector.`}
+            title={`${primarySuite.name.replace("LAMID ", "")} adapts to every sector.`}
           />
           {/* A compact chip row — no room for `body` here, so only the
               sector name renders even where MODULE_PAGES carries one. */}
@@ -264,7 +264,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
               >
                 <span
                   className="h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ background: engine.tint }}
+                  style={{ background: primarySuite.tint }}
                   aria-hidden="true"
                 />
                 {ind.name}

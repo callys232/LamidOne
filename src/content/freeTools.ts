@@ -217,6 +217,21 @@ export const FREE_TOOLS: FreeTool[] = [
 export const LIVE_TOOLS = FREE_TOOLS.filter((t) => t.engineCode);
 
 /**
+ * One concrete, runnable example per suite — for suite pages that want
+ * to ground "how do I use this" in an actual input/output pair rather
+ * than only the homepage's single featured diagnostic (which is always
+ * CORE's Q44). Deliberately broader than RUNNABLE_TOOLS: an
+ * `externalHref` (LEARN's template library) is a genuine live
+ * destination too, just off-platform, so it counts here even though the
+ * homepage picker excludes it. DESK and SIGNAL have no entry — SIGNAL's
+ * visibility check has no `engineCode` and no href of any kind yet, and
+ * DESK has none listed — so both correctly resolve to `undefined` rather
+ * than linking a page that isn't live.
+ */
+export const featuredToolForSuite = (suiteId: string): FreeTool | undefined =>
+  FREE_TOOLS.find((t) => t.suite === suiteId && (t.engineCode || t.toolHref || t.externalHref));
+
+/**
  * Everything a visitor can actually run right now — an engine, a
  * dedicated calculator, or a real page. Excludes anything not yet wired
  * to a computation, because a diagnostic picker that offers a dead

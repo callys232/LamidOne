@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { SUITES, type Suite } from "@/content/suites";
+import { altitudeLabel } from "@/content/strategyLevels";
 
 /**
  * The suite grid — the compression made visible.
@@ -69,6 +70,9 @@ export function SuiteCard({ suite }: { suite: Suite }) {
 
       <h3 className="font-display text-xl">{suite.name}</h3>
       <p className="faint mt-1 text-[13px]">{suite.kind}</p>
+      <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide" style={{ color: suite.tint }}>
+        {altitudeLabel(suite.strategyLevel)} strategy
+      </p>
 
       <ul className="mt-5 flex-1 space-y-2.5">
         {bullets.map((b) => (

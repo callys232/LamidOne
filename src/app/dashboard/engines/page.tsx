@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useDashboard } from "@/components/dashboard/DashboardShell";
 import { SUITES } from "@/content/suites";
-import { engineForSuite } from "@/content/aios";
-import { microcopyForEngine } from "@/content/microcopy";
+import { primarySuiteForSuite } from "@/content/aios";
+import { microcopyForSuite } from "@/content/microcopy";
 import { EmptyState } from "@/app/dashboard/page";
 
 /**
@@ -56,7 +56,7 @@ export default function EnginesPage() {
                category line returns, because the prompt has been
                answered and repeating it would be nagging. */
             const mc = v.intelligence.runsMade === 0
-              ? microcopyForEngine(engineForSuite(s.id)?.id)
+              ? microcopyForSuite(primarySuiteForSuite(s.id)?.id)
               : null;
             return (
               <Link key={s.id} href={`/suites/${s.id}#use-cases`} className="card card-interactive p-5">

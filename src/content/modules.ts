@@ -1,4 +1,4 @@
-import type { Engine } from "./aios";
+import type { PrimarySuite } from "./aios";
 
 /**
  * MODULE LANDING PAGE COPY — CORE, GROW, TALENT, FINANCE.
@@ -10,7 +10,7 @@ import type { Engine } from "./aios";
  * titles, every closing CTA) — "The Diagnostic Intelligence Engine of
  * the Human-AI Operating System", "LAMID GROW is the transformation
  * engine", "your capability engine begins here". That is the same
- * ambiguity that produced the ENGINES[].suites bug in aios.ts: on this
+ * ambiguity that produced the PRIMARY_SUITES[].suites bug in aios.ts: on this
  * site "engine" is reserved for an individual diagnostic tool (Q44,
  * R01…), and CORE/GROW/TALENT/FINANCE are suites. Left as written, this
  * page would have been the most visible surviving instance of the exact
@@ -44,7 +44,7 @@ import type { Engine } from "./aios";
  */
 
 export type ModulePage = {
-  engine: Engine["id"];
+  suite: PrimarySuite["id"];
   /** Small tracked kicker above the identity chip. Optional: only CORE
    *  has one so far — GROW, TALENT and FINANCE fall back to no eyebrow
    *  rather than a placeholder, until their own is written. */
@@ -92,7 +92,7 @@ export type ModulePage = {
 
 export const MODULE_PAGES: ModulePage[] = [
   {
-    engine: "core",
+    suite: "core",
     eyebrow: "Consulting, Reimagined",
     headline: "Strategy That Never Goes Stale",
     tagline: "See Clearly. Decide Faster.",
@@ -102,7 +102,7 @@ export const MODULE_PAGES: ModulePage[] = [
        result — the same fact, said from the seat you're actually
        sitting in (see the driver's-seat note below `works`). */
     subhead:
-      "Run a diagnostic any time you need one, and every decision stays lined up with what's actually happening — not what happened last quarter.",
+      "Run a diagnostic any time you need one, and every decision stays lined up with what's actually happening — not what happened last quarter. The only suite here that runs both ends: a board-level call and the weekly cadence that carries it out.",
     purpose: {
       /* Was "Clarity is the beginning of transformation." — an
          abstract noun doing the being, not a person doing anything.
@@ -147,11 +147,11 @@ export const MODULE_PAGES: ModulePage[] = [
     capabilities: [
       { title: "See every diagnostic in one place", body: "Every score and every record live in one system — not scattered across five tools that don't talk to each other." },
       { title: "Catch what you're missing", body: "Find the blind spots and the opportunities sitting behind them, before they cost you." },
-      { title: "See what's actually driving the numbers", body: "Not what the org chart says should be driving them." },
+      { title: "See what's actually driving the numbers", body: "The trace runs to the decision, team or process that actually moved the metric — not whichever one the org chart assumes should be driving it." },
       { title: "Turn insight into your next move", body: "CORE sorts what you learn into a short, ordered list: do this first." },
       { title: "Back your judgement with real facts", body: "Decide with what's true right now, not what was true last quarter." },
-      { title: "Catch risk while it's still small", body: "Governance, compliance and operational risk, flagged as it happens — not at the next audit." },
-      { title: "Check a decision before you commit", body: "See whether it actually lines up with your stated strategy, before you act on it." },
+      { title: "Flag risk while it's still small", body: "Governance, compliance and operational risk, flagged as it happens — not at the next audit." },
+      { title: "Check a decision before you commit", body: "See whether it actually lines up with your stated strategy — not a gut sense that it probably does." },
     ],
     /* Was ["OS Core Layer", "Diagnostic Nodes", "Insight Streams",
        "Diagnostic Outputs"] — architecture jargon naming CORE's own
@@ -187,22 +187,24 @@ export const MODULE_PAGES: ModulePage[] = [
     cta: { claim: "Start with clarity.", action: "Activate LAMID CORE, and start running your own diagnostics." },
   },
   {
-    engine: "grow",
+    suite: "grow",
     /* Was "Intelligent Transformation Pathways for Business Momentum" —
        four nouns stacked with no verb, the same pattern CORE's old
-       headline had. Rewritten as a plain imperative built on GROW's own
-       established value word (ENGINES.grow.value in aios.ts is
-       "Transformation") — same move as CORE's tagline reusing
-       "Clarity". */
-    headline: "Transform With a Plan You Can Actually Carry",
-    tagline: "Plan It. Then Move.",
-    /* Was "...can actually carry" — the headline's exact phrase,
-       repeated. See the note above `cta` for the full count: "actually
-       carry" (or close variants) turned up 4 times down this one page.
-       Diversified below; the headline keeps the phrase since that's
-       the one placement that earns it. */
+       headline had. Then "Transform With a Plan You Can Actually
+       Carry" — fixed the verb problem but introduced a new one: "actually
+       carry" (or close variants) turned up 4 times on this one page, and
+       this was the instance that supposedly earned the phrase. Replaced
+       outright rather than patched. Matches CORE's own headline shape
+       (noun + "That" + verb phrase — "Strategy That Never Goes Stale")
+       and uses GROW's own established value word (PRIMARY_SUITES.grow.value
+       in aios.ts is "Transformation") — same move as CORE's tagline
+       reusing "Clarity". Deliberately distinct from the subhead below:
+       the subhead already owns "growth plan sized to capacity" in its
+       own words, so the headline doesn't restate it. */
+    headline: "Transformation That Fits What You Can Resource",
+    tagline: "Where People and AI Build the Future",
     subhead:
-      "Build a growth plan sized to what your people, cash and cadence can support — then track it as one flow instead of five disconnected initiatives.",
+      "Build a growth plan sized to what your people, cash and cadence can support — then track it as one flow instead of five disconnected initiatives. This is business-unit strategy: how you compete in your market, not what the board allocates.",
     purpose: {
       /* Was "Transformation is not an event. It is a system." — an
          abstract noun doing the being, same fix as CORE's purpose
@@ -270,11 +272,11 @@ export const MODULE_PAGES: ModulePage[] = [
     cta: { claim: "Move with intelligence.", action: "Activate LAMID GROW, and build a plan your business can carry." },
   },
   {
-    engine: "talent",
+    suite: "talent",
     /* Was "Workforce Capability Intelligence for Business Strength" —
        four stacked nouns, no verb. First rewrite was "Build the
        Capability Before You Need It", built on TALENT's own value word
-       (ENGINES.talent.value is "Capability") — but "before you need
+       (PRIMARY_SUITES.talent.value is "Capability") — but "before you need
        it" is the exact phrase the "Succession and pathways" use case
        already uses two sections down this same page (suites.ts:
        "Build the bench before you need it."), so the headline was
@@ -287,7 +289,7 @@ export const MODULE_PAGES: ModulePage[] = [
     headline: "See Your Workforce as Clearly as Your Numbers",
     tagline: "Map It. Then Close It.",
     subhead:
-      "See where your workforce is strong, stretched or at risk — then close the gap before it becomes a resignation, a stalled project or a leadership vacuum.",
+      "See where your workforce is strong, stretched or at risk — then close the gap before it becomes a resignation, a stalled project or a leadership vacuum. This is the people function's own plan, not an HR report written for someone else.",
     purpose: {
       /* Was "Capability is the foundation of performance." — same
          abstract-noun-doing-the-being pattern fixed on CORE and GROW. */
@@ -343,17 +345,17 @@ export const MODULE_PAGES: ModulePage[] = [
     cta: { claim: "Strengthen your workforce.", action: "Activate LAMID TALENT, and see your people as clearly as your numbers." },
   },
   {
-    engine: "finance",
+    suite: "finance",
     /* Was "Real-Time Financial Foresight for Business Performance" —
        four stacked nouns, no verb. suites.ts's own FINANCE headline
        ("Finance That Drives Decisions, Not Just Reports Them") was
        already plain and verb-led, so reused here rather than inventing
        a second, weaker one — same value word either way
-       (ENGINES.finance.value in aios.ts is "Financial Performance"). */
+       (PRIMARY_SUITES.finance.value in aios.ts is "Financial Performance"). */
     headline: "Finance That Drives Decisions, Not Just Reports Them",
     tagline: "See the Impact. Then Decide.",
     subhead:
-      "See exactly what a decision costs or earns before you make it — CORE's diagnostics, GROW's plan and TALENT's workforce data, all priced in one place.",
+      "See exactly what a decision costs or earns before you make it — CORE's diagnostics, GROW's plan and TALENT's workforce data, all priced in one place. Runs the finance function's own budget and the board's enterprise-value number off the same figures.",
     purpose: {
       /* Was "Financial clarity is the anchor of business intelligence."
          — same abstract-noun-doing-the-being pattern fixed on CORE,
@@ -409,8 +411,8 @@ export const MODULE_PAGES: ModulePage[] = [
   },
 ];
 
-export const MODULE_BY_ENGINE: Record<string, ModulePage> = Object.fromEntries(
-  MODULE_PAGES.map((m) => [m.engine, m]),
+export const MODULE_BY_SUITE: Record<string, ModulePage> = Object.fromEntries(
+  MODULE_PAGES.map((m) => [m.suite, m]),
 );
 
 /**
@@ -438,23 +440,24 @@ export const SYSTEM_FLOW = {
 };
 
 /**
- * WHERE THE OTHER FIVE SUITES SIT.
+ * WHERE THE OTHER FOUR SUITES SIT.
  *
- * The document locks four suites. The platform ships nine in total. The
- * remaining five are not a fifth through ninth engine — each one is a
- * working part of an engine, or the floor all four stand on.
+ * The document locks four suites. The platform ships eight in total. The
+ * remaining four are not a fifth through eighth primary suite — each one is a
+ * working part of a primary suite, or the floor all four stand on.
  *
- * This is the copy that says so, rendered at the top of those five
+ * This is the copy that says so, rendered at the top of those four
  * suite pages so a reader arriving at LAMID DESK is told immediately
- * that it is how FINANCE actually moves money, rather than being left
- * to wonder why it is not in the four-engine story on the homepage.
+ * that it is how CORE actually turns a decision into a transaction,
+ * rather than being left to wonder why it is not in the four-suite
+ * story on the homepage.
  *
- * `engine: null` means the OS layer rather than an engine — see the
+ * `suite: null` means the OS layer rather than a primary suite — see the
  * DOCUSHARE note in aios.ts's OS_LAYER.
  */
 export type SuiteParent = {
-  /** Which of the four suites this one runs inside; null = the OS layer. */
-  engine: Engine["id"] | null;
+  /** Which of the four primary suites this one runs inside; null = the OS layer. */
+  suite: PrimarySuite["id"] | null;
   /** The one-line relationship, used as the band's heading. */
   claim: string;
   body: string;
@@ -480,35 +483,35 @@ export type SuiteParent = {
  */
 export const SUITE_PARENT: Record<string, SuiteParent> = {
   desk: {
-    engine: "core",
+    suite: "core",
     claim: "DESK runs inside LAMID CORE.",
     body:
       "CORE is where the business decides — the diagnostic, the decision record, the rationale attached to the outcome. DESK is where those decisions become a transaction: proposals costed straight from diagnostic output, milestones tracked through to invoice, with the reasoning carried through rather than re-typed.",
     split: "CORE decides. DESK delivers and bills it.",
   },
   signal: {
-    engine: "finance",
+    suite: "finance",
     claim: "SIGNAL runs inside LAMID FINANCE.",
     body:
       "FINANCE reads the money and the market position together — what the business is worth, and whether the market can find it. SIGNAL is the outward half of that: market visibility, events and content, tracked beside the same forecasts rather than filed in a separate tool.",
     split: "FINANCE prices the business. SIGNAL puts it in front of buyers.",
   },
   learn: {
-    engine: "grow",
+    suite: "grow",
     claim: "LEARN runs inside LAMID GROW.",
     body:
       "GROW sequences growth against the capacity you actually have — which options you can resource, and in what order. LEARN is where the missing capacity gets built rather than hired: structured programmes and certification, so a sequenced plan does not stall waiting on a hire.",
     split: "GROW sequences the plan. LEARN builds what it needs.",
   },
   market: {
-    engine: "talent",
+    suite: "talent",
     claim: "MARKET runs inside LAMID TALENT.",
     body:
       "Capability comes from two places: built, or sourced. LEARN builds it. MARKET sources it — matching vetted specialists against the gap TALENT identified, then running the engagement through milestones you approve before work moves on and payment releases.",
     split: "TALENT names the capability. MARKET brings it in.",
   },
   docushare: {
-    engine: null,
+    suite: null,
     /* This entry is no longer rendered anywhere — DOCUSHARE moved off
        the `Suite` type and the shared suite template to its own page
        (see content/docushare.ts's header comment), so `SuiteParentBand`

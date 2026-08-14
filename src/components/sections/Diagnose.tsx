@@ -3,7 +3,7 @@ import { ArrowRight, Clock } from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { RUNNABLE_TOOLS } from "@/content/freeTools";
 import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
-import { engineForSuite } from "@/content/aios";
+import { primarySuiteForSuite } from "@/content/aios";
 import { EngineCard } from "@/components/graphics/EngineCard";
 
 /**
@@ -37,8 +37,8 @@ export function Diagnose() {
   if (!featured) return null;
 
   const suite = SUITES_BY_ID[featured.suite as SuiteId];
-  const engine = engineForSuite(featured.suite);
-  const tint = engine?.tint ?? suite?.tint ?? "var(--brand)";
+  const primarySuite = primarySuiteForSuite(featured.suite);
+  const tint = primarySuite?.tint ?? suite?.tint ?? "var(--brand)";
   /* `poweredBy` is "Q44 — Decision Clarity Score". This kept the head
      and threw the tail away, which left a bare module code on the card
      next to "3 min" — an identifier that means something internally and
@@ -155,7 +155,7 @@ export function Diagnose() {
           </dl>
         </div>
 
-        <EngineCard suiteId={engine?.id ?? featured.suite} tint={tint} />
+        <EngineCard suiteId={primarySuite?.id ?? featured.suite} tint={tint} />
       </Link>
 
       <p className="faint mt-7 text-sm leading-relaxed">

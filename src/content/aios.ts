@@ -9,7 +9,8 @@ import type { SuiteId } from "./suites";
  * so those are repaired here. No wording was changed.
  *
  * THE AGGREGATION. The document locks four suites. This platform ships
- * nine in total. The remaining five roll up under one of the four:
+ * eight in total (DOCUSHARE is the OS layer, not a ninth — see below).
+ * The remaining four roll up under one of the primary four:
  *
  *   DESK      → CORE     the decision record becomes a transaction —
  *                        proposals, milestones, invoicing — inside the
@@ -28,9 +29,9 @@ import type { SuiteId } from "./suites";
  * (HP_ECOSYSTEM.suites in content/homepage.ts), so a reader could land
  * on two different explanations of where a suite sits depending which
  * page they read. THIS array is the one every other lookup in the
- * codebase resolves through (`ENGINE_BY_SUITE`, `engineForSuite()`) —
+ * codebase resolves through (`PRIMARY_SUITE_BY_SUITE`, `primarySuiteForSuite()`) —
  * fixing SUITE_PARENT without fixing this would have left the error
- * live everywhere ELSE that calls `engineForSuite`.
+ * live everywhere ELSE that calls `primarySuiteForSuite`.
  *
  * DOCUSHARE is deliberately not folded into one suite. File
  * infrastructure and secure sharing is substrate, not a capability — so
@@ -40,30 +41,42 @@ import type { SuiteId } from "./suites";
  * something real.
  *
  * The `suites` field on each suite is the aggregation. It is structural
- * metadata, not copy — it routes the nine real suite pages under the
+ * metadata, not copy — it routes the eight real suite pages under the
  * four-suite story without altering a word of that story.
  */
 
-export type Engine = {
+export type PrimarySuite = {
   id: "core" | "grow" | "talent" | "finance";
   name: string;
-  /** The value this engine delivers. These four words are the thread:
-   *  they appear in the hero subhead as the promise, and again here as
-   *  the engine that keeps it. Hero says what you get; the engine says
-   *  who does it. */
+  /** The value this primary suite delivers. These four words are the
+   *  thread: they appear in the hero subhead as the promise, and again
+   *  here as the suite that keeps it. Hero says what you get; the suite
+   *  says who does it. */
   value: string;
   /** The promise, from the document's PROMISE section. */
   valueClaim: string;
   role: string;
   promise: string;
   capabilities: string[];
-  /** Which real suites run inside this engine. Structural, not copy. */
+  /**
+   * The driver's-seat line, one per SUITE rather than per altitude.
+   * strategyLevels.ts's `inPractice` says the same kind of thing but is
+   * keyed to a pyramid LEVEL — and two suites (TALENT and FINANCE) share
+   * the "functional" level, so that field can't be looked up 1:1 by
+   * suite id without either duplicating text or showing the wrong
+   * suite's action on a card. This is that per-suite equivalent, used
+   * where a component (EcosystemHub's homepage cards) needs exactly one
+   * "you" line matched to exactly one suite. Same rule as
+   * strategyLevels.ts: "you" act, the suite is the tool.
+   */
+  inPractice: string;
+  /** Which real suites run inside this primary suite. Structural, not copy. */
   suites: SuiteId[];
   /** Module accent from the document's UI kit. */
   tint: string;
 };
 
-export const ENGINES: Engine[] = [
+export const PRIMARY_SUITES: PrimarySuite[] = [
   {
     id: "core",
     name: "LAMID CORE",
@@ -78,6 +91,7 @@ export const ENGINES: Engine[] = [
       "Precision guidance for consultants and leaders",
       "Strategic clarity delivered through the AIOS",
     ],
+    inPractice: "You hold decision authority and rationale as one live record — priced in FINANCE against the same figures the board sees.",
     suites: ["core", "desk"],
     tint: "#1A7CFF",
   },
@@ -95,6 +109,7 @@ export const ENGINES: Engine[] = [
       "Real-time performance intelligence",
       "Continuous transformation momentum",
     ],
+    inPractice: "You sequence the growth options actually open to you, priced against the capacity you really have.",
     suites: ["grow", "learn"],
     tint: "#1A7CFF",
   },
@@ -112,6 +127,7 @@ export const ENGINES: Engine[] = [
       "Leadership empowerment and team strengthening",
       "Unified human-capital insight across your business",
     ],
+    inPractice: "You score capability against the roles you need now, and turn that read into a costed budget in FINANCE.",
     suites: ["talent", "market"],
     tint: "#1A7CFF",
   },
@@ -129,27 +145,28 @@ export const ENGINES: Engine[] = [
       "Unified financial performance dashboards",
       "Intelligent capital allocation pathways",
     ],
+    inPractice: "You enter the figures; FINANCE does the arithmetic in front of you — nothing here is estimated by a model.",
     suites: ["finance", "signal"],
     tint: "#1A7CFF",
   },
 ];
 
 /**
- * Suite → engine, inverted from ENGINES[].suites rather than written
- * out again. Anything that knows a suite id can resolve the engine that
- * owns it — agents, use cases, dashboards — without a second mapping
- * that could drift from this one.
+ * Suite → primary suite, inverted from PRIMARY_SUITES[].suites rather
+ * than written out again. Anything that knows a suite id can resolve
+ * the primary suite that owns it — agents, use cases, dashboards —
+ * without a second mapping that could drift from this one.
  *
- * DOCUSHARE is deliberately absent: it is the OS layer, not an engine
- * (see OS_LAYER), so callers get `undefined` and must decide what that
- * means for them rather than being handed a wrong parent.
+ * DOCUSHARE is deliberately absent: it is the OS layer, not a primary
+ * suite (see OS_LAYER), so callers get `undefined` and must decide what
+ * that means for them rather than being handed a wrong parent.
  */
-export const ENGINE_BY_SUITE: Partial<Record<SuiteId, Engine>> =
-  Object.fromEntries(ENGINES.flatMap((e) => e.suites.map((s) => [s, e])));
+export const PRIMARY_SUITE_BY_SUITE: Partial<Record<SuiteId, PrimarySuite>> =
+  Object.fromEntries(PRIMARY_SUITES.flatMap((e) => e.suites.map((s: SuiteId) => [s, e])));
 
-/** The engine that owns a suite, or undefined for the OS layer. */
-export const engineForSuite = (id: string): Engine | undefined =>
-  ENGINE_BY_SUITE[id as SuiteId];
+/** The primary suite that owns a suite, or undefined for the OS layer. */
+export const primarySuiteForSuite = (id: string): PrimarySuite | undefined =>
+  PRIMARY_SUITE_BY_SUITE[id as SuiteId];
 
 /**
  * WHO IT IS FOR.
@@ -194,7 +211,7 @@ export const AIOS_HERO = {
      accounts for the whole system instead of half of it.
 
      Split into three fields rather than one string because the middle
-     word animates. Order matches ENGINES: CORE, GROW, TALENT, FINANCE.
+     word animates. Order matches PRIMARY_SUITES: CORE, GROW, TALENT, FINANCE.
      "talent" rather than "capability" so the rotating word never
      collides with the value of the same name sitting directly below. */
   headlineLead: "The future of",
@@ -204,7 +221,7 @@ export const AIOS_HERO = {
   /* No subhead and no supporting paragraph, deliberately.
    *
    * The four values now render as their own row under the headline
-   * (sourced from ENGINES[].value), which is what the subhead's comma
+   * (sourced from PRIMARY_SUITES[].value), which is what the subhead's comma
    * list was for. The category claim is already in the eyebrow above.
    *
    * The supporting paragraph — "LAMID ONE integrates human expertise
@@ -260,8 +277,7 @@ export const AIOS_WORKS: { title: string; body: string }[] = [
    ─────────────────────────────────────────────────────────────── */
 /**
  * The four places traditional consulting breaks — each paired with the
- * engine that answers it and the three steps to actually use that
- * engine.
+ * suite that answers it and the three steps to actually use it.
  *
  * The pairing is not decoration. Each break is a symptom, and a page
  * that names four symptoms without naming the cure is just complaining
@@ -276,8 +292,8 @@ export const AIOS_WORKS: { title: string; body: string }[] = [
 export type WhyBreak = {
   title: string;
   body: string;
-  /** The engine that answers this failure. In ENGINES order. */
-  engine: Engine["id"];
+  /** The suite that answers this failure. In PRIMARY_SUITES order. */
+  suite: PrimarySuite["id"];
   /** How you actually use it — what you enter, what it does, what returns. */
   use: string[];
   run: { label: string; href: string };
@@ -286,7 +302,7 @@ export type WhyBreak = {
 export const WHY_BREAKS: WhyBreak[] = [
   {
     title: "Diagnosis is fragmented",
-    engine: "core",
+    suite: "core",
     use: [
       "Answer a structured intake — typed questions per dimension, not a blank form.",
       "The CORE engines score decision quality, cadence, alignment and governance against what you entered.",
@@ -297,7 +313,7 @@ export const WHY_BREAKS: WhyBreak[] = [
   },
   {
     title: "Transformation is inconsistent",
-    engine: "grow",
+    suite: "grow",
     use: [
       "List the growth options actually in front of you, and rate each on market pull and what you can already do.",
       "Set how many you can genuinely resource at once — the constraint is the point.",
@@ -308,7 +324,7 @@ export const WHY_BREAKS: WhyBreak[] = [
   },
   {
     title: "Talent development is reactive",
-    engine: "talent",
+    suite: "talent",
     use: [
       "Name the seats you cannot afford to leave empty, and how much notice you would realistically get.",
       "Name who is behind each one and how soon they could actually hold it — leave it blank if there is nobody.",
@@ -319,7 +335,7 @@ export const WHY_BREAKS: WhyBreak[] = [
   },
   {
     title: "Financial intelligence is isolated",
-    engine: "finance",
+    suite: "finance",
     use: [
       "Enter your cost lines — quantities, unit costs, periods.",
       "Set overhead, contingency and tax. Every figure is arithmetic computed from your inputs; no model writes a number.",
@@ -363,24 +379,24 @@ export const PROOF_POINTS: { title: string; body: string }[] = [
 /* ───────────────────────────────────────────────────────────────
    THE PROMISE — one line per engine
    ─────────────────────────────────────────────────────────────── */
-export const PROMISE: { engine: string; claim: string; body: string }[] = [
+export const PROMISE: { suite: string; claim: string; body: string }[] = [
   {
-    engine: "CORE",
+    suite: "CORE",
     claim: "Clarity will be continuous.",
     body: "Real-time diagnostic intelligence from LAMID CORE ensures leaders never navigate blind spots or outdated insight.",
   },
   {
-    engine: "GROW",
+    suite: "GROW",
     claim: "Transformation will be precise.",
     body: "Intelligent pathways from LAMID GROW guide organisations through targeted, adaptive, and integrated change.",
   },
   {
-    engine: "TALENT",
+    suite: "TALENT",
     claim: "Capability will be future-ready.",
     body: "Workforce intelligence from LAMID TALENT accelerates skills, strengthens teams, and aligns human capability with strategic goals.",
   },
   {
-    engine: "FINANCE",
+    suite: "FINANCE",
     claim: "Financial performance will be intelligent.",
     body: "Real-time foresight from LAMID FINANCE connects decisions, talent moves, and transformation pathways directly to financial outcomes.",
   },
@@ -518,17 +534,17 @@ export const INDUSTRIES: { name: string; body: string }[] = [
 /* ───────────────────────────────────────────────────────────────
    PRODUCT WALKTHROUGH — seven steps, a first-time visitor's journey.
 
-   `phase` and `engine` are structural metadata, not copy. The seven
+   `phase` and `suite` are structural metadata, not copy. The seven
    steps are not a flat list: step 1 is entry, steps 2–5 are the four
-   engines each taking their turn, step 6 is where they converge, and
+   suites each taking their turn, step 6 is where they converge, and
    step 7 closes the loop back to the start. Tagging that here lets the
    walkthrough render its real shape instead of a numbered column.
    ─────────────────────────────────────────────────────────────── */
 export type WalkStep = {
   title: string;
   body: string;
-  phase: "enter" | "engine" | "converge" | "loop";
-  engine?: Engine["id"];
+  phase: "enter" | "suite" | "converge" | "loop";
+  suite?: PrimarySuite["id"];
 };
 
 export const WALKTHROUGH: WalkStep[] = [
@@ -538,26 +554,26 @@ export const WALKTHROUGH: WalkStep[] = [
     body: "Leaders, consultants, and teams access a unified interface powered by real-time intelligence and adaptive learning.",
   },
   {
-    phase: "engine",
-    engine: "core",
+    phase: "suite",
+    suite: "core",
     title: "CORE Diagnoses the Business",
     body: "The OS reveals performance drivers, blind spots, systemic patterns, and strategic priorities instantly — providing continuous clarity.",
   },
   {
-    phase: "engine",
-    engine: "grow",
+    phase: "suite",
+    suite: "grow",
     title: "GROW Builds Transformation Pathways",
     body: "Intelligent workflows guide the organisation from strategy to execution, ensuring alignment, momentum, and measurable progress.",
   },
   {
-    phase: "engine",
-    engine: "talent",
+    phase: "suite",
+    suite: "talent",
     title: "TALENT Maps Capability & Accelerates Skills",
     body: "The OS identifies capability gaps, strengthens teams, accelerates skills, and aligns human capital with transformation goals.",
   },
   {
-    phase: "engine",
-    engine: "finance",
+    phase: "suite",
+    suite: "finance",
     title: "FINANCE Delivers Real-Time Foresight",
     body: "Financial intelligence connects decisions to outcomes, enabling smarter resource allocation, scenario modelling, and performance optimisation.",
   },
@@ -605,25 +621,25 @@ export const CTA_TRIO: {
   title: string;
   body: string;
   href: string;
-  engine: Engine["id"];
+  suite: PrimarySuite["id"];
 }[] = [
   {
     title: "Diagnose with Clarity",
     body: "Reveal critical insights instantly and understand exactly where to act.",
     href: "/diagnostics/q44",
-    engine: "core",
+    suite: "core",
   },
   {
     title: "Transform with Precision",
     body: "Activate targeted, intelligent change powered by real-time analysis.",
     href: "/diagnostics/g03",
-    engine: "grow",
+    suite: "grow",
   },
   {
     title: "Grow Continuously",
     body: "Sustain momentum, scale impact, and unlock intelligent, unified growth.",
     href: "/signup",
-    engine: "finance",
+    suite: "finance",
   },
 ];
 

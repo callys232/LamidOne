@@ -1,4 +1,4 @@
-import type { Engine } from "./aios";
+import type { PrimarySuite } from "./aios";
 
 /**
  * MODULE MICROCOPY — the words the product itself speaks.
@@ -12,7 +12,7 @@ import type { Engine } from "./aios";
  *
  * WHY IT MATTERS MORE THAN THE MARKETING COPY. A visitor reads the
  * homepage once. A customer reads "No insights yet — run a diagnostic
- * to reveal clarity" every time they open an empty engine. Microcopy is
+ * to reveal clarity" every time they open an empty suite. Microcopy is
  * where a brand voice is actually kept or lost, and it is normally the
  * part written ad-hoc at the moment a component needs a string.
  *
@@ -26,7 +26,7 @@ import type { Engine } from "./aios";
  * are mine.
  *
  * `run` is the one that carries weight: it is the primary compute
- * action, and it is the label the diagnostic runner uses per engine.
+ * action, and it is the label the diagnostic runner uses per suite.
  */
 
 export type ModuleMicrocopy = {
@@ -39,22 +39,22 @@ export type ModuleMicrocopy = {
     inspect: string;
     /** Watch a measure over time. */
     track: string;
-    /** Open the artefact the engine produced. */
+    /** Open the artefact the suite produced. */
     open: string;
   };
   /** Term → what it means. Attached to the labels below where shown. */
   tooltips: { term: string; body: string }[];
-  /** The engine's own nouns, as the document names them. */
+  /** The suite's own nouns, as the document names them. */
   labels: string[];
   /** Confirmations after a state change. Present tense, no exclamation. */
   interactions: string[];
-  /** Shown when the engine has nothing to display yet. */
+  /** Shown when the suite has nothing to display yet. */
   emptyState: string;
   success: string;
   error: string;
 };
 
-export const MODULE_MICROCOPY: Record<Engine["id"], ModuleMicrocopy> = {
+export const MODULE_MICROCOPY: Record<PrimarySuite["id"], ModuleMicrocopy> = {
   core: {
     buttons: {
       run: "Run Diagnostic",
@@ -142,13 +142,13 @@ export const MODULE_MICROCOPY: Record<Engine["id"], ModuleMicrocopy> = {
 
 /**
  * Microcopy for a module code (Q44, G03, A22…), resolved through the
- * suite that owns it and then the engine that owns that suite.
+ * suite that owns it and then the primary suite that owns that suite.
  *
  * Returns null rather than a default for DOCUSHARE-backed or unmapped
- * codes: a wrong engine's voice is worse than the neutral string the
+ * codes: a wrong suite's voice is worse than the neutral string the
  * caller already has. Callers fall back rather than mis-attribute.
  */
-export function microcopyForEngine(engineId: string | undefined): ModuleMicrocopy | null {
-  if (!engineId) return null;
-  return MODULE_MICROCOPY[engineId as Engine["id"]] ?? null;
+export function microcopyForSuite(suiteId: string | undefined): ModuleMicrocopy | null {
+  if (!suiteId) return null;
+  return MODULE_MICROCOPY[suiteId as PrimarySuite["id"]] ?? null;
 }

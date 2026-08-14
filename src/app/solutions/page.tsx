@@ -40,7 +40,9 @@ export default function SolutionsIndex() {
               <p className="lead mt-6">
                 <span className="text-brand">LAMID ONE</span> adapts to your size, your role and your objective —
                 rather than expecting you to adapt to it. Every path below opens onto the same shared
-                record, so switching starting points later never means starting over.
+                record, so switching starting points later never means starting over. And each role
+                below sits at a different altitude of the business — a board seat is not a functional
+                seat, and the platform treats that as a real distinction, not a detail.
               </p>
             </div>
           </div>

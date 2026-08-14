@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/Button";
 import { HP_ECOSYSTEM } from "@/content/homepage";
 import { SUITE_MARKS, CheckMark } from "@/components/graphics/SuiteMarks";
 import { SuiteMore, Reveal } from "@/components/sections/SuiteMore";
+import { SUITES_BY_ID, type SuiteId } from "@/content/suites";
+import { altitudeLabel } from "@/content/strategyLevels";
+import { PRIMARY_SUITES } from "@/content/aios";
 
 /**
  * "Four suites. One ecosystem." — the hub grid.
  *
  * CORE, GROW, TALENT and FINANCE are the four SUITES. Engines are the
- * tools inside them — Q44, R01, F04, A22 — not a layer above. The
- * `ENGINES` export in aios.ts is a misleading name for the suite
- * grouping; do not read the taxonomy off it.
+ * tools inside them — Q44, R01, F04, A22 — not a layer above. aios.ts's
+ * `PRIMARY_SUITES` export (renamed from the misleading `ENGINES`) is
+ * the suite grouping; do not read the taxonomy off the word "engine".
  *
  * LAYOUT — the split column. Prose on the left, a 2×2 of suites on the
  * right, which is the shape HubSpot's product grid uses and it earns
@@ -121,6 +124,7 @@ export function EcosystemHub() {
         {HP_ECOSYSTEM.suites.map((s, i) => {
           const Mark = SUITE_MARKS[s.id];
           const [lead, ...more] = s.checks;
+          const primary = PRIMARY_SUITES.find((p) => p.id === s.id);
           return (
             <article
               key={s.id}
@@ -150,6 +154,19 @@ export function EcosystemHub() {
               <h3 className="font-display mt-3.5 text-xl font-semibold" style={{ color: s.tint }}>
                 {s.name}
               </h3>
+              <p className="faint mt-1 text-[11px] font-semibold uppercase tracking-wide">
+                {altitudeLabel(SUITES_BY_ID[s.id as SuiteId].strategyLevel)} strategy
+              </p>
+
+              {/* The driver's-seat line — same field, same rule as
+                  AltitudeMap's own `inPractice` line on /why-lamid-one,
+                  now on the page most readers actually land on. Set in
+                  full ink rather than muted grey so it reads as the
+                  thing you go and do, not a footnote to the label above
+                  it. */}
+              {primary && (
+                <p className="mt-3 text-[14.5px] font-medium leading-snug">{primary.inPractice}</p>
+              )}
 
               <hr
                 className="mt-4 border-0 border-t"

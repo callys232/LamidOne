@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ArrowRight } from "lucide-react";
-import { WHY_BREAKS, ENGINES } from "@/content/aios";
+import { WHY_BREAKS, PRIMARY_SUITES } from "@/content/aios";
 
 /**
- * The four places traditional consulting breaks — and the engine that
+ * The four places traditional consulting breaks — and the suite that
  * answers each one.
  *
  * WHAT CHANGED AND WHY. This was four collapsible cards containing only
@@ -15,14 +15,14 @@ import { WHY_BREAKS, ENGINES } from "@/content/aios";
  * go — which was the homepage's whole problem in miniature.
  *
  * Now each row is a diagnosis followed by an instruction: the failure,
- * the engine that fixes it, the three things you actually do, and the
+ * the suite that fixes it, the three things you actually do, and the
  * link that opens the tool. Expanding a row is no longer "read more
  * argument" — it is "here is how to use this".
  *
  * Still collapsed by default, and still independent rather than an
  * exclusive accordion. Closed, the four titles read as one indictment —
  * fragmented, inconsistent, reactive, isolated. Open, they read as a
- * manual. The engine name and its tint stay visible in both states, so
+ * manual. The suite name and its tint stay visible in both states, so
  * the pairing survives without expanding anything.
  */
 export function WhyAccordion() {
@@ -37,17 +37,17 @@ export function WhyAccordion() {
 
 function WhyRow({ index, item }: { index: number; item: (typeof WHY_BREAKS)[number] }) {
   const [open, setOpen] = useState(false);
-  const engine = ENGINES.find((e) => e.id === item.engine)!;
+  const suite = PRIMARY_SUITES.find((e) => e.id === item.suite)!;
 
   return (
-    <div className="card p-6 sm:p-7" style={{ borderTop: `3px solid ${engine.tint}` }}>
+    <div className="card p-6 sm:p-7" style={{ borderTop: `3px solid ${suite.tint}` }}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         className="flex w-full items-start gap-4 text-left"
       >
-        <span className="font-display shrink-0 text-2xl tabular-nums" style={{ color: engine.tint }}>
+        <span className="font-display shrink-0 text-2xl tabular-nums" style={{ color: suite.tint }}>
           {index + 1}
         </span>
         <span className="min-w-0 flex-1">
@@ -55,7 +55,7 @@ function WhyRow({ index, item }: { index: number; item: (typeof WHY_BREAKS)[numb
           {/* Visible whether or not the row is open — the pairing is the
               point of the section and must not require a click. */}
           <span className="faint mt-1 block text-xs">
-            Answered by <span style={{ color: engine.tint }}>{engine.name}</span>
+            Answered by <span style={{ color: suite.tint }}>{suite.name}</span>
           </span>
         </span>
         <ChevronDown
@@ -73,14 +73,14 @@ function WhyRow({ index, item }: { index: number; item: (typeof WHY_BREAKS)[numb
 
           <div className="mt-5 border-t pt-5" style={{ borderColor: "var(--line-soft)" }}>
             <p className="faint text-[11px] font-semibold uppercase tracking-[0.14em]">
-              How to use {engine.name.replace("LAMID ", "")}
+              How to use {suite.name.replace("LAMID ", "")}
             </p>
             <ol className="mt-3 space-y-2.5">
               {item.use.map((step, i) => (
                 <li key={step} className="flex gap-3 text-sm leading-relaxed">
                   <span
                     className="mt-0.5 shrink-0 text-xs font-semibold tabular-nums"
-                    style={{ color: engine.tint }}
+                    style={{ color: suite.tint }}
                   >
                     {i + 1}
                   </span>

@@ -3,10 +3,11 @@ import { ArrowRight } from "lucide-react";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { CTA } from "@/content/brand";
-import { ENGINES } from "@/content/aios";
-import { MODULE_BY_ENGINE, SUITE_PARENT } from "@/content/modules";
-import { microcopyForEngine } from "@/content/microcopy";
+import { PRIMARY_SUITES } from "@/content/aios";
+import { MODULE_BY_SUITE, SUITE_PARENT } from "@/content/modules";
+import { microcopyForSuite } from "@/content/microcopy";
 import type { SuiteId } from "@/content/suites";
+import { ModuleStory } from "@/components/sections/ModuleStory";
 
 /**
  * The brand document's module landing page, rendered under the four
@@ -37,8 +38,8 @@ export function SuiteParentBand({ suiteId }: { suiteId: SuiteId }) {
   const parent = SUITE_PARENT[suiteId];
   if (!parent) return null;
 
-  const engine = parent.engine ? ENGINES.find((e) => e.id === parent.engine) : null;
-  const tint = engine?.tint ?? "var(--brand)";
+  const suite = parent.suite ? PRIMARY_SUITES.find((e) => e.id === parent.suite) : null;
+  const tint = suite?.tint ?? "var(--brand)";
 
   return (
     <Section id="where-it-sits" className="border-t">
@@ -56,12 +57,12 @@ export function SuiteParentBand({ suiteId }: { suiteId: SuiteId }) {
             <p className="font-display text-xl leading-snug" style={{ color: tint }}>
               {parent.split}
             </p>
-            {engine && (
+            {suite && (
               <Link
-                href={`/suites/${engine.id}`}
+                href={`/suites/${suite.id}`}
                 className="link-underline mt-6 inline-flex items-center gap-1.5 text-sm"
               >
-                <span>Open {engine.name}</span> <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <span>Open {suite.name}</span> <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             )}
           </div>
@@ -72,58 +73,28 @@ export function SuiteParentBand({ suiteId }: { suiteId: SuiteId }) {
 }
 
 export function ModuleSections({ suiteId }: { suiteId: SuiteId }) {
-  const mod = MODULE_BY_ENGINE[suiteId];
+  const mod = MODULE_BY_SUITE[suiteId];
   if (!mod) return null;
 
-  const engine = ENGINES.find((e) => e.id === mod.engine)!;
-  const tint = engine.tint;
-  const glossary = microcopyForEngine(engine.id);
+  const suite = PRIMARY_SUITES.find((e) => e.id === mod.suite)!;
+  const tint = suite.tint;
+  const glossary = microcopyForSuite(suite.id);
 
   return (
     <>
-      {/* ── The gap ───────────────────────────────────────────
-          Optional — renders only where MODULE_PAGES sets `gap`. Same
-          job TheGap does on the homepage — name the problem before the
-          product — scoped to one suite. Text only: no chart, no score.
-          See the note on ModulePage.gap for why. */}
-      {mod.gap && (
-        <Section className="border-t">
-          <div className="grid items-start gap-10 md:grid-cols-12">
-            <div className="md:col-span-5">
-              <span
-                className="inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-[13px] font-semibold"
-                style={{ borderColor: "var(--line)" }}
-              >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: tint }} aria-hidden="true" />
-                {mod.gap.badge}
-              </span>
-            </div>
-            <div className="md:col-span-6 md:col-start-7">
-              <h2 className="h-section">{mod.gap.title}</h2>
-              <p className="lead mt-5">{mod.gap.body}</p>
-            </div>
-          </div>
-        </Section>
-      )}
+      {/* ── The gap, then the purpose paragraphs ─────────────────
+          Was two static sections (a gap block, then three paragraphs
+          stacked under one heading). Now one slider: the gap and each
+          purpose paragraph is its own slide with its own drawing, so a
+          reader takes in one beat of the argument at a time instead of
+          a wall of text. See ModuleStory.tsx for the mechanics and
+          ModuleStoryArt.tsx for what each drawing argues. */}
+      <ModuleStory suiteId={suite.id} mod={mod} tint={tint} />
 
-      {/* ── Purpose ─────────────────────────────────────────── */}
-      <Section id="purpose" className="border-t">
-        <div className="grid gap-10 md:grid-cols-12">
-          <h2 className="h-section md:col-span-5">{mod.purpose.title}</h2>
-          <div className="md:col-span-6 md:col-start-7">
-            {mod.purpose.paragraphs.map((p, i) => (
-              <p key={p} className={`leading-relaxed ${i === 0 ? "lead" : "muted mt-4 text-[15px]"}`}>
-                {p}
-              </p>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── How this engine works ───────────────────────────── */}
+      {/* ── How this suite works ───────────────────────────── */}
       <Section id="how-it-works" tone="tint" className="border-t">
         <SectionHeading
-          eyebrow={`How ${engine.name.replace("LAMID ", "")} works`}
+          eyebrow={`How ${suite.name.replace("LAMID ", "")} works`}
           title={mod.worksTagline}
         />
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -141,7 +112,7 @@ export function ModuleSections({ suiteId }: { suiteId: SuiteId }) {
 
       {/* ── Capabilities ────────────────────────────────────── */}
       <Section id="capabilities" className="border-t">
-        <SectionHeading eyebrow="Capabilities" title={`What ${engine.name.replace("LAMID ", "")} delivers.`} />
+        <SectionHeading eyebrow="Capabilities" title={`What ${suite.name.replace("LAMID ", "")} delivers.`} />
         <dl className="divide-hairline">
           {mod.capabilities.map((c) => (
             <div key={c.title} className="flex flex-col gap-1.5 py-5 sm:flex-row sm:gap-10">
@@ -192,7 +163,7 @@ export function ModuleSections({ suiteId }: { suiteId: SuiteId }) {
       <Section id="industries" className="border-t">
         <SectionHeading
           eyebrow="Industry applications"
-          title={`${engine.name.replace("LAMID ", "")} adapts to every sector.`}
+          title={`${suite.name.replace("LAMID ", "")} adapts to every sector.`}
         />
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {mod.industries.map((ind) => (

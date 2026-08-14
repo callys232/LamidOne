@@ -9,8 +9,9 @@ import { SuiteGrid } from "@/components/sections/SuiteGrid";
 import { Faq } from "@/components/sections/Faq";
 import { HOME_COMPARISON } from "@/content/home";
 import { CTA } from "@/content/brand";
-import { ENGINES } from "@/content/aios";
+import { PRIMARY_SUITES } from "@/content/aios";
 import { AiosAdvantage, AiosProof, AiosWhy } from "@/components/sections/Aios";
+import { AltitudeMap } from "@/components/sections/AltitudeMap";
 
 export const metadata: Metadata = {
   title: "Why LAMID ONE",
@@ -41,7 +42,9 @@ export default function WhyPage() {
               </h1>
               <p className="lead mt-6 max-w-2xl">
                 We keep the model, the reasoning and the working — so the next decision starts from
-                what you already know rather than from another discovery phase.
+                what you already know rather than from another discovery phase. And it spans every
+                altitude of that decision, from a board-level call down to the team running it —
+                not one flat layer called &ldquo;strategy&rdquo;.
               </p>
               <CtaPair primary={CTA.primary} secondary={CTA.secondary} className="mt-10" />
             </div>
@@ -106,23 +109,27 @@ export default function WhyPage() {
           </dl>
         </Section>
 
-        {/* The four engines, then the nine suites underneath them.
+        <AltitudeMap />
+
+        {/* The four primary suites, then the eight suites underneath them.
             This page used to open the section with "Nine suites on one
             record" and drop straight into a flat grid — which read as
             nine peer products and contradicted the structure stated on
-            the homepage. The engine row is the missing layer: each
-            engine leads with the value it delivers, and the suite grid
-            below is what actually runs inside them. */}
+            the homepage, and miscounted besides: the platform ships
+            eight suites, not nine (DOCUSHARE is the OS layer, not a
+            ninth). The primary-suite row is the missing layer: each one
+            leads with the value it delivers, and the suite grid below is
+            what actually runs inside them. */}
         <Section id="suites" className="border-t">
           <SectionHeading
             eyebrow="The ecosystem"
-            title="Four engines. Nine suites. One record."
-            blurb="Each engine owns one of the four outcomes. The suites are how that engine does the work — not nine separate products you have to assemble yourself."
+            title="Four suites own the outcomes. Eight in total. One record."
+            blurb="Each of the four owns one of the four outcomes. The rest are how that suite does the work — not eight separate products you have to assemble yourself."
             action={<Link href="/products" className="link-underline text-sm">All features</Link>}
           />
 
           <ul className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {ENGINES.map((e) => (
+            {PRIMARY_SUITES.map((e) => (
               <li key={e.id} className="card p-6" style={{ borderTop: `3px solid ${e.tint}` }}>
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: e.tint }}>
                   {e.value}
